@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApplication1.Communication
+namespace Tracker.TrackerEssentials.Communication
 {
-    public class Sports
+    public class GameParts
     {
-        public enum SportEnum
+        public enum GamePart
         {
-            Esports = 1,
+            FT = 1,
         }
     }
 }

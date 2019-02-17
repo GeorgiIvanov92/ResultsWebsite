@@ -14,7 +14,7 @@ namespace WebApplication1.Controllers
     {
         private TrackerDBContext db;
         public EsportsResultsController(TrackerDBContext db)
-        {
+        {  
             if (this.db == null)
             {
                 this.db = db;
@@ -26,7 +26,10 @@ namespace WebApplication1.Controllers
             var results = db.Results.ToList();
             foreach(var result in results)
             {
-                yield return result;
+                if (result.SportId == 1)
+                {
+                    yield return result;
+                }
             }
             
         }
