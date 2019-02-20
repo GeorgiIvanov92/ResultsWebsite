@@ -11,7 +11,7 @@ namespace Tracker
             TrackerDBContext dbContext = new TrackerDBContext();
             EsportsLiveScore.GetNewLinks();
             var results = EsportsLiveScore.GetResultEvents();
-            //dbContext.Results.Add();
+            dbContext.Results.AddRange(results);
             dbContext.SaveChanges();
             
         }
