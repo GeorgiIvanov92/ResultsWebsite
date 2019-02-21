@@ -1,26 +1,26 @@
-import React, { Component } from 'react';
+﻿import React, { Component } from 'react';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
 
-export class LeagueOfLegendsData extends Component {
-   
+export class CounterStrikeData extends Component {
 
-    displayName = LeagueOfLegendsData.name
 
-  constructor(props) {
-    super(props);
-      this.state = {
-          results: [], loading: true, loadedspecificLeague: false, specificleague: ''
-      };
-    fetch('api/LeagueOfLegends/GetResults')
-      .then(response => response.json())
-      .then(data => {
-          this.setState({
-              results: data, loading: false
-          });
-          });
-      this.renderResults = this.renderResults.bind(this);
-      this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
-      this.renderLeagueTable = this.renderLeagueTable.bind(this);
+    displayName = CounterStrikeData.name
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            results: [], loading: true, loadedspecificLeague: false, specificleague: ''
+        };
+        fetch('api/CounterStrike/GetResults')
+            .then(response => response.json())
+            .then(data => {
+                this.setState({
+                    results: data, loading: false
+                });
+            });
+        this.renderResults = this.renderResults.bind(this);
+        this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
+        this.renderLeagueTable = this.renderLeagueTable.bind(this);
     }
     renderLeagueTable(arr) {
         return (
@@ -37,12 +37,11 @@ export class LeagueOfLegendsData extends Component {
                             </Navbar.Brand>
                         </Navbar.Header>
                     </Navbar>
-                    )}
+                )}
             </div>
         );
-        }
-        determineLeaguesToAdd(results)
-    {
+    }
+    determineLeaguesToAdd(results) {
         //let mappedLeagues = [];
         //results.map(result => {
         //    if (mappedLeagues.indexOf(result.leagueName) === -1) {
@@ -56,7 +55,7 @@ export class LeagueOfLegendsData extends Component {
         return (
             this.renderLeagueTable(arr)
         );
-    }   
+    }
 
     renderResults(results) {
         return (
@@ -96,21 +95,21 @@ export class LeagueOfLegendsData extends Component {
     }
 
 
-render() {
-    let contents;
-    if (this.state.loadedspecificLeague) {
-        contents = this.renderResults(this.state.results[this.state.specificleague]);
-    } else {
-        contents = this.state.loading
-            ? <p><em>Loading...</em></p>
-            : this.determineLeaguesToAdd(this.state.results);
-    }
+    render() {
+        let contents;
+        if (this.state.loadedspecificLeague) {
+            contents = this.renderResults(this.state.results[this.state.specificleague]);
+        } else {
+            contents = this.state.loading
+                ? <p><em>Loading...</em></p>
+                : this.determineLeaguesToAdd(this.state.results);
+        }
 
-    return (
-        <div>
-            <h1>{this.state.specificleague.length <1 ? 'League of Legends ' : this.state.specificleague} Results</h1>           
-            {contents}
-      </div>
-    );
-  }
+        return (
+            <div>
+                <h1>{this.state.specificleague.length < 1 ? 'Counter Strike ' : this.state.specificleague} Results</h1>
+                {contents}
+            </div>
+        );
+    }
 }
