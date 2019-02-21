@@ -1,5 +1,5 @@
 ﻿import React, { Component } from 'react';
-import { Navbar, Nav, NavItem } from 'react-bootstrap';
+import { Navbar, Button} from 'react-bootstrap';
 
 export class CounterStrikeData extends Component {
 
@@ -58,39 +58,59 @@ export class CounterStrikeData extends Component {
     }
 
     renderResults(results) {
+        let tempRes;
+        for (let a = 0; a < results.length; a++) {
+            for (let i = 0; i < results.length - 1; i++) {
+                if (results[i].gameDate < results[i + 1].gameDate) {
+                    tempRes = results[i + 1];
+                    results[i + 1] = results[i];
+                    results[i] = tempRes;
+                }
+            }
+        }
         return (
-            <table className='table'>
-                <thead>
-                    <tr>
-                        <th>League</th>
-                        <th>Game Date</th>
-                        <th>Home Team</th>
-                        <th>Away Team</th>
-                        <th>Home Score</th>
-                        <th>Away Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {results.map(result =>
-                        <tr key={result.gameDate + "@" + result.homeTeam}>
-                            <td>{result.leagueName}</td>
-                            <td>{new Date(result.gameDate)
-                                .toLocaleDateString('en-GB',
-                                    {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric',
-                                        hour: 'numeric',
-                                        minute: 'numeric',
-                                    })}</td>
-                            <td>{result.homeTeam}</td>
-                            <td>{result.awayTeam}</td>
-                            <td>{result.homeScore}</td>
-                            <td>{result.awayScore}</td>
+            <div>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    loadedspecificLeague: false,
+                    specificleague: ''
+                })}>Back To All Leagues</Button>
+
+
+                <table className='table'>
+                    <thead>
+                        <tr>
+                            <th>Game Date</th>
+                            <th>Home Team</th>
+                            <th>Home Score</th>
+                            <th>Away Score</th>
+                            <th>Away Team</th>
+                            <th>League</th>
                         </tr>
-                    )}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {results.map(result =>
+                            <tr key={result.gameDate + "@" + result.homeTeam}>
+
+                                <td>{new Date(result.gameDate)
+                                    .toLocaleDateString('en-GB',
+                                        {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                        })}</td>
+                                <td>{result.homeTeam}</td>
+                                <td>{result.homeScore}</td>
+                                <td>{result.awayScore}</td>
+                                <td>{result.awayTeam}</td>
+                                <td>{result.leagueName}</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         );
     }
 

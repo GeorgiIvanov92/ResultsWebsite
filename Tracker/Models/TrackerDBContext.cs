@@ -21,7 +21,7 @@ namespace Tracker.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server = (LocalDb)\\MSSQLLocalDB; Database = TrackerDB; Trusted_Connection = True;");
+            optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["SQL"].ConnectionString);
         }
       
     }

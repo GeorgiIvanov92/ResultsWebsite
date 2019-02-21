@@ -1,19 +1,31 @@
 ﻿using System;
+using System.Configuration;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Tracker.Models;
+using Tracker.Workers;
 
 namespace Tracker
 {
     class Program
     {
-        static void Main(string[] args)
+        private static TimeSpan TrackerSamplePeriodInMinutes = new TimeSpan(0, int.Parse(ConfigurationManager.AppSettings["ResultsSamplePeriodInMinutes"]), 0);
+        private static Task TrackerTask = new Task(() => TrackerWorker.TrackerWorkerInit(TrackerSamplePeriodInMinutes));
+        Program()
         {
-            TrackerDBContext dbContext = new TrackerDBContext();
-            EsportsLiveScore.GetNewLinks();
-            var results = EsportsLiveScore.GetResultEvents();
-            dbContext.Results.AddRange(results);
-            dbContext.SaveChanges();
             
         }
+        
+        static void Main(string[] args)
+        {            
+            TrackerTask.Start();
+            while (true)
+            {
+                
+            }
+            
+        }
+
     }
 }
