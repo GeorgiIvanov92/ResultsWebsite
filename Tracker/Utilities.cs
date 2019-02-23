@@ -17,10 +17,10 @@ namespace Tracker
                 bool eligableEvent = true;
                 foreach(var dbResult in dbResults)
                 {
-                    if(result.LeagueName != dbResult.LeagueName 
-                        || result.HomeTeam != dbResult.HomeTeam
-                        || result.AwayTeam != dbResult.AwayTeam
-                        || result.GameDate.ToString() != dbResult.GameDate.ToString())
+                    if(result.LeagueName == dbResult.LeagueName 
+                        && result.HomeTeam == dbResult.HomeTeam
+                        && result.AwayTeam == dbResult.AwayTeam
+                        && result.GameDate.ToString() == dbResult.GameDate.ToString())
                     {
                         eligableEvent = false;
                         break;
@@ -33,6 +33,18 @@ namespace Tracker
                 }
             }
             return filteredResults;
+        }
+        public static List<Results> UnwantedEventsFromDb(TrackerDBContext dbContext)
+        {
+            var eventsToRemove = new List<Results>();
+            foreach (var res in dbContext.Results)
+            {
+                if (res.GameDate < DateTime.UtcNow.AddDays(-30))
+                {
+                    eventsToRemove.Add(res);
+                }
+            }
+            return eventsToRemove;
         }
     }
 }

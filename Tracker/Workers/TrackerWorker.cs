@@ -17,6 +17,7 @@ namespace Tracker.Workers
                 var results = EsportsLiveScore.GetResultEvents();
                 var filteredResults = Utilities.FilterAlreadySentEvents(dbContext, results);
                 dbContext.Results.AddRange(filteredResults);
+                dbContext.RemoveRange(Utilities.UnwantedEventsFromDb(dbContext));
                 dbContext.SaveChanges();
                 Thread.Sleep(TrackerSamplePeriodInMinutes);
             }
