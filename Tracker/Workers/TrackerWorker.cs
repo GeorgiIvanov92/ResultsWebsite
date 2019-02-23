@@ -19,6 +19,7 @@ namespace Tracker.Workers
                 dbContext.Results.AddRange(filteredResults);
                 dbContext.RemoveRange(Utilities.UnwantedEventsFromDb(dbContext));
                 dbContext.SaveChanges();
+                EsportsLiveScore.GetTeamLinksFromResultsTeams(results);
                 Thread.Sleep(TrackerSamplePeriodInMinutes);
             }
         }

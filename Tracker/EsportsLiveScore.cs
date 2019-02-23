@@ -7,19 +7,22 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Tracker.Models;
 using Tracker.TrackerEssentials;
+using static Tracker.TrackerEssentials.Communication.Sports;
 
 namespace Tracker
 {
     public static class EsportsLiveScore
     {
         private static HttpClient client;
-        public static List<Link> Links;
+        public static List<Link> ResultsLinks;
         private static string _baseUrl = "http://www.esportlivescore.com/";
         private static readonly string format = "dd/MM HH:mm";
-        private static readonly Regex tournamentNameRegex = new Regex(@"title=""(.*?)""", RegexOptions.Compiled | RegexOptions.Multiline);  
+        private static readonly Regex tournamentNameRegex = new Regex(@"title=""(.*?)""", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static List<Link> TeamLinks;
+        private static readonly string _baseTeamUrl = "http://www.esportlivescore.com/t_{0}-{1}_g_{2}.html";
         public static void GetNewLinks()
         {
-            Links = new List<Link>();
+            ResultsLinks = new List<Link>();
             if (client == null)
             {
                 client = new HttpClient();
@@ -35,22 +38,22 @@ namespace Tracker
                 if (url.Contains("csgo"))
                 {
                     link = new Link(TrackerEssentials.Communication.Sports.SportEnum.CounterStrike, new Uri(_baseUrl+url));
-                    Links.Add(link);
+                    ResultsLinks.Add(link);
                 }else if (url.Contains("leagueoflegends"))
                 {
                     link = new Link(TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends, new Uri(_baseUrl + url));
-                    Links.Add(link);
+                    ResultsLinks.Add(link);
                 }else if (url.Contains("dota"))
                 {
                     link = new Link(TrackerEssentials.Communication.Sports.SportEnum.Dota2, new Uri(_baseUrl + url));
-                    Links.Add(link);
+                    ResultsLinks.Add(link);
                 }
             }
         }
         public static List<Results> GetResultEvents()
         {
             List<Results> results = new List<Results>();
-            foreach(var link in Links)
+            foreach(var link in ResultsLinks)
             {
                 try
                 {
@@ -103,6 +106,23 @@ namespace Tracker
                 }
             }
             return results;
+        }
+        public static void GetTeamLinksFromResultsTeams(List<Results> results)
+        {
+            TeamLinks = new List<Link>();
+            foreach(var res in results)
+            {
+                var uri = new Uri(string.Format(_baseTeamUrl, res.HomeTeam.Replace(' ', '-')
+                    , Utilities.Sport[res.SportId.Value], Utilities.Sport[res.SportId.Value]));
+                TeamLinks.Add(new Link((SportEnum)res.SportId, uri));
+                uri = new Uri(string.Format(_baseTeamUrl, res.AwayTeam.Replace(' ', '-')
+                    , Utilities.Sport[res.SportId.Value], Utilities.Sport[res.SportId.Value]));
+                TeamLinks.Add(new Link((SportEnum)res.SportId, uri));
+            }
+        }
+        public static void DownloadTeamImages()
+        {
+            //todo : download images
         }
     }
 }

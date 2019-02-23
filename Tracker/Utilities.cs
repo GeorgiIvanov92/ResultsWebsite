@@ -8,6 +8,12 @@ namespace Tracker
 {
     public static class Utilities
     {
+        public static Dictionary<int, string> Sport = new Dictionary<int, string>()
+        {
+            {1,"leagueoflegends" },
+            {2,"csgo" },
+            {3,"dota" }
+        };
         public static List<Results> FilterAlreadySentEvents(TrackerDBContext db, List<Results> results)
         {
             List<Results> filteredResults = new List<Results>();
