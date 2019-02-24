@@ -9,15 +9,24 @@ export class LeagueOfLegendsData extends Component {
   constructor(props) {
     super(props);
       this.state = {
-          results: [], loading: true, loadedspecificLeague: false, specificleague: ''
+          results: [], images: [], loading: true, loadedspecificLeague: false, specificleague: '',
+          imagesRenderText: 'data:image/png;base64,'
       };
     fetch('api/LeagueOfLegends/GetResults')
       .then(response => response.json())
       .then(data => {
           this.setState({
-              results: data, loading: false
-          });
-          });
+              results: data
+            });
+        }).then(fetch('api/LeagueOfLegends/GetImages')
+            .then(response => response.json()).then(data => {
+                this.setState({
+                    images: data,
+                    loading: false
+                });
+            }));
+
+      
       this.renderResults = this.renderResults.bind(this);
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
       this.renderLeagueTable = this.renderLeagueTable.bind(this);
@@ -96,8 +105,8 @@ export class LeagueOfLegendsData extends Component {
                                             year: 'numeric',
                                             hour: 'numeric',
                                             minute: 'numeric',
-                                        })}</td>
-                                <td>{result.homeTeam}</td>
+                                    })}</td>
+                                <td img src={this.state.imagesRenderText + this.state.images[result.homeTeam]}> {result.homeTeam}</td>
                                 <td>{result.homeScore}</td>
                                 <td>{result.awayScore}</td>
                                 <td>{result.awayTeam}</td>
@@ -122,7 +131,9 @@ render() {
     }
 
     return (
+           
         <div>
+            <h1 img src={`data:image/;base64,${this.state.images['100 Thieves']}`}> zdr kp</h1>
             <h1>{this.state.specificleague.length <1 ? 'League of Legends ' : this.state.specificleague} Results</h1>           
             {contents}
       </div>

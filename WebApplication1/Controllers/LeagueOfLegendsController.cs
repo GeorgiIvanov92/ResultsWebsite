@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using WebApplication1.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace WebApplication1.Controllers
 {
@@ -16,16 +17,22 @@ namespace WebApplication1.Controllers
         private TrackerDBContext db;
         private ConcurrentDictionary<string, HashSet<Results>> Leagues = new ConcurrentDictionary<string, HashSet<Results>>();
         private Object _lock = new Object();
-        public LeagueOfLegendsController(TrackerDBContext db)
+        private IConfiguration Configuration;
+        public LeagueOfLegendsController(TrackerDBContext db, IConfiguration Configuration)
         {  
             if (this.db == null)
             {
                 this.db = db;
             }
+            if(this.Configuration == null)
+            {
+                this.Configuration = Configuration;
+            }
         }
         [HttpGet("[action]")]
         public ConcurrentDictionary<string, HashSet<Results>> GetResults()
         {
+            Leagues = new ConcurrentDictionary<string, HashSet<Results>>();
             var results = db.Results.ToList();
             Parallel.ForEach(results, (result) =>
             {
@@ -49,25 +56,56 @@ namespace WebApplication1.Controllers
                 }
             });
             return Leagues;
-            
+
         }
-        //useless since after calling fetch the list isnt ordered
-        private List<Results> BubbleSort(List<Results> results)
+        [HttpGet("[action]")]
+        public ConcurrentDictionary<string, string> GetImages()
         {
-            Results tempRes;
-            for(int a=0; a<results.Count; a++)
+            Leagues = new ConcurrentDictionary<string, HashSet<Results>>();
+            var results = db.Results.ToList();
+            Parallel.ForEach(results, (result) =>
             {
-                for (int i = 0; i < results.Count - 1; i++)
+                if (result.SportId == 1)
                 {
-                    if (results[i].GameDate < results[i + 1].GameDate)
+                    if (Leagues.ContainsKey(result.LeagueName))
                     {
-                        tempRes = results[i + 1];
-                        results[i + 1] = results[i];
-                        results[i] = tempRes;
+                        lock (_lock)
+                        {
+                            Leagues[result.LeagueName].Add(result);
+                        }
+                    }
+                    else
+                    {
+                        lock (_lock)
+                        {
+                            Leagues.TryAdd(result.LeagueName, new HashSet<Results>() { result });
+                        }
+                    }
+
+                }
+            });
+            ConcurrentDictionary<string, string> images = new ConcurrentDictionary<string, string>();
+            Parallel.ForEach(Leagues, (league) =>
+            {
+                var results2 = league.Value;
+                foreach (var res in results2)
+                {
+                    try
+                    {
+                        if (!images.ContainsKey(res.HomeTeam))
+                        {
+                            var imageString = Convert.ToBase64String(System.IO.File.ReadAllBytes
+                                (Configuration.GetSection("ImagePathReader").Value + res.HomeTeam + ".png"));
+                            images.TryAdd(res.HomeTeam, imageString);
+                        }
+                    }catch(Exception ex)
+                    {
+                        continue;
                     }
                 }
-            }
-            return results;
+            });
+            return images;
         }
+
     }
 }

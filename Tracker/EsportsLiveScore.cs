@@ -1,7 +1,10 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Globalization;
+using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,21 +16,20 @@ namespace Tracker
 {
     public static class EsportsLiveScore
     {
-        private static HttpClient client;
+        private static HttpClient HttpClient;
         public static List<Link> ResultsLinks;
         private static string _baseUrl = "http://www.esportlivescore.com/";
         private static readonly string format = "dd/MM HH:mm";
         private static readonly Regex tournamentNameRegex = new Regex(@"title=""(.*?)""", RegexOptions.Compiled | RegexOptions.Multiline);
-        private static List<Link> TeamLinks;
-        private static readonly string _baseTeamUrl = "http://www.esportlivescore.com/t_{0}-{1}_g_{2}.html";
+        private static List<Link> TeamLinks = new List<Link>();
         public static void GetNewLinks()
         {
             ResultsLinks = new List<Link>();
-            if (client == null)
+            if (HttpClient == null)
             {
-                client = new HttpClient();
+                HttpClient = new HttpClient();
             }
-            var page = client.GetStringAsync(_baseUrl).Result;
+            var page = HttpClient.GetStringAsync(_baseUrl).Result;
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(page);
             var linkNodes = doc.DocumentNode.SelectSingleNode("//ul[contains(@id,'games')]").SelectNodes(".//li/a");
@@ -37,15 +39,15 @@ namespace Tracker
                 Link link;
                 if (url.Contains("csgo"))
                 {
-                    link = new Link(TrackerEssentials.Communication.Sports.SportEnum.CounterStrike, new Uri(_baseUrl+url));
+                    link = new Link(SportEnum.CounterStrike, new Uri(_baseUrl+url));
                     ResultsLinks.Add(link);
                 }else if (url.Contains("leagueoflegends"))
                 {
-                    link = new Link(TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends, new Uri(_baseUrl + url));
+                    link = new Link(SportEnum.LeagueOfLegends, new Uri(_baseUrl + url));
                     ResultsLinks.Add(link);
                 }else if (url.Contains("dota"))
                 {
-                    link = new Link(TrackerEssentials.Communication.Sports.SportEnum.Dota2, new Uri(_baseUrl + url));
+                    link = new Link(SportEnum.Dota2, new Uri(_baseUrl + url));
                     ResultsLinks.Add(link);
                 }
             }
@@ -57,7 +59,7 @@ namespace Tracker
             {
                 try
                 {
-                    var page = client.GetStringAsync(link.Uri).Result;
+                    var page = HttpClient.GetStringAsync(link.Uri).Result;
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(page);
                     var finishedMatchesNodes = doc.DocumentNode.SelectSingleNode("//div[contains(@id,'finished')]").SelectNodes(".//div[contains(@id,'event_id')]");
@@ -92,7 +94,17 @@ namespace Tracker
                                 SportId = (int)link.Sport
                             };
                             results.Add(res);
-                            
+                            var homeTeamLink = gameNode.SelectSingleNode(".//div[contains(@class,'team-home')]//div[contains(@class,'event-team-info')]/a")?.Attributes["href"].Value;
+                            if (homeTeamLink != null)
+                            {
+                                TeamLinks.Add(new Link((SportEnum)res.SportId, new Uri(_baseUrl + homeTeamLink), $"{res.HomeTeam}"));
+                            }
+                            var awayTeamLink = gameNode.SelectSingleNode(".//div[contains(@class,'team-away')]//div[contains(@class,'event-team-info')]/a")?.Attributes["href"].Value;
+                            if (awayTeamLink != null)
+                            {
+                                TeamLinks.Add(new Link((SportEnum)res.SportId, new Uri(_baseUrl + awayTeamLink),$"{res.AwayTeam}"));
+                            }
+
                         }
                         catch (Exception ex)
                         {
@@ -107,17 +119,28 @@ namespace Tracker
             }
             return results;
         }
-        public static void GetTeamLinksFromResultsTeams(List<Results> results)
+        public static void WriteTeamIconsToDisk()
         {
-            TeamLinks = new List<Link>();
-            foreach(var res in results)
+            foreach(var team in TeamLinks)
             {
-                var uri = new Uri(string.Format(_baseTeamUrl, res.HomeTeam.Replace(' ', '-')
-                    , Utilities.Sport[res.SportId.Value], Utilities.Sport[res.SportId.Value]));
-                TeamLinks.Add(new Link((SportEnum)res.SportId, uri));
-                uri = new Uri(string.Format(_baseTeamUrl, res.AwayTeam.Replace(' ', '-')
-                    , Utilities.Sport[res.SportId.Value], Utilities.Sport[res.SportId.Value]));
-                TeamLinks.Add(new Link((SportEnum)res.SportId, uri));
+                try
+                {
+                    var pageString = HttpClient.GetStringAsync(team.Uri).Result;
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(pageString);
+                    var imgPath = doc.DocumentNode.SelectSingleNode("//div[contains(@class,'table-container')]//div[contains(@class,'logo')]//img");
+                    var stringUrl = imgPath?.Attributes["src"].Value;
+                    var imageByteArray = HttpClient.GetByteArrayAsync(stringUrl).Result;
+                    MemoryStream ms = new MemoryStream(imageByteArray);
+                    ms.Write(imageByteArray);
+                    FileStream fileStream = File.Create(ConfigurationManager.AppSettings["ImagesSavePath"] + team.AdditionalData + ".png");
+                    fileStream.Write(imageByteArray);
+                    fileStream.Close();
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
             }
         }
         public static void DownloadTeamImages()

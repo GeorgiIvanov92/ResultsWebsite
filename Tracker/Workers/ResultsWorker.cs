@@ -6,7 +6,7 @@ using Tracker.Models;
 
 namespace Tracker.Workers
 {
-    public static class TrackerWorker
+    public static class ResultsWorker
     {
         public static void TrackerWorkerInit(TimeSpan TrackerSamplePeriodInMinutes)
         {
@@ -19,7 +19,7 @@ namespace Tracker.Workers
                 dbContext.Results.AddRange(filteredResults);
                 dbContext.RemoveRange(Utilities.UnwantedEventsFromDb(dbContext));
                 dbContext.SaveChanges();
-                EsportsLiveScore.GetTeamLinksFromResultsTeams(results);
+                EsportsLiveScore.WriteTeamIconsToDisk();
                 Thread.Sleep(TrackerSamplePeriodInMinutes);
             }
         }

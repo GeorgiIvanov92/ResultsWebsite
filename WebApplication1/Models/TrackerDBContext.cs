@@ -21,7 +21,6 @@ namespace WebApplication1.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                //optionsBuilder.UseSqlServer("Server=(LocalDb)\\MSSQLLocalDB;Database=TrackerDB;Trusted_Connection=True;");
             }
         }
 

@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Configuration;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Tracker.Models;
 using Tracker.Workers;
 
 namespace Tracker
 {
     class Program
     {
-        private static TimeSpan TrackerSamplePeriodInMinutes = new TimeSpan(0, int.Parse(ConfigurationManager.AppSettings["ResultsSamplePeriodInMinutes"]), 0);
-        private static Task TrackerTask = new Task(() => TrackerWorker.TrackerWorkerInit(TrackerSamplePeriodInMinutes));
-        Program()
-        {
-            
-        }
-        
+        private static TimeSpan ResultsTrackerTimeSpan = new TimeSpan(0, int.Parse(ConfigurationManager.AppSettings["ResultsSamplePeriodInMinutes"]), 0);
+        private static TimeSpan ImagesTrackerTimeSpan = new TimeSpan(0, int.Parse(ConfigurationManager.AppSettings["ImagesSamplePeriodInMinutes"]), 0);
+        private static Task ResultsTask = new Task(() => ResultsWorker.TrackerWorkerInit(ResultsTrackerTimeSpan));
+        private static Task ImagesTask = new Task(() => ImagesWorker.ImagesWorkerInit(ImagesTrackerTimeSpan));
         static void Main(string[] args)
         {            
-            TrackerTask.Start();
+            ResultsTask.Start();
+            ImagesTask.Start();
             while (true)
             {
                 
