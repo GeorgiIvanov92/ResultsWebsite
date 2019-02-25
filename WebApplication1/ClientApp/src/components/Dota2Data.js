@@ -9,15 +9,21 @@ export class Dota2Data extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            results: [], loading: true, loadedspecificLeague: false, specificleague: ''
+            results: [], images: [], loading: true, loadedspecificLeague: false, specificleague: ''
         };
         fetch('api/Dota2/GetResults')
             .then(response => response.json())
             .then(data => {
                 this.setState({
-                    results: data, loading: false
+                    results: data
                 });
-            });
+            }).then(fetch('api/Dota2/GetImages')
+                .then(response => response.json()).then(data => {
+                    this.setState({
+                        images: data,
+                        loading: false
+                    });
+                }));
         this.renderResults = this.renderResults.bind(this);
         this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
         this.renderLeagueTable = this.renderLeagueTable.bind(this);
@@ -42,12 +48,6 @@ export class Dota2Data extends Component {
         );
     }
     determineLeaguesToAdd(results) {
-        //let mappedLeagues = [];
-        //results.map(result => {
-        //    if (mappedLeagues.indexOf(result.leagueName) === -1) {
-        //        mappedLeagues.push(result.leagueName);
-        //    }
-        //});
         let arr = [];
         Object.keys(results).forEach(function (key) {
             arr.push(key);
@@ -82,10 +82,11 @@ export class Dota2Data extends Component {
                         <tr>
                             <th>Game Date</th>
                             <th>Home Team</th>
+                            <th>Home Logo</th>
                             <th>Home Score</th>
                             <th>Away Score</th>
+                            <th>Away Logo</th>
                             <th>Away Team</th>
-                            <th>League</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,10 +103,13 @@ export class Dota2Data extends Component {
                                             minute: 'numeric',
                                         })}</td>
                                 <td>{result.homeTeam}</td>
+                                <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
+                                    this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
                                 <td>{result.homeScore}</td>
                                 <td>{result.awayScore}</td>
+                                <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
+                                    this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
                                 <td>{result.awayTeam}</td>
-                                <td>{result.leagueName}</td>
                             </tr>
                         )}
                     </tbody>

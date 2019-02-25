@@ -85,6 +85,10 @@ namespace WebApplication1.Controllers
                 }
             });
             ConcurrentDictionary<string, string> images = new ConcurrentDictionary<string, string>();
+            var defaultImageByteArray = System.IO.File.ReadAllBytes
+                              (Configuration.GetSection("ImagePathReader").Value + "defaultLoLLogo" + ".png");
+            var defaultImageString = Convert.ToBase64String(defaultImageByteArray);
+            images.TryAdd("default", defaultImageString);
             Parallel.ForEach(Leagues, (league) =>
             {
                 var results2 = league.Value;
@@ -94,9 +98,17 @@ namespace WebApplication1.Controllers
                     {
                         if (!images.ContainsKey(res.HomeTeam))
                         {
-                            var imageString = Convert.ToBase64String(System.IO.File.ReadAllBytes
-                                (Configuration.GetSection("ImagePathReader").Value + res.HomeTeam + ".png"));
-                            images.TryAdd(res.HomeTeam, imageString);
+                            var imageByteArray = System.IO.File.ReadAllBytes
+                                (Configuration.GetSection("ImagePathReader").Value + res.HomeTeam + ".png");
+                            var imageString = Convert.ToBase64String(imageByteArray);
+                            images.TryAdd(res.HomeTeam.Trim(), imageString);
+                        }
+                        else if (!images.ContainsKey(res.AwayTeam))
+                        {
+                            var imageByteArray = System.IO.File.ReadAllBytes
+                                                            (Configuration.GetSection("ImagePathReader").Value + res.AwayTeam + ".png");
+                            var imageString = Convert.ToBase64String(imageByteArray);
+                            images.TryAdd(res.AwayTeam.Trim(), imageString);
                         }
                     }catch(Exception ex)
                     {

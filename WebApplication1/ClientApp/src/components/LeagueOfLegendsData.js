@@ -9,8 +9,7 @@ export class LeagueOfLegendsData extends Component {
   constructor(props) {
     super(props);
       this.state = {
-          results: [], images: [], loading: true, loadedspecificLeague: false, specificleague: '',
-          imagesRenderText: 'data:image/png;base64,'
+          results: [], images: [], loading: true, loadedspecificLeague: false, specificleague: ''
       };
     fetch('api/LeagueOfLegends/GetResults')
       .then(response => response.json())
@@ -87,10 +86,11 @@ export class LeagueOfLegendsData extends Component {
                         <tr>
                             <th>Game Date</th>
                             <th>Home Team</th>
+                            <th>Home Logo</th>
                             <th>Home Score</th>
                             <th>Away Score</th>
+                            <th>Away Logo</th>
                             <th>Away Team</th>
-                            <th>League</th>
                         </tr>
                 </thead>
                 <tbody>
@@ -106,11 +106,14 @@ export class LeagueOfLegendsData extends Component {
                                             hour: 'numeric',
                                             minute: 'numeric',
                                     })}</td>
-                                <td img src={this.state.imagesRenderText + this.state.images[result.homeTeam]}> {result.homeTeam}</td>
+                                <td>{result.homeTeam}</td>
+                                <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
+                                    this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
                                 <td>{result.homeScore}</td>
                                 <td>{result.awayScore}</td>
+                                <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
+                                    this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
                                 <td>{result.awayTeam}</td>
-                                <td>{result.leagueName}</td>
                             </tr>
                     )}
                 </tbody>
@@ -133,7 +136,6 @@ render() {
     return (
            
         <div>
-            <h1 img src={`data:image/;base64,${this.state.images['100 Thieves']}`}> zdr kp</h1>
             <h1>{this.state.specificleague.length <1 ? 'League of Legends ' : this.state.specificleague} Results</h1>           
             {contents}
       </div>

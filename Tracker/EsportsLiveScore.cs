@@ -78,6 +78,14 @@ namespace Tracker
                             }
                             var homeTeam = gameNode.SelectSingleNode(".//div[contains(@class,'team-home')]").InnerText.Trim();
                             var awayTeam = gameNode.SelectSingleNode(".//div[contains(@class,'team-away')]").InnerText.Trim();
+                            if (homeTeam.EndsWith("6"))
+                            {
+                                homeTeam = homeTeam.Substring(0, homeTeam.Length - 1).Trim();
+                            }
+                            if (awayTeam.EndsWith("6"))
+                            {
+                                awayTeam = awayTeam.Substring(0, awayTeam.Length - 1).Trim();
+                            }
                             var homeScore = int.Parse(gameNode.SelectSingleNode(".//div[contains(@class,'event-main-scores')]/div[contains(@class,'team-home')]").InnerText);
                             var awayScore = int.Parse(gameNode.SelectSingleNode(".//div[contains(@class,'event-main-scores')]/div[contains(@class,'team-away')]").InnerText);
                             var leagueNameRaw = gameNode.SelectSingleNode(".//div[contains(@class,'event-tournament-info')]").InnerHtml;
