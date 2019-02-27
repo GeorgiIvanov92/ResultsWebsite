@@ -48,12 +48,12 @@ namespace Tracker
             foreach (var result in preliveEvents)
             {
                 bool eligableEvent = true;
-                foreach (var dbResult in dbPreliveEvents)
+                foreach (var dbPrelive in dbPreliveEvents)
                 {
-                    if (result.LeagueName == dbResult.LeagueName
-                        && result.HomeTeam == dbResult.HomeTeam
-                        && result.AwayTeam == dbResult.AwayTeam
-                        && result.GameDate.ToString() == dbResult.GameDate.ToString())
+                    if (result.LeagueName == dbPrelive.LeagueName
+                        && result.HomeTeam == dbPrelive.HomeTeam
+                        && result.AwayTeam == dbPrelive.AwayTeam
+                        && result.GameDate.ToString() == dbPrelive.GameDate.ToString())
                     {
                         eligableEvent = false;
                         break;
