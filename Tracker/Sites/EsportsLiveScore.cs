@@ -17,14 +17,14 @@ namespace Tracker
     public static class EsportsLiveScore
     {
         private static HttpClient HttpClient;
-        public static List<Link> ResultsLinks;
+        public static List<Link> LinksForLeagues;
         private static string _baseUrl = "http://www.esportlivescore.com/";
         private static readonly string format = "dd/MM HH:mm";
         private static readonly Regex tournamentNameRegex = new Regex(@"title=""(.*?)""", RegexOptions.Compiled | RegexOptions.Multiline);
-        private static List<Link> TeamLinks = new List<Link>();
+        public static List<Link> TeamLinks = new List<Link>();
         public static void GetNewLinks()
         {
-            ResultsLinks = new List<Link>();
+            LinksForLeagues = new List<Link>();
             if (HttpClient == null)
             {
                 HttpClient = new HttpClient();
@@ -40,22 +40,22 @@ namespace Tracker
                 if (url.Contains("csgo"))
                 {
                     link = new Link(SportEnum.CounterStrike, new Uri(_baseUrl+url));
-                    ResultsLinks.Add(link);
+                    LinksForLeagues.Add(link);
                 }else if (url.Contains("leagueoflegends"))
                 {
                     link = new Link(SportEnum.LeagueOfLegends, new Uri(_baseUrl + url));
-                    ResultsLinks.Add(link);
+                    LinksForLeagues.Add(link);
                 }else if (url.Contains("dota"))
                 {
                     link = new Link(SportEnum.Dota2, new Uri(_baseUrl + url));
-                    ResultsLinks.Add(link);
+                    LinksForLeagues.Add(link);
                 }
             }
         }
         public static List<Results> GetResultEvents()
         {
             List<Results> results = new List<Results>();
-            foreach(var link in ResultsLinks)
+            foreach(var link in LinksForLeagues)
             {
                 try
                 {
@@ -151,9 +151,58 @@ namespace Tracker
                 }
             }
         }
-        public static void DownloadTeamImages()
+        public static List<Prelive> GetPreliveEvents()
         {
-            //todo : download images
+            List<Prelive> preliveEvents = new List<Prelive>();
+            foreach(var link in LinksForLeagues)
+            {
+                try
+                {
+                    var page = HttpClient.GetStringAsync(link.Uri).Result;
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(page);
+                    var league = doc.DocumentNode.SelectSingleNode("//div[contains(@class,'page-description tournament-description')]//h1").InnerText;
+                    var preliveNodes = doc.DocumentNode.SelectSingleNode("//div[contains(@id,'upcoming')]")
+                        .SelectNodes(".//div[contains(@id,'event_id_')]");
+                    foreach(var node in preliveNodes)
+                    {
+                        Prelive prelive = new Prelive();
+                        var tournamentInfoNode = node.SelectSingleNode(".//div[contains(@class,'event-tournament-info')]");
+                        var bestOf = tournamentInfoNode.InnerText;
+                        if (bestOf!= null && bestOf.Contains("BO"))
+                        {
+                            prelive.BestOf = int.Parse(bestOf.Replace("BO", ""));
+
+                        }
+                        prelive.LeagueName = league;
+                        prelive.SportId = (int)link.Sport;
+                        var homeTeam = node.SelectSingleNode(".//div[contains(@class,'team-home')]").InnerText.Trim();
+                        var awayTeam = node.SelectSingleNode(".//div[contains(@class,'team-away')]").InnerText.Trim();
+                        if(homeTeam != null && awayTeam != null)
+                        {
+                            prelive.HomeTeam = homeTeam;
+                            prelive.AwayTeam = awayTeam;
+                        }
+                        var dateString = node.SelectSingleNode(".//div[contains(@class,'event_date_day_month')]").InnerText.Trim();
+                        var hourAndMinute = node.SelectSingleNode(".//div[contains(@class,'event_date_hour_minutes')]").InnerText.Trim();
+                        var entireString = $"{dateString} {hourAndMinute}";
+                        DateTime dt;
+
+                        if (!DateTime.TryParseExact(entireString, format, new CultureInfo("en-Us"), DateTimeStyles.AdjustToUniversal, out dt))
+                        {
+
+                        }
+                        prelive.GameDate = dt;
+                        preliveEvents.Add(prelive);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+            }
+            return preliveEvents;
         }
     }
 }

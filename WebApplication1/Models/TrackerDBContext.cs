@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Tracker.Models;
 
 namespace WebApplication1.Models
 {
@@ -16,6 +17,7 @@ namespace WebApplication1.Models
         }
 
         public virtual DbSet<Results> Results { get; set; }
+        public virtual DbSet<Prelive> Prelive { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

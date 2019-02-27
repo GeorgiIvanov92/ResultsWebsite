@@ -9,22 +9,27 @@ export class LeagueOfLegendsData extends Component {
   constructor(props) {
     super(props);
       this.state = {
-          results: [], images: [], loading: true, loadedspecificLeague: false, specificleague: ''
+          sport: [],
+          results: [],
+          images: [],
+          prelive: [],
+          loading: true,
+          loadedspecificLeague: false,
+          shouldLoadPrelive: false,
+          shouldLoadResults: false,
+          specificleague: ''
       };
-    fetch('api/LeagueOfLegends/GetResults')
-      .then(response => response.json())
-      .then(data => {
-          this.setState({
-              results: data
-            });
-        }).then(fetch('api/LeagueOfLegends/GetImages')
-            .then(response => response.json()).then(data => {
-                this.setState({
-                    images: data,
-                    loading: false
-                });
-            }));
-
+      fetch('api/LeagueOfLegends/GetSport')
+          .then(response => response.json())
+          .then(data => {
+              this.setState({
+                  sport: data,
+                  results: data.resultsEvents,
+                  images: data.teamLogos,
+                  prelive: data.preliveEvents,
+                  loading: false
+              });
+          });
       
       this.renderResults = this.renderResults.bind(this);
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
@@ -33,10 +38,12 @@ export class LeagueOfLegendsData extends Component {
     renderLeagueTable(arr) {
         return (
             <div>
+                <h1>League of Legends</h1> 
                 {arr.map(league =>
 
                     <Navbar inverse style={{ width: '50%' }} onClick={() => this.setState({
                         loadedspecificLeague: true,
+                        shouldLoadResults: true,
                         specificleague: league
                     })}>
                         <Navbar.Header>
@@ -61,10 +68,8 @@ export class LeagueOfLegendsData extends Component {
 
     renderResults(results) {
         let tempRes;
-        for (let a = 0; a < results.length; a++)
-        {
-            for (let i = 0; i < results.length - 1; i++)
-            {
+        for (let a = 0; a < results.length; a++) {
+            for (let i = 0; i < results.length - 1; i++) {
                 if (results[i].gameDate < results[i + 1].gameDate) {
                     tempRes = results[i + 1];
                     results[i + 1] = results[i];
@@ -72,32 +77,110 @@ export class LeagueOfLegendsData extends Component {
                 }
             }
         }
+        {
+            let disablePrelive = true;
+            if (this.state.specificleague in this.state.prelive)
+            {
+                disablePrelive = false;
+            }
+            return (
+                <div>
+                    <h1>{this.state.specificleague} Results</h1>
+                    <Button variant="outline-dark" onClick={() => this.setState({
+                        loadedspecificLeague: false,
+                        specificleague: ''
+                    })}>Back To All Leagues</Button>
+
+                    <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
+                        shouldLoadPrelive: true,
+                        shouldLoadResults: false,
+                    })}>Upcoming Games</Button>
+
+
+
+                    <table className='table'>
+                        <thead>
+                            <tr>
+                                <th>Game Date</th>
+                                <th>Home Team</th>
+                                <th>Home Logo</th>
+                                <th>Home Score</th>
+                                <th>Away Score</th>
+                                <th>Away Logo</th>
+                                <th>Away Team</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {results.map(result =>
+                                <tr key={result.gameDate + "@" + result.homeTeam}>
+
+                                    <td>{new Date(result.gameDate)
+                                        .toLocaleDateString('en-GB',
+                                            {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric',
+                                                hour: 'numeric',
+                                                minute: 'numeric',
+                                            })}</td>
+                                    <td>{result.homeTeam}</td>
+                                    <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
+                                        this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
+                                    <td>{result.homeScore}</td>
+                                    <td>{result.awayScore}</td>
+                                    <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
+                                        this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
+                                    <td>{result.awayTeam}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+    }
+
+    renderPrelive(prelive) {
+        let tempRes;
+        for (let a = 0; a < prelive.length; a++) {
+            for (let i = 0; i < prelive.length - 1; i++) {
+                if (prelive[i].gameDate > prelive[i + 1].gameDate) {
+                    tempRes = prelive[i + 1];
+                    prelive[i + 1] = prelive[i];
+                    prelive[i] = tempRes;
+                }
+            }
+        }
         return (
             <div>
-           
+                <h1>{this.state.specificleague} Upcoming Games</h1> 
                 <Button variant="outline-dark" onClick={() => this.setState({
                     loadedspecificLeague: false,
                     specificleague: ''
                 })}>Back To All Leagues</Button>
 
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: true,
+                    shouldLoadPrelive: false
+                })}>Results</Button>
 
-            <table className='table'>
-                <thead>
+
+                <table className='table'>
+                    <thead>
                         <tr>
                             <th>Game Date</th>
                             <th>Home Team</th>
-                            <th>Home Logo</th>
-                            <th>Home Score</th>
-                            <th>Away Score</th>
+                            <th>Home Logo</th>                            
                             <th>Away Logo</th>
                             <th>Away Team</th>
+                            <th>Best Of</th>
                         </tr>
-                </thead>
-                <tbody>
-                    {results.map(result =>
-                            <tr key={result.gameDate + "@" + result.homeTeam}>
+                    </thead>
+                    <tbody>
+                        {prelive.map(pre =>
+                            <tr key={pre.gameDate + "@" + pre.homeTeam}>
 
-                                <td>{new Date(result.gameDate)
+                                <td>{new Date(pre.gameDate)
                                     .toLocaleDateString('en-GB',
                                         {
                                             day: 'numeric',
@@ -106,19 +189,20 @@ export class LeagueOfLegendsData extends Component {
                                             hour: 'numeric',
                                             minute: 'numeric',
                                     })}</td>
-                                <td>{result.homeTeam}</td>
-                                <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
-                                    this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
-                                <td>{result.homeScore}</td>
-                                <td>{result.awayScore}</td>
-                                <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
-                                    this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
-                                <td>{result.awayTeam}</td>
+                                <img src={`data:image/png;base64,${pre.homeTeam in this.state.images ?
+                                    this.state.images[pre.homeTeam] : this.state.images['default']}`} alt={pre.homeTeam} >
+                                </img>
+                                <td>{pre.homeTeam}</td>          
+                                <td>{pre.awayTeam}</td>
+                                <img src={`data:image/png;base64,${pre.awayTeam in this.state.images ?
+                                    this.state.images[pre.awayTeam] : this.state.images['default']}`} alt={pre.awayTeam} >
+                                </img>
+                                <td>{pre.bestOf}</td>
                             </tr>
-                    )}
-                </tbody>
+                        )}
+                    </tbody>
                 </table>
-                </div>
+            </div>
         );
     }
 
@@ -126,7 +210,9 @@ export class LeagueOfLegendsData extends Component {
 render() {
     let contents;
     if (this.state.loadedspecificLeague) {
-        contents = this.renderResults(this.state.results[this.state.specificleague]);
+        contents = this.state.shouldLoadResults ?
+            this.renderResults(this.state.results[this.state.specificleague])
+            : this.renderPrelive(this.state.prelive[this.state.specificleague]);
     } else {
         contents = this.state.loading
             ? <p><em>Loading...</em></p>
@@ -135,8 +221,7 @@ render() {
 
     return (
            
-        <div>
-            <h1>{this.state.specificleague.length <1 ? 'League of Legends ' : this.state.specificleague} Results</h1>           
+        <div>                    
             {contents}
       </div>
     );

@@ -8,19 +8,19 @@ namespace Tracker.Workers
 {
     public static class ResultsWorker
     {
-        public static void TrackerWorkerInit(TimeSpan TrackerSamplePeriodInMinutes)
+        public static void ResultsWorkerInit(TimeSpan ResultsSamplePeriod)
         {
             while (true)
             {
                 TrackerDBContext dbContext = new TrackerDBContext();
                 EsportsLiveScore.GetNewLinks();
                 var results = EsportsLiveScore.GetResultEvents();
-                var filteredResults = Utilities.FilterAlreadySentEvents(dbContext, results);
+                var filteredResults = Utilities.FilterAlreadySentResults(dbContext, results);
                 dbContext.Results.AddRange(filteredResults);
-                dbContext.RemoveRange(Utilities.UnwantedEventsFromDb(dbContext));
+                Utilities.RemoveUnwatedEventsFromDb(ref dbContext);
                 dbContext.SaveChanges();
-                EsportsLiveScore.WriteTeamIconsToDisk();
-                Thread.Sleep(TrackerSamplePeriodInMinutes);
+                Console.WriteLine($"Finished Getting Results at {DateTime.Now.ToShortTimeString()}. New Results Added to db: {filteredResults.Count}. Sampling Results again in {ResultsSamplePeriod.Hours} hours and {ResultsSamplePeriod.Minutes} minutes");
+                Thread.Sleep(ResultsSamplePeriod);
             }
         }
     }

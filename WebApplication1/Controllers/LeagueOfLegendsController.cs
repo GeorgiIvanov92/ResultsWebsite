@@ -8,14 +8,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using WebApplication1.Models;
 using Microsoft.Extensions.Configuration;
+using WebApi.Communication;
+using Tracker.Models;
 
 namespace WebApplication1.Controllers
 {
     [Route("api/[controller]")]
     public class LeagueOfLegendsController : Controller
     {
-        private TrackerDBContext db;
-        private ConcurrentDictionary<string, HashSet<Results>> Leagues = new ConcurrentDictionary<string, HashSet<Results>>();
+        private TrackerDBContext db;       
         private Object _lock = new Object();
         private IConfiguration Configuration;
         public LeagueOfLegendsController(TrackerDBContext db, IConfiguration Configuration)
@@ -30,66 +31,40 @@ namespace WebApplication1.Controllers
             }
         }
         [HttpGet("[action]")]
-        public ConcurrentDictionary<string, HashSet<Results>> GetResults()
+        public Sport GetSport()
         {
-            Leagues = new ConcurrentDictionary<string, HashSet<Results>>();
+            Sport sport = new Sport();
+            ConcurrentDictionary<string, HashSet<Results>> ResultEvents = new ConcurrentDictionary<string, HashSet<Results>>();
+            ConcurrentDictionary<string, HashSet<Prelive>> PreliveEvents = new ConcurrentDictionary<string, HashSet<Prelive>>();
             var results = db.Results.ToList();
             Parallel.ForEach(results, (result) =>
             {
                 if (result.SportId == 1)
                 {
-                    if (Leagues.ContainsKey(result.LeagueName))
+                    if (ResultEvents.ContainsKey(result.LeagueName))
                     {
                         lock (_lock)
                         {
-                            Leagues[result.LeagueName].Add(result);
+                            ResultEvents[result.LeagueName].Add(result);
                         }
                     }
                     else
                     {
                         lock (_lock)
                         {
-                            Leagues.TryAdd(result.LeagueName, new HashSet<Results>() { result });
-                        }
-                    }
-                       
-                }
-            });
-            return Leagues;
-
-        }
-        [HttpGet("[action]")]
-        public ConcurrentDictionary<string, string> GetImages()
-        {
-            Leagues = new ConcurrentDictionary<string, HashSet<Results>>();
-            var results = db.Results.ToList();
-            Parallel.ForEach(results, (result) =>
-            {
-                if (result.SportId == 1)
-                {
-                    if (Leagues.ContainsKey(result.LeagueName))
-                    {
-                        lock (_lock)
-                        {
-                            Leagues[result.LeagueName].Add(result);
-                        }
-                    }
-                    else
-                    {
-                        lock (_lock)
-                        {
-                            Leagues.TryAdd(result.LeagueName, new HashSet<Results>() { result });
+                            ResultEvents.TryAdd(result.LeagueName, new HashSet<Results>() { result });
                         }
                     }
 
                 }
             });
+            sport.ResultsEvents = ResultEvents;
             ConcurrentDictionary<string, string> images = new ConcurrentDictionary<string, string>();
             var defaultImageByteArray = System.IO.File.ReadAllBytes
                               (Configuration.GetSection("ImagePathReader").Value + "defaultLoLLogo" + ".png");
             var defaultImageString = Convert.ToBase64String(defaultImageByteArray);
             images.TryAdd("default", defaultImageString);
-            Parallel.ForEach(Leagues, (league) =>
+            Parallel.ForEach(ResultEvents, (league) =>
             {
                 var results2 = league.Value;
                 foreach (var res in results2)
@@ -110,14 +85,43 @@ namespace WebApplication1.Controllers
                             var imageString = Convert.ToBase64String(imageByteArray);
                             images.TryAdd(res.AwayTeam.Trim(), imageString);
                         }
-                    }catch(Exception ex)
+                    }
+                    catch (Exception ex)
                     {
                         continue;
                     }
                 }
             });
-            return images;
+            sport.TeamLogos = images;
+
+            var preliveEventsFromDb = db.Prelive.ToList();
+
+            Parallel.ForEach(preliveEventsFromDb, (preliveEvent) =>
+            {
+                if (preliveEvent.SportId == 1)
+                {
+                    if (PreliveEvents.ContainsKey(preliveEvent.LeagueName))
+                    {
+                        lock (_lock)
+                        {
+                            PreliveEvents[preliveEvent.LeagueName].Add(preliveEvent);
+                        }
+                    }
+                    else
+                    {
+                        lock (_lock)
+                        {
+                            PreliveEvents.TryAdd(preliveEvent.LeagueName, new HashSet<Prelive>() { preliveEvent });
+                        }
+                    }
+
+                }
+            });
+            sport.PreliveEvents = PreliveEvents;
+            return sport;
+
         }
+        
 
     }
 }

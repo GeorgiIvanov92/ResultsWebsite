@@ -14,7 +14,7 @@ namespace Tracker
             {2,"csgo" },
             {3,"dota" }
         };
-        public static List<Results> FilterAlreadySentEvents(TrackerDBContext db, List<Results> results)
+        public static List<Results> FilterAlreadySentResults(TrackerDBContext db, List<Results> results)
         {
             List<Results> filteredResults = new List<Results>();
             var dbResults = db.Results.ToList();
@@ -40,17 +40,54 @@ namespace Tracker
             }
             return filteredResults;
         }
-        public static List<Results> UnwantedEventsFromDb(TrackerDBContext dbContext)
+
+        public static List<Prelive> FilterAlreadySentPreliveEvents(TrackerDBContext db, List<Prelive> preliveEvents)
         {
-            var eventsToRemove = new List<Results>();
+            List<Prelive> filteredPreliveEvents = new List<Prelive>();
+            var dbPreliveEvents = db.Prelive.ToList();
+            foreach (var result in preliveEvents)
+            {
+                bool eligableEvent = true;
+                foreach (var dbResult in dbPreliveEvents)
+                {
+                    if (result.LeagueName == dbResult.LeagueName
+                        && result.HomeTeam == dbResult.HomeTeam
+                        && result.AwayTeam == dbResult.AwayTeam
+                        && result.GameDate.ToString() == dbResult.GameDate.ToString())
+                    {
+                        eligableEvent = false;
+                        break;
+                    }
+
+                }
+                if (eligableEvent)
+                {
+                    filteredPreliveEvents.Add(result);
+                }
+            }
+            return filteredPreliveEvents;
+        }
+
+        public static void RemoveUnwatedEventsFromDb(ref TrackerDBContext dbContext)
+        {
+            var resultsToRemove = new List<Results>();
             foreach (var res in dbContext.Results)
             {
                 if (res.GameDate < DateTime.UtcNow.AddDays(-30))
                 {
-                    eventsToRemove.Add(res);
+                    resultsToRemove.Add(res);
                 }
             }
-            return eventsToRemove;
+            dbContext.RemoveRange(resultsToRemove);
+            var preliveEventsToRemove = new List<Prelive>();
+            foreach(var pre in dbContext.Prelive)
+            {
+                if (pre.GameDate < DateTime.UtcNow)
+                {
+                    preliveEventsToRemove.Add(pre);
+                }
+            }
+            dbContext.RemoveRange(preliveEventsToRemove);
         }
     }
 }
