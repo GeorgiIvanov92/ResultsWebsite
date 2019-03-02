@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
 using WebApi.Cache;
 using WebApplication1.Models;
 
@@ -14,12 +16,12 @@ namespace WebApplication1
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -71,7 +73,8 @@ namespace WebApplication1
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
-            CacheCreator cacheCreator = new CacheCreator(db,config);
+            TimeSpan timeSpan = new TimeSpan(0, 0, int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value));
+            CacheCreator cacheCreator = new CacheCreator(db, config, cache,timeSpan);
             cache.Set("LeagueOfLegends", cacheCreator.CreateSportCacheById(1));
             cache.Set("CSGO", cacheCreator.CreateSportCacheById(2));
             cache.Set("Dota2", cacheCreator.CreateSportCacheById(3));

@@ -15,7 +15,7 @@ export class NavMenu extends Component {
       <Navbar inverse fixedTop fluid collapseOnSelect>
         <Navbar.Header>
           <Navbar.Brand>
-            <Link to={'/'}>Results</Link>
+            <Link to={'/'}>Esports Stats</Link>
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>

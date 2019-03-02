@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Tracker.Models;
 using WebApi.Entity;
@@ -12,20 +14,33 @@ namespace WebApi.Cache
 {
     public class CacheCreator
     {
-        TrackerDBContext db;
-        Object _lock = new Object();
-        IConfiguration Configuration;
-        Dictionary<int, string> DefaultImagesById;
-        public CacheCreator(TrackerDBContext db, IConfiguration config)
+        private TrackerDBContext db;
+        private Object _lock = new Object();
+        private IConfiguration Configuration;
+        private Dictionary<int, string> DefaultImagesById;
+        private IMemoryCache _cache;
+        public CacheCreator(TrackerDBContext db, IConfiguration config, IMemoryCache cache,TimeSpan time)
         {
             this.db = db;
             Configuration = config;
+            _cache = cache;
             DefaultImagesById = new Dictionary<int, string>()
             {
                 { 1,"defaultLoLLogo" },
                 { 2,"defaultCSLogo" },
                 { 3,"defaultDota2Logo" },
             };
+        }
+
+        public void UpdateMemoryCacheOnInterval(TimeSpan time)
+        {
+            while (true)
+            {
+                _cache.Set("LeagueOfLegends", CreateSportCacheById(1));
+                _cache.Set("CSGO", CreateSportCacheById(2));
+                _cache.Set("Dota2", CreateSportCacheById(3));
+                Thread.Sleep(time);
+            }
         }
         public Sport CreateSportCacheById(int sportId)
         {

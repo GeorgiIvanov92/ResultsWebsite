@@ -25,34 +25,6 @@ namespace WebApplication1.Models
             {
             }
         }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Results>(entity =>
-            {
-                entity.HasKey(e => e.GameId);
-
-                entity.ToTable("results");
-
-                entity.Property(e => e.GameId).HasColumnName("GameID");
-
-                entity.Property(e => e.AwayTeam)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.GameDate).HasColumnType("date");
-
-                entity.Property(e => e.HomeTeam)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.LeagueName)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.SportId).HasColumnName("SportID");
-            });
-        }
-        protected override 
+      
     }
 }
