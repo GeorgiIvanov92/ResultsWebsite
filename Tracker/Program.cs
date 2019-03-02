@@ -18,6 +18,9 @@ namespace Tracker
             ResultsTask.Start();
             ImagesTask.Start();
             PreliveTask.Start();
+            DateTime ResultsCompletionDateTime;
+            DateTime PreliveCompletionDateTime;
+            DateTime ImagesCompletionDateTime;
             while (true)
             {
 

@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WebApi.Cache;
 using WebApplication1.Models;
 
 namespace WebApplication1
@@ -27,6 +29,8 @@ namespace WebApplication1
             services.AddEntityFrameworkSqlServer().AddDbContext<TrackerDBContext>
                 (options => options.UseSqlServer(connection));
 
+            services.AddMemoryCache();
+
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -35,7 +39,7 @@ namespace WebApplication1
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMemoryCache cache,TrackerDBContext db, IConfiguration config)
         {
             if (env.IsDevelopment())
             {
@@ -46,7 +50,7 @@ namespace WebApplication1
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
@@ -54,8 +58,8 @@ namespace WebApplication1
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    "default",
+                    "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
@@ -67,6 +71,10 @@ namespace WebApplication1
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
+            CacheCreator cacheCreator = new CacheCreator(db,config);
+            cache.Set("LeagueOfLegends", cacheCreator.CreateSportCacheById(1));
+            cache.Set("CSGO", cacheCreator.CreateSportCacheById(2));
+            cache.Set("Dota2", cacheCreator.CreateSportCacheById(3));
         }
     }
 }

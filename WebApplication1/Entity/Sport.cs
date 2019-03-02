@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Tracker.Models;
 using WebApplication1.Models;
 
-namespace WebApi.Communication
+namespace WebApi.Entity
 {
     public class Sport
     {

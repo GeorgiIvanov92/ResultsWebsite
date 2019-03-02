@@ -53,5 +53,6 @@ namespace WebApplication1.Models
                 entity.Property(e => e.SportId).HasColumnName("SportID");
             });
         }
+        protected override 
     }
 }

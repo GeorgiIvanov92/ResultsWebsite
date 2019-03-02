@@ -8,7 +8,7 @@ import { Dota2Data } from './components/Dota2Data';
 
 export default class App extends Component {
   displayName = App.name
-
+   
   render() {
     return (
       <Layout>

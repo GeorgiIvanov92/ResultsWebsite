@@ -9,21 +9,28 @@ export class CounterStrikeData extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            results: [], images: [], loading: true, loadedspecificLeague: false, specificleague: ''
+            sport: [],
+            results: [],
+            images: [],
+            prelive: [],
+            loading: true,
+            loadedspecificLeague: false,
+            shouldLoadPrelive: false,
+            shouldLoadResults: false,
+            specificleague: ''
         };
-        fetch('api/CounterStrike/GetResults')
+        fetch('api/CounterStrike/GetSport')
             .then(response => response.json())
             .then(data => {
                 this.setState({
-                    results: data
+                    sport: data,
+                    results: data.resultsEvents,
+                    images: data.teamLogos,
+                    prelive: data.preliveEvents,
+                    loading: false
                 });
-            }).then(fetch('api/CounterStrike/GetImages')
-                .then(response => response.json()).then(data => {
-                    this.setState({
-                        images: data,
-                        loading: false
-                    });
-                }));
+            });
+
         this.renderResults = this.renderResults.bind(this);
         this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
         this.renderLeagueTable = this.renderLeagueTable.bind(this);
@@ -31,10 +38,12 @@ export class CounterStrikeData extends Component {
     renderLeagueTable(arr) {
         return (
             <div>
+                <h1>CS:GO</h1>
                 {arr.map(league =>
 
                     <Navbar inverse style={{ width: '50%' }} onClick={() => this.setState({
                         loadedspecificLeague: true,
+                        shouldLoadResults: true,
                         specificleague: league
                     })}>
                         <Navbar.Header>
@@ -47,7 +56,7 @@ export class CounterStrikeData extends Component {
             </div>
         );
     }
-    determineLeaguesToAdd(results) {       
+    determineLeaguesToAdd(results) {
         let arr = [];
         Object.keys(results).forEach(function (key) {
             arr.push(key);
@@ -59,6 +68,7 @@ export class CounterStrikeData extends Component {
 
     renderResults(results) {
         let tempRes;
+        //bubble sort by game date
         for (let a = 0; a < results.length; a++) {
             for (let i = 0; i < results.length - 1; i++) {
                 if (results[i].gameDate < results[i + 1].gameDate) {
@@ -68,13 +78,91 @@ export class CounterStrikeData extends Component {
                 }
             }
         }
+        {
+            let disablePrelive = true;
+            if (this.state.specificleague in this.state.prelive) {
+                disablePrelive = false;
+            }
+            return (
+                <div>
+                    <h1>{this.state.specificleague} Results</h1>
+                    <Button variant="outline-dark" onClick={() => this.setState({
+                        loadedspecificLeague: false,
+                        specificleague: ''
+                    })}>Back To All Leagues</Button>
+
+                    <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
+                        shouldLoadPrelive: true,
+                        shouldLoadResults: false,
+                    })}>Upcoming Games</Button>
+
+
+
+                    <table className='table'>
+                        <thead>
+                            <tr>
+                                <th>Game Date</th>
+                                <th>Home Team</th>
+                                <th>Home Logo</th>
+                                <th>Home Score</th>
+                                <th>Away Score</th>
+                                <th>Away Logo</th>
+                                <th>Away Team</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {results.map(result =>
+                                <tr key={result.gameDate + "@" + result.homeTeam}>
+
+                                    <td>{new Date(result.gameDate)
+                                        .toLocaleDateString('en-GB',
+                                            {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric',
+                                                hour: 'numeric',
+                                                minute: 'numeric',
+                                            })}</td>
+                                    <td>{result.homeTeam}</td>
+                                    <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
+                                        this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
+                                    <td>{result.homeScore}</td>
+                                    <td>{result.awayScore}</td>
+                                    <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
+                                        this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
+                                    <td>{result.awayTeam}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+    }
+
+    renderPrelive(prelive) {
+        let tempRes;
+        for (let a = 0; a < prelive.length; a++) {
+            for (let i = 0; i < prelive.length - 1; i++) {
+                if (prelive[i].gameDate > prelive[i + 1].gameDate) {
+                    tempRes = prelive[i + 1];
+                    prelive[i + 1] = prelive[i];
+                    prelive[i] = tempRes;
+                }
+            }
+        }
         return (
             <div>
-
+                <h1>{this.state.specificleague} Upcoming Games</h1>
                 <Button variant="outline-dark" onClick={() => this.setState({
                     loadedspecificLeague: false,
                     specificleague: ''
                 })}>Back To All Leagues</Button>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: true,
+                    shouldLoadPrelive: false
+                })}>Results</Button>
 
 
                 <table className='table'>
@@ -83,17 +171,16 @@ export class CounterStrikeData extends Component {
                             <th>Game Date</th>
                             <th>Home Team</th>
                             <th>Home Logo</th>
-                            <th>Home Score</th>
-                            <th>Away Score</th>
                             <th>Away Logo</th>
                             <th>Away Team</th>
+                            <th>Best Of</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {results.map(result =>
-                            <tr key={result.gameDate + "@" + result.homeTeam}>
+                        {prelive.map(pre =>
+                            <tr key={pre.gameDate + "@" + pre.homeTeam}>
 
-                                <td>{new Date(result.gameDate)
+                                <td>{new Date(pre.gameDate)
                                     .toLocaleDateString('en-GB',
                                         {
                                             day: 'numeric',
@@ -102,14 +189,15 @@ export class CounterStrikeData extends Component {
                                             hour: 'numeric',
                                             minute: 'numeric',
                                         })}</td>
-                                <td>{result.homeTeam}</td>
-                                <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
-                                    this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
-                                <td>{result.homeScore}</td>
-                                <td>{result.awayScore}</td>
-                                <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
-                                    this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
-                                <td>{result.awayTeam}</td>
+                                <img src={`data:image/png;base64,${pre.homeTeam in this.state.images ?
+                                    this.state.images[pre.homeTeam] : this.state.images['default']}`} alt={pre.homeTeam} >
+                                </img>
+                                <td>{pre.homeTeam}</td>
+                                <td>{pre.awayTeam}</td>
+                                <img src={`data:image/png;base64,${pre.awayTeam in this.state.images ?
+                                    this.state.images[pre.awayTeam] : this.state.images['default']}`} alt={pre.awayTeam} >
+                                </img>
+                                <td>{pre.bestOf}</td>
                             </tr>
                         )}
                     </tbody>
@@ -122,7 +210,9 @@ export class CounterStrikeData extends Component {
     render() {
         let contents;
         if (this.state.loadedspecificLeague) {
-            contents = this.renderResults(this.state.results[this.state.specificleague]);
+            contents = this.state.shouldLoadResults ?
+                this.renderResults(this.state.results[this.state.specificleague])
+                : this.renderPrelive(this.state.prelive[this.state.specificleague]);
         } else {
             contents = this.state.loading
                 ? <p><em>Loading...</em></p>
@@ -130,8 +220,8 @@ export class CounterStrikeData extends Component {
         }
 
         return (
+
             <div>
-                <h1>{this.state.specificleague.length < 1 ? 'Counter Strike ' : this.state.specificleague} Results</h1>
                 {contents}
             </div>
         );

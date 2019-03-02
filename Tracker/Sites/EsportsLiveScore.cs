@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Tracker.Models;
 using Tracker.TrackerEssentials;
 using static Tracker.TrackerEssentials.Communication.Sports;
@@ -156,54 +157,56 @@ namespace Tracker
         public static List<Prelive> GetPreliveEvents()
         {
             List<Prelive> preliveEvents = new List<Prelive>();
-            foreach(var link in LinksForLeagues)
+            Parallel.ForEach(LinksForLeagues, link =>
             {
-                try
                 {
-                    var page = HttpClient.GetStringAsync(link.Uri).Result;
-                    HtmlDocument doc = new HtmlDocument();
-                    doc.LoadHtml(page);
-                    var league = doc.DocumentNode.SelectSingleNode("//div[contains(@class,'page-description tournament-description')]//h1").InnerText;
-                    var preliveNodes = doc.DocumentNode.SelectSingleNode("//div[contains(@id,'upcoming')]")
-                        .SelectNodes(".//div[contains(@id,'event_id_')]");
-                    foreach(var node in preliveNodes)
+                    try
                     {
-                        Prelive prelive = new Prelive();
-                        var tournamentInfoNode = node.SelectSingleNode(".//div[contains(@class,'event-tournament-info')]");
-                        var bestOf = tournamentInfoNode.InnerText;
-                        if (bestOf!= null && bestOf.Contains("BO"))
+                        var page = HttpClient.GetStringAsync(link.Uri).Result;
+                        HtmlDocument doc = new HtmlDocument();
+                        doc.LoadHtml(page);
+                        var league = doc.DocumentNode.SelectSingleNode("//div[contains(@class,'page-description tournament-description')]//h1").InnerText;
+                        var preliveNodes = doc.DocumentNode.SelectSingleNode("//div[contains(@id,'upcoming')]")
+                            .SelectNodes(".//div[contains(@id,'event_id_')]");
+                        foreach (var node in preliveNodes)
                         {
-                            prelive.BestOf = int.Parse(bestOf.Replace("BO", ""));
+                            Prelive prelive = new Prelive();
+                            var tournamentInfoNode = node.SelectSingleNode(".//div[contains(@class,'event-tournament-info')]");
+                            var bestOf = tournamentInfoNode.InnerText;
+                            if (bestOf != null && bestOf.Contains("BO"))
+                            {
+                                prelive.BestOf = int.Parse(bestOf.Replace("BO", ""));
+
+                            }
+                            prelive.LeagueName = league;
+                            prelive.SportId = (int)link.Sport;
+                            var homeTeam = node.SelectSingleNode(".//div[contains(@class,'team-home')]").InnerText.Trim();
+                            var awayTeam = node.SelectSingleNode(".//div[contains(@class,'team-away')]").InnerText.Trim();
+                            if (homeTeam != null && awayTeam != null)
+                            {
+                                prelive.HomeTeam = homeTeam;
+                                prelive.AwayTeam = awayTeam;
+                            }
+                            var dateString = node.SelectSingleNode(".//div[contains(@class,'event_date_day_month')]").InnerText.Trim();
+                            var hourAndMinute = node.SelectSingleNode(".//div[contains(@class,'event_date_hour_minutes')]").InnerText.Trim();
+                            var entireString = $"{dateString} {hourAndMinute}";
+                            DateTime dt;
+
+                            if (!DateTime.TryParseExact(entireString, format, new CultureInfo("en-Us"), DateTimeStyles.AdjustToUniversal, out dt))
+                            {
+
+                            }
+                            prelive.GameDate = dt;
+                            preliveEvents.Add(prelive);
 
                         }
-                        prelive.LeagueName = league;
-                        prelive.SportId = (int)link.Sport;
-                        var homeTeam = node.SelectSingleNode(".//div[contains(@class,'team-home')]").InnerText.Trim();
-                        var awayTeam = node.SelectSingleNode(".//div[contains(@class,'team-away')]").InnerText.Trim();
-                        if(homeTeam != null && awayTeam != null)
-                        {
-                            prelive.HomeTeam = homeTeam;
-                            prelive.AwayTeam = awayTeam;
-                        }
-                        var dateString = node.SelectSingleNode(".//div[contains(@class,'event_date_day_month')]").InnerText.Trim();
-                        var hourAndMinute = node.SelectSingleNode(".//div[contains(@class,'event_date_hour_minutes')]").InnerText.Trim();
-                        var entireString = $"{dateString} {hourAndMinute}";
-                        DateTime dt;
-
-                        if (!DateTime.TryParseExact(entireString, format, new CultureInfo("en-Us"), DateTimeStyles.AdjustToUniversal, out dt))
-                        {
-
-                        }
-                        prelive.GameDate = dt;
-                        preliveEvents.Add(prelive);
-
+                    }
+                    catch (Exception ex)
+                    {
+                        return;
                     }
                 }
-                catch (Exception ex)
-                {
-                    continue;
-                }
-            }
+            });
             return preliveEvents;
         }
     }
