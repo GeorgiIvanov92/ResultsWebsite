@@ -129,7 +129,9 @@ namespace Tracker
         }
         public static void WriteTeamIconsToDisk()
         {
-            foreach(var team in TeamLinks)
+            FileInfo file = new FileInfo(ConfigurationManager.AppSettings["ImagesSavePath"]);
+            file.Directory.Create();
+            foreach (var team in TeamLinks)
             {
                 try
                 {
