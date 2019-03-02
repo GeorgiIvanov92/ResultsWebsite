@@ -12,18 +12,12 @@ using WebApplication1.Models;
 
 namespace WebApi.Cache
 {
-    public class CacheCreator
+    public static class CacheCreator
     {
-        private TrackerDBContext db;
-        private Object _lock = new Object();
-        private IConfiguration Configuration;
-        private Dictionary<int, string> DefaultImagesById;
-        private IMemoryCache _cache;
-        public CacheCreator(TrackerDBContext db, IConfiguration config, IMemoryCache cache,TimeSpan time)
+        private static Object _lock = new Object();
+        private static Dictionary<int, string> DefaultImagesById;
+        static CacheCreator()
         {
-            this.db = db;
-            Configuration = config;
-            _cache = cache;
             DefaultImagesById = new Dictionary<int, string>()
             {
                 { 1,"defaultLoLLogo" },
@@ -32,17 +26,17 @@ namespace WebApi.Cache
             };
         }
 
-        public void UpdateMemoryCacheOnInterval(TimeSpan time)
-        {
-            while (true)
-            {
-                _cache.Set("LeagueOfLegends", CreateSportCacheById(1));
-                _cache.Set("CSGO", CreateSportCacheById(2));
-                _cache.Set("Dota2", CreateSportCacheById(3));
-                Thread.Sleep(time);
-            }
-        }
-        public Sport CreateSportCacheById(int sportId)
+        //public void UpdateMemoryCacheOnInterval(TimeSpan time)
+        //{
+        //    while (true)
+        //    {
+        //        _cache.Set("LeagueOfLegends", CreateSportCacheById(1));
+        //        _cache.Set("CSGO", CreateSportCacheById(2));
+        //        _cache.Set("Dota2", CreateSportCacheById(3));
+        //        Thread.Sleep(time);
+        //    }
+        //}
+        public static Sport CreateSportCacheById(int sportId, TrackerDBContext db, IConfiguration Configuration)
         {
             Sport sport = new Sport();
             ConcurrentDictionary<string, HashSet<Results>> ResultEvents = new ConcurrentDictionary<string, HashSet<Results>>();
@@ -129,6 +123,7 @@ namespace WebApi.Cache
                 }
             });
             sport.PreliveEvents = PreliveEvents;
+            sport.LastUpdate = DateTime.UtcNow;
             return sport;
         } 
     }

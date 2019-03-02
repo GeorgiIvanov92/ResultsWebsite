@@ -13,5 +13,6 @@ namespace WebApi.Entity
         public ConcurrentDictionary<string, HashSet<Results>> ResultsEvents = new ConcurrentDictionary<string,HashSet<Results>>();
         public ConcurrentDictionary<string, HashSet<Prelive>> PreliveEvents = new ConcurrentDictionary<string, HashSet<Prelive>>();
         public ConcurrentDictionary<string, string> TeamLogos = new ConcurrentDictionary<string, string>();
+        public DateTime LastUpdate = DateTime.UtcNow;
     }
 }

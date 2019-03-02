@@ -72,12 +72,10 @@ namespace WebApplication1
                 {
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
-            });
-            TimeSpan timeSpan = new TimeSpan(0, 0, int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value));
-            CacheCreator cacheCreator = new CacheCreator(db, config, cache,timeSpan);
-            cache.Set("LeagueOfLegends", cacheCreator.CreateSportCacheById(1));
-            cache.Set("CSGO", cacheCreator.CreateSportCacheById(2));
-            cache.Set("Dota2", cacheCreator.CreateSportCacheById(3));
+            });            
+            cache.Set("LeagueOfLegends", CacheCreator.CreateSportCacheById(1,db,Configuration));
+            cache.Set("CSGO", CacheCreator.CreateSportCacheById(2, db, Configuration));
+            cache.Set("Dota2", CacheCreator.CreateSportCacheById(3, db, Configuration));
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Tracker.Models;
+using WebApi.Cache;
 using WebApi.Entity;
 using WebApplication1.Models;
 
@@ -16,15 +17,25 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class CounterStrikeController : Controller
     {
+        TrackerDBContext db;
+        IConfiguration Configuration;
         private IMemoryCache _cache;
-        public CounterStrikeController(IMemoryCache memoryCache)
+        public CounterStrikeController(IMemoryCache memoryCache, TrackerDBContext db, IConfiguration config)
         {
-            _cache = memoryCache;         
+            this.db = db;
+            Configuration = config;
+            _cache = memoryCache;
         }
         [HttpGet("[action]")]
         public Object GetSport()
         {
-            return _cache.Get("CSGO");
+            var sport = _cache.Get("CSGO") as Sport;
+            if (sport.LastUpdate < DateTime.UtcNow.AddSeconds(-int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value)))
+            {
+                _cache.Set("CSGO", CacheCreator.CreateSportCacheById(1, db, Configuration));
+                sport = _cache.Get("CSGO") as Sport;
+            }
+            return sport;
         }
     }
 }

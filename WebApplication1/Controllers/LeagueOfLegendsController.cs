@@ -17,16 +17,26 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class LeagueOfLegendsController : Controller
     {
+        private TrackerDBContext db;
+        private IConfiguration Configuration;
         private IMemoryCache _cache;
-        public LeagueOfLegendsController(TrackerDBContext db, IConfiguration Configuration, IMemoryCache memoryCache)
-        {            
+        public LeagueOfLegendsController(TrackerDBContext db, IConfiguration config, IMemoryCache memoryCache)
+        {
+            this.db = db;
+            Configuration = config;
             _cache = memoryCache;
         }
 
         [HttpGet("[action]")]
-        public Object GetSport()
+        public Sport GetSport()
         {
-            return _cache.Get("LeagueOfLegends");
+            var sport = _cache.Get("LeagueOfLegends") as Sport;
+            if (sport.LastUpdate < DateTime.UtcNow.AddSeconds(-int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value)))
+            {
+                _cache.Set("LeagueOfLegends",CacheCreator.CreateSportCacheById(1, db, Configuration));
+                sport = _cache.Get("LeagueOfLegends") as Sport;
+            }
+                return sport;
         }       
 
     }

@@ -10,21 +10,32 @@ using WebApplication1.Models;
 using Microsoft.Extensions.Configuration;
 using Tracker.Models;
 using WebApi.Entity;
+using WebApi.Cache;
 
 namespace WebApplication1.Controllers
 {
     [Route("api/[controller]")]
     public class Dota2Controller : Controller
     {
+        TrackerDBContext db;
+        IConfiguration Configuration;
         private IMemoryCache _cache;
-        public Dota2Controller(IMemoryCache memoryCache)
+        public Dota2Controller(IMemoryCache memoryCache,TrackerDBContext db, IConfiguration config)
         {
+            this.db = db;
+            Configuration = config;
             _cache = memoryCache;
         }
         [HttpGet("[action]")]
         public Object GetSport()
         {
-            return _cache.Get("Dota2");
+            var sport = _cache.Get("Dota2") as Sport;
+            if (sport.LastUpdate < DateTime.UtcNow.AddSeconds(-int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value)))
+            {
+                _cache.Set("Dota2", CacheCreator.CreateSportCacheById(1, db, Configuration));
+                sport = _cache.Get("Dota2") as Sport;
+            }
+            return sport;
         }
     }
 }
