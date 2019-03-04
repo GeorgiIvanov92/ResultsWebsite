@@ -5,15 +5,16 @@ using System.Text;
 
 namespace Tracker.Models
 {
-    class Team
+    public class Team
     {
         [Key]
-        public int TeamId { get; set; }
+        public int? Id { get; set; }
+        public string Name { get; set; }
         public int? SportId { get; set; }
         public string Region { get; set; }
+        public float Winrate { get; set; }
+        public float AverageGameTime { get; set; }
 
-        public DateTime? GameDate { get; set; }
-        public int BestOf { get; set; }
     }
 }
  

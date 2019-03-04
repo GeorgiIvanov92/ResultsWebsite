@@ -14,5 +14,8 @@ namespace Tracker.Models
         public GeneralPlayerStats GeneralPlayerStats { get; set; }
         public string Nickname { get; set; }
         public int SportId { get; set; }
+        [ForeignKey("TeamId")]
+        public Team Team { get; set; }
+        public int? TeamId { get; set; }
     }
 }

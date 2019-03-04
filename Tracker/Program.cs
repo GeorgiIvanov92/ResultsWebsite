@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
+using System;
 using System.Configuration;
 using System.Threading.Tasks;
+using Tracker.Models;
 using Tracker.Workers;
 
 namespace Tracker
@@ -15,8 +18,15 @@ namespace Tracker
         private static Task ImagesTask = new Task(() => ImagesWorker.ImagesWorkerInit(ImagesTrackerTimeSpan));
         private static Task PreliveTask = new Task(() => PreliveWorker.PreliveWorkerInit(PreliveTrackerTimeSpan));
         private static Task TeamsTask = new Task(() => TeamsWorker.TeamsWorkerInit(TeamsTrackerTimeSpan));
+        private static bool _createTablesOnStartup = ConfigurationManager.AppSettings["CreateTablesOnStartup"] == "true";
         static void Main(string[] args)
-        {            
+        {
+            if (_createTablesOnStartup)
+            {
+                TrackerDBContext db = new TrackerDBContext();
+                RelationalDatabaseCreator dbCreator = (RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>();
+                dbCreator.CreateTables();
+            }            
             ResultsTask.Start();
             ImagesTask.Start();
             PreliveTask.Start();
