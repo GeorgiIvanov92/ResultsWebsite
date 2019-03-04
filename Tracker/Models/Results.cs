@@ -17,5 +17,6 @@ namespace Tracker.Models
         public int? AwayScore { get; set; }
         public int? GamePart { get; set; }
         public DateTime? GameDate { get; set; }
+       
     }
 }
