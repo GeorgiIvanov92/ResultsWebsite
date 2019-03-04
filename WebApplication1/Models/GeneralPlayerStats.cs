@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Tracker.Models
+namespace WebApi.Models
 {
     public class GeneralPlayerStats
     {
         [Key]
         public int? StatsId { get; set; }
         public string Nickname { get; set; }
-        [ForeignKey ("PlayerId")]
+        [ForeignKey("PlayerId")]
         Player Player { get; set; }
         public string PlayerId { get; set; }
         public int Wins { get; set; }

@@ -23,9 +23,16 @@ namespace Tracker
         {
             if (_createTablesOnStartup)
             {
-                TrackerDBContext db = new TrackerDBContext();
-                RelationalDatabaseCreator dbCreator = (RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>();
-                dbCreator.CreateTables();
+                try
+                {
+                    TrackerDBContext db = new TrackerDBContext();
+                    RelationalDatabaseCreator dbCreator = (RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>();
+                    dbCreator.CreateTables();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Some of the tables already exist, consider changing CreateTablesOnStartup to false from App.config");
+                }
             }            
             ResultsTask.Start();
             ImagesTask.Start();

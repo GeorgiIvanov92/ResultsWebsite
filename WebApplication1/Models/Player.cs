@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Tracker.Models
+namespace WebApi.Models
 {
     public class Player
-    {  
+    {
         [Key]
         public int? PlayerId { get; set; }
         public string Nickname { get; set; }
