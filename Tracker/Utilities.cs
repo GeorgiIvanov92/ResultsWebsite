@@ -14,59 +14,68 @@ namespace Tracker
             {2,"csgo" },
             {3,"dota" }
         };
-        public static List<Results> FilterAlreadySentResults(TrackerDBContext db, List<Results> results)
+        public static List<T> FilterAlreadySentEvents<T>(TrackerDBContext db, List<T> rows)
         {
-            List<Results> filteredResults = new List<Results>();
-            var dbResults = db.Results.ToList();
-            foreach(var result in results)
+            if(rows is List<Results>)
             {
-                bool eligableEvent = true;
-                foreach(var dbResult in dbResults)
+                List<Results> results = new List<Results>();
+                rows.ForEach(ev => results.Add(ev as Results));
+                List<Results> filteredResults = new List<Results>();
+                var dbResults = db.Results.ToList();
+                foreach (var result in results)
                 {
-                    if(result.LeagueName == dbResult.LeagueName 
-                        && result.HomeTeam == dbResult.HomeTeam
-                        && result.AwayTeam == dbResult.AwayTeam
-                        && result.GameDate.ToString() == dbResult.GameDate.ToString())
+                    bool eligableEvent = true;
+                    foreach (var dbResult in dbResults)
                     {
-                        eligableEvent = false;
-                        break;
-                    }
-                   
-                }
-                if (eligableEvent)
-                {
-                    filteredResults.Add(result);
-                }
-            }
-            return filteredResults;
-        }
+                        if (result.LeagueName == dbResult.LeagueName
+                            && result.HomeTeam == dbResult.HomeTeam
+                            && result.AwayTeam == dbResult.AwayTeam
+                            && result.GameDate.ToString() == dbResult.GameDate.ToString())
+                        {
+                            eligableEvent = false;
+                            break;
+                        }
 
-        public static List<Prelive> FilterAlreadySentPreliveEvents(TrackerDBContext db, List<Prelive> preliveEvents)
-        {
-            List<Prelive> filteredPreliveEvents = new List<Prelive>();
-            var dbPreliveEvents = db.Prelive.ToList();
-            foreach (var result in preliveEvents)
+                    }
+                    if (eligableEvent)
+                    {
+                        filteredResults.Add(result);
+                    }
+                }
+                return filteredResults as List<T>;
+            }
+
+            else if(rows is List<Prelive>)
             {
-                bool eligableEvent = true;
-                foreach (var dbPrelive in dbPreliveEvents)
+                List<Prelive> preliveEvents = new List<Prelive>();
+                rows.ForEach(ev => preliveEvents.Add(ev as Prelive));
+                List<Prelive> filteredPreliveEvents = new List<Prelive>();
+                var dbPreliveEvents = db.Prelive.ToList();
+                foreach (var prelive in preliveEvents)
                 {
-                    if (result.LeagueName == dbPrelive.LeagueName
-                        && result.HomeTeam == dbPrelive.HomeTeam
-                        && result.AwayTeam == dbPrelive.AwayTeam
-                        && result.GameDate.ToString() == dbPrelive.GameDate.ToString())
+                    bool eligableEvent = true;
+                    foreach (var dbPrelive in dbPreliveEvents)
                     {
-                        eligableEvent = false;
-                        break;
-                    }
+                        if (prelive.LeagueName == dbPrelive.LeagueName
+                            && prelive.HomeTeam == dbPrelive.HomeTeam
+                            && prelive.AwayTeam == dbPrelive.AwayTeam
+                            && prelive.GameDate.ToString() == dbPrelive.GameDate.ToString())
+                        {
+                            eligableEvent = false;
+                            break;
+                        }
 
+                    }
+                    if (eligableEvent)
+                    {
+                        filteredPreliveEvents.Add(prelive);
+                    }
                 }
-                if (eligableEvent)
-                {
-                    filteredPreliveEvents.Add(result);
-                }
-            }
-            return filteredPreliveEvents;
+                return filteredPreliveEvents as List<T>;
+            }            
+            return rows;
         }
+              
 
         public static void RemoveUnwatedEventsFromDb(ref TrackerDBContext dbContext)
         {

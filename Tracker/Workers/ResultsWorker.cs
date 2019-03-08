@@ -16,7 +16,7 @@ namespace Tracker.Workers
                 TrackerDBContext dbContext = new TrackerDBContext();
                 EsportsLiveScore.GetNewLinks();
                 var results = EsportsLiveScore.GetResultEvents();
-                var filteredResults = Utilities.FilterAlreadySentResults(dbContext, results);
+                var filteredResults = Utilities.FilterAlreadySentEvents(dbContext, results);
                 dbContext.Results.AddRange(filteredResults);
                 Utilities.RemoveUnwatedEventsFromDb(ref dbContext);
                 dbContext.SaveChanges();

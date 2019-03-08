@@ -18,7 +18,7 @@ namespace Tracker.Workers
                 }
                 TrackerDBContext dbContext = new TrackerDBContext();
                 var preliveEvents =EsportsLiveScore.GetPreliveEvents();
-                var filteredEvents = Utilities.FilterAlreadySentPreliveEvents(dbContext, preliveEvents);
+                var filteredEvents = Utilities.FilterAlreadySentEvents(dbContext, preliveEvents);
                 dbContext.Prelive.AddRange(filteredEvents);
                 dbContext.SaveChanges();
                 Console.WriteLine($"Finished Getting Prelive Events at {DateTime.Now.ToShortTimeString()}." +

@@ -17,6 +17,7 @@ namespace Tracker.Models
         public TrackerDBContext(DbContextOptions<TrackerDBContext> options)
             : base(options)
         {
+            
         }
 
         public virtual DbSet<Results> Results { get; set; }
@@ -27,7 +28,8 @@ namespace Tracker.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["SQL"].ConnectionString);           
+            optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["SQL"].ConnectionString);
+            optionsBuilder.EnableSensitiveDataLogging();
         }
       
     }
