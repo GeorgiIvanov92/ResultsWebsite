@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Tracker.Models;
+using Tracker.Sites;
 
 namespace Tracker.Workers
 {
@@ -11,7 +12,7 @@ namespace Tracker.Workers
         public static void ResultsWorkerInit(TimeSpan ResultsSamplePeriod)
         {
             while (true)
-            {
+            {                
                 TrackerDBContext dbContext = new TrackerDBContext();
                 EsportsLiveScore.GetNewLinks();
                 var results = EsportsLiveScore.GetResultEvents();

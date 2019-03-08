@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System.Configuration;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Tracker.Models
 {
@@ -19,10 +21,13 @@ namespace Tracker.Models
 
         public virtual DbSet<Results> Results { get; set; }
         public virtual DbSet<Prelive> Prelive { get; set; }
+        public virtual DbSet<GeneralPlayerStats> GeneralPlayerStats { get; set; }
+        public virtual DbSet<Player> Player { get; set; }
+        public virtual DbSet<Team> Team { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["SQL"].ConnectionString);
+            optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["SQL"].ConnectionString);           
         }
       
     }
