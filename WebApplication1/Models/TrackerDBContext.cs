@@ -19,7 +19,6 @@ namespace WebApplication1.Models
 
         public virtual DbSet<Results> Results { get; set; }
         public virtual DbSet<Prelive> Prelive { get; set; }
-        public virtual DbSet<GeneralPlayerStats> GeneralPlayerStats { get; set; }
         public virtual DbSet<Player> Player { get; set; }
         public virtual DbSet<Team> Team { get; set; }
 

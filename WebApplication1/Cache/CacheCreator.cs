@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tracker.Models;
 using WebApi.Entity;
+using WebApi.Models;
 using WebApplication1.Models;
 
 namespace WebApi.Cache
@@ -25,17 +26,6 @@ namespace WebApi.Cache
                 { 3,"defaultDota2Logo" },
             };
         }
-
-        //public void UpdateMemoryCacheOnInterval(TimeSpan time)
-        //{
-        //    while (true)
-        //    {
-        //        _cache.Set("LeagueOfLegends", CreateSportCacheById(1));
-        //        _cache.Set("CSGO", CreateSportCacheById(2));
-        //        _cache.Set("Dota2", CreateSportCacheById(3));
-        //        Thread.Sleep(time);
-        //    }
-        //}
         public static Sport CreateSportCacheById(int sportId, TrackerDBContext db, IConfiguration Configuration)
         {
             Sport sport = new Sport();
@@ -124,7 +114,39 @@ namespace WebApi.Cache
             });
             sport.PreliveEvents = PreliveEvents;
             sport.LastUpdate = DateTime.UtcNow;
-            return sport;
+
+            var teamsFromDb = db.Team.ToList();
+            var playersFromDb = db.Player.ToList();
+
+            ConcurrentDictionary<string, ConcurrentDictionary<Team, HashSet<Player>>> leaguesAndTeams = 
+                new ConcurrentDictionary<string, ConcurrentDictionary<Team, HashSet<Player>>>();
+
+            Parallel.ForEach(teamsFromDb, (team) =>
+            {
+                if(team.SportId == sportId)
+                {                   
+                    HashSet<Player> playersInTeam = new HashSet<Player>();
+                    foreach (var player in playersFromDb)
+                    {
+                        if(player.TeamId == team.Id)
+                        {
+                            playersInTeam.Add(player);
+                        }
+                    }
+                    if (leaguesAndTeams.ContainsKey(team.Region))
+                    {
+                        leaguesAndTeams[team.Region].TryAdd(team, playersInTeam);
+                    }
+                    else
+                    {
+                        ConcurrentDictionary<Team, HashSet<Player>> teams = new ConcurrentDictionary<Team, HashSet<Player>>();
+                        teams.TryAdd(team, playersInTeam);
+                        leaguesAndTeams.TryAdd(team.Region, teams);
+                    }
+                }
+            });
+            sport.TeamsInLeagues = leaguesAndTeams;
+                return sport;
         } 
     }
 }

@@ -25,6 +25,14 @@ namespace Tracker.Workers
                     dbContext.Team.AddRange(teams);
                     dbContext.SaveChanges();
                 }
+                var playersFromDb = dbContext.Player.ToList();
+                var players = lol.GetPlayers(dbContext);
+                if(players.Count > 0)
+                {
+                    dbContext.Player.RemoveRange(playersFromDb);
+                    dbContext.Player.AddRange(players);
+                    dbContext.SaveChanges();
+                }
                 Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
                     $" {teams.Count} teams added to Db. " +
                     $"Sampling Teams again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");

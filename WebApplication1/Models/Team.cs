@@ -32,7 +32,7 @@ namespace WebApi.Models
         public float DeathsPerGame { get; set; }
         public float KDRatio { get; set; }
         public float WardsPerMinute { get; set; }
-        public float VisionPerMinute { get; set; }
+        public float VisionWardsPerMinute { get; set; }
         public float WardsClearedPerMinute { get; set; }
         public float WardsClearedPercent { get; set; }
         public int CloudDrakesKilled { get; set; }
