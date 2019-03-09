@@ -1,5 +1,5 @@
 ﻿import React, { Component } from 'react';
-import { Navbar, Button} from 'react-bootstrap';
+import { Navbar, Button, Table} from 'react-bootstrap';
 
 export class CounterStrikeData extends Component {
 
@@ -98,7 +98,7 @@ export class CounterStrikeData extends Component {
 
 
 
-                    <table className='table'>
+                    <Table striped bordered hover variant="dark" className='table'>
                         <thead>
                             <tr>
                                 <th>Game Date</th>
@@ -134,7 +134,7 @@ export class CounterStrikeData extends Component {
                                 </tr>
                             )}
                         </tbody>
-                    </table>
+                    </Table>
                 </div>
             );
         }
@@ -165,7 +165,7 @@ export class CounterStrikeData extends Component {
                 })}>Results</Button>
 
 
-                <table className='table'>
+                <Table striped bordered hover variant="dark" className='table'>
                     <thead>
                         <tr>
                             <th>Game Date</th>
@@ -201,7 +201,7 @@ export class CounterStrikeData extends Component {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                </Table>
             </div>
         );
     }
