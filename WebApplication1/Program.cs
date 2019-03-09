@@ -22,7 +22,11 @@ namespace WebApplication1
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
             .UseKestrel(options =>
+<<<<<<< HEAD
+            {
+=======
             {         
+>>>>>>> 681daf4edab06eb19473380713dff93677fb2668
                 options.Listen(IPAddress.Loopback, 5081); //HTTP
                 options.Listen(IPAddress.Loopback, 5043); //HTTPS
             })
