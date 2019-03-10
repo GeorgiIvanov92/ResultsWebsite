@@ -16,26 +16,23 @@ namespace Tracker.Workers
             {
                 TrackerDBContext dbContext = new TrackerDBContext();
                 var teamsFromDb = dbContext.Team.ToList();
+                var playersFromDb = dbContext.Player.ToList();
                 GamesOfLegends lol = new GamesOfLegends();
+                List<Player> players = new List<Player>();
                 lol.GetLinks();
                 var teams=lol.GetTeams();
                 if (teams.Count > 0)
                 {
+                    dbContext.Player.RemoveRange(playersFromDb);
                     dbContext.Team.RemoveRange(teamsFromDb);
                     dbContext.Team.AddRange(teams);
-                    dbContext.SaveChanges();
-                }
-                var playersFromDb = dbContext.Player.ToList();
-                var players = lol.GetPlayers(dbContext);
-                if(players.Count > 0)
-                {
-                    dbContext.Player.RemoveRange(playersFromDb);
+                    players = lol.GetPlayers(dbContext);
                     dbContext.Player.AddRange(players);
                     dbContext.SaveChanges();
                 }
                 Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
-                    $" {teams.Count} teams added to Db. " +
-                    $"Sampling Teams again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");
+                    $" {teams.Count} teams and {players.Count} players added to Db." +
+                    $"Sampling Teams and Players again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");
                 Thread.Sleep(TeamsSamplePeriodInMinutes);
             }
         }

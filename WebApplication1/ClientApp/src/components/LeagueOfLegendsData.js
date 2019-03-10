@@ -13,6 +13,7 @@ export class LeagueOfLegendsData extends Component {
           results: [],
           images: [],
           prelive: [],
+          teams: [],
           loading: true,
           loadedspecificLeague: false,
           shouldLoadPrelive: false,
@@ -27,6 +28,7 @@ export class LeagueOfLegendsData extends Component {
                   results: data.resultsEvents,
                   images: data.teamLogos,
                   prelive: data.preliveEvents,
+                  teams: data.teamsInLeagues,
                   loading: false
               });
           });
@@ -66,8 +68,9 @@ export class LeagueOfLegendsData extends Component {
         );
     }   
 
-    renderResults(results) {
+    renderResults(results,teams) {
         let tempRes;
+        let ad = teams;
         for (let a = 0; a < results.length; a++) {
             for (let i = 0; i < results.length - 1; i++) {
                 if (results[i].gameDate < results[i + 1].gameDate) {
@@ -211,7 +214,7 @@ render() {
     let contents;
     if (this.state.loadedspecificLeague) {
         contents = this.state.shouldLoadResults ?
-            this.renderResults(this.state.results[this.state.specificleague])
+            this.renderResults(this.state.results[this.state.specificleague], this.state.teams)
             : this.renderPrelive(this.state.prelive[this.state.specificleague]);
     } else {
         contents = this.state.loading
