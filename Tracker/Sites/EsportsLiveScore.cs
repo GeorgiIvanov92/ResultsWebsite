@@ -23,8 +23,10 @@ namespace Tracker
         private static readonly string format = "dd/MM HH:mm";
         private static readonly Regex tournamentNameRegex = new Regex(@"title=""(.*?)""", RegexOptions.Compiled | RegexOptions.Multiline);
         public static List<Link> TeamLinks = new List<Link>();
+        public static bool HaveGatheredLinks = false;
         public static void GetNewLinks()
         {
+            HaveGatheredLinks = false;
             LinksForLeagues = new List<Link>();
             if (HttpClient == null)
             {
@@ -52,6 +54,7 @@ namespace Tracker
                     LinksForLeagues.Add(link);
                 }
             }
+            HaveGatheredLinks = true;
         }
         public static List<Results> GetResultEvents()
         {

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using WebApplication1.Models;
 using Microsoft.Extensions.Configuration;
-using WebApi.Entity;
+using WebApi.TransportObjects;
 using Tracker.Models;
 using WebApi.Cache;
 

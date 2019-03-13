@@ -298,21 +298,21 @@ namespace Tracker.Sites
         {
             List<Player> players = new List<Player>();
             List<Team> teams = db.Team.ToList();
-            Parallel.ForEach(PlayerLinks, (playerLink) =>
+            foreach (var playerLink in PlayerLinks)
             {
                 try
                 {
                     var responseString = client.GetStringAsync(playerLink.Uri).Result;
                     if (responseString == null)
                     {
-                        return;
+                        continue;
                     }
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(responseString);
                     var playerName = doc.DocumentNode.SelectSingleNode("//h1[contains(@class,'panel-title')]")?.InnerText;
                     if (playerName == null)
                     {
-                        return;
+                        continue;
                     }
                     Player player = new Player()
                     {
@@ -329,7 +329,7 @@ namespace Tracker.Sites
                     }
                     if (player.TeamId == 0)
                     {
-                        return;
+                        continue;
                     }
                     var tables = doc.DocumentNode.SelectNodes("//table[contains(@class,'table_list')]");
                     foreach (var table in tables)
@@ -482,7 +482,8 @@ namespace Tracker.Sites
                                     }
                                 }
                             }
-                        }catch(Exception ex)
+                        }
+                        catch (Exception ex)
                         {
                             continue;
                         }
@@ -498,7 +499,7 @@ namespace Tracker.Sites
 
                     }
                 }
-            });
+            }
             return players;
 
         }

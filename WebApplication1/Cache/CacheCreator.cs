@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Tracker.Models;
-using WebApi.Entity;
+using WebApi.TransportObjects;
 using WebApi.Models;
 using WebApplication1.Models;
 

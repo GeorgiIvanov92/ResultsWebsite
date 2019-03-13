@@ -9,7 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Tracker.Models;
 using WebApi.Cache;
-using WebApi.Entity;
+using WebApi.TransportObjects;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers

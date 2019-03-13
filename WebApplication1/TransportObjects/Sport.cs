@@ -7,7 +7,7 @@ using Tracker.Models;
 using WebApi.Models;
 using WebApplication1.Models;
 
-namespace WebApi.Entity
+namespace WebApi.TransportObjects
 {
     public class Sport
     {

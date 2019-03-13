@@ -12,9 +12,9 @@ namespace Tracker.Workers
         {
             while (true)
             {
-                while (EsportsLiveScore.TeamLinks == null || EsportsLiveScore.TeamLinks.Count == 0)
+                while (!EsportsLiveScore.HaveGatheredLinks)
                 {
-                    Thread.Sleep(30000);
+
                 }
                 EsportsLiveScore.WriteTeamIconsToDisk();
                 Console.WriteLine($"Finished Saving Team Logos at {DateTime.Now.ToShortTimeString()}. Sampling images again in {ImageSamplePeriodInMinutes.Hours} hours {ImageSamplePeriodInMinutes.Minutes} minutes");
