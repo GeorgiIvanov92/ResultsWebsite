@@ -54,7 +54,6 @@ namespace Tracker
                     LinksForLeagues.Add(link);
                 }
             }
-            HaveGatheredLinks = true;
         }
         public static List<Results> GetResultEvents()
         {
@@ -129,6 +128,7 @@ namespace Tracker
                     continue;
                 }
             }
+            HaveGatheredLinks = true;
             return results;
         }
         public static void WriteTeamIconsToDisk()

@@ -26,13 +26,19 @@ namespace Tracker.Workers
                     dbContext.Player.RemoveRange(playersFromDb);
                     dbContext.Team.RemoveRange(teamsFromDb);
                     dbContext.Team.AddRange(teams);
+                    dbContext.SaveChanges();
+
+                    Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
+                   $" {teams.Count} teams added to Db.");
+                  
                     players = lol.GetPlayers(dbContext);
                     dbContext.Player.AddRange(players);
                     dbContext.SaveChanges();
+
+                    Console.WriteLine($"Finished Getting Players at {DateTime.Now.ToShortTimeString()}." +
+                   $" {players.Count} players added to Db.");
                 }
-                Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
-                    $" {teams.Count} teams and {players.Count} players added to Db." +
-                    $"Sampling Teams and Players again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");
+                Console.WriteLine($"Sampling Teams and Players again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");
                 Thread.Sleep(TeamsSamplePeriodInMinutes);
             }
         }

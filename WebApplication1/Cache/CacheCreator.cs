@@ -116,36 +116,30 @@ namespace WebApi.Cache
             sport.LastUpdate = DateTime.UtcNow;
 
             var teamsFromDb = db.Team.ToList();
-            var playersFromDb = db.Player.ToList();
-
-            ConcurrentDictionary<string, ConcurrentDictionary<Team, HashSet<Player>>> leaguesAndTeams = 
-                new ConcurrentDictionary<string, ConcurrentDictionary<Team, HashSet<Player>>>();
+            sport.Players = db.Player.ToList();
+            ConcurrentDictionary<string, HashSet<Team>> teams = new ConcurrentDictionary<string, HashSet<Team>>();
 
             Parallel.ForEach(teamsFromDb, (team) =>
             {
                 if(team.SportId == sportId)
-                {                   
-                    HashSet<Player> playersInTeam = new HashSet<Player>();
-                    foreach (var player in playersFromDb)
+                {
+                    if (teams.ContainsKey(team.Region))
                     {
-                        if(player.TeamId == team.Id)
+                        lock (_lock)
                         {
-                            playersInTeam.Add(player);
+                            teams[team.Region].Add(team);
                         }
-                    }
-                    if (leaguesAndTeams.ContainsKey(team.Region))
-                    {
-                        leaguesAndTeams[team.Region].TryAdd(team, playersInTeam);
                     }
                     else
                     {
-                        ConcurrentDictionary<Team, HashSet<Player>> teams = new ConcurrentDictionary<Team, HashSet<Player>>();
-                        teams.TryAdd(team, playersInTeam);
-                        leaguesAndTeams.TryAdd(team.Region, teams);
-                    }
+                        lock (_lock)
+                        {
+                            teams.TryAdd(team.Region, new HashSet<Team>() { team });
+                        }
+                    }               
                 }
             });
-            sport.TeamsInLeagues = leaguesAndTeams;
+            sport.TeamsInLeague = teams;
                 return sport;
         } 
     }

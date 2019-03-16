@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, Button, ButtonToolBar, Table } from 'react-bootstrap';
+import { Navbar, Button, ButtonToolBar, Table, Dropdown } from 'react-bootstrap';
 
 export class LeagueOfLegendsData extends Component {
    
@@ -14,10 +14,13 @@ export class LeagueOfLegendsData extends Component {
           images: [],
           prelive: [],
           teams: [],
+          players: [],
+          specificTeams: [],
           loading: true,
           loadedspecificLeague: false,
           shouldLoadPrelive: false,
           shouldLoadResults: false,
+          shouldLoadSpecificTeams: false,
           specificleague: ''
       };
       fetch('api/LeagueOfLegends/GetSport')
@@ -28,7 +31,8 @@ export class LeagueOfLegendsData extends Component {
                   results: data.resultsEvents,
                   images: data.teamLogos,
                   prelive: data.preliveEvents,
-                  teams: data.teamsInLeagues,
+                  teams: data.teamsInLeague,
+                  players: data.players,
                   loading: false
               });
           });
@@ -70,7 +74,6 @@ export class LeagueOfLegendsData extends Component {
 
     renderResults(results,teams) {
         let tempRes;
-        let ad = teams;
         for (let a = 0; a < results.length; a++) {
             for (let i = 0; i < results.length - 1; i++) {
                 if (results[i].gameDate < results[i + 1].gameDate) {
@@ -85,13 +88,14 @@ export class LeagueOfLegendsData extends Component {
             if (this.state.specificleague in this.state.prelive)
             {
                 disablePrelive = false;
-            }
+            }           
             return (
-                <div>
+                <div>                   
                     <h1>{this.state.specificleague} Results</h1>
-                    <Button variant="outline-dark" onClick={() => this.setState({
+                    <Button variant="outline-dark" onClick={() =>
+                        this.setState({
                         loadedspecificLeague: false,
-                        specificleague: ''
+                        specificleague: '',
                     })}>Back To All Leagues</Button>
 
                     <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
@@ -99,8 +103,17 @@ export class LeagueOfLegendsData extends Component {
                         shouldLoadResults: false,
                     })}>Upcoming Games</Button>
 
+                    {!teams ? <Dropdown>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            Teams
+                       </Dropdown.Toggle>
 
-
+                        <Dropdown.Menu>
+                            {teams.map(team => <Dropdown.Item>{team.name}</Dropdown.Item>)}
+                        </Dropdown.Menu>
+                    </Dropdown> : <h1> No teams to show </h1>}
+                    
+ 
                     <Table striped bordered hover variant="dark" className='table'>
                         <thead>
                             <tr>
@@ -212,9 +225,19 @@ export class LeagueOfLegendsData extends Component {
 
 render() {
     let contents;
-    if (this.state.loadedspecificLeague) {
+    if (this.state.shouldLoadSpecificTeams && this.state.specificleague) {
+        fetch('api/LeagueOfLegends/' + this.state.specificleague)
+            .then(response => response.json())
+            .then(data => {
+                this.setState({
+                    specificTeams: data,
+                    shouldLoadSpecificTeams: false
+                });
+            });
+    }
+    if (this.state.loadedspecificLeague) {       
         contents = this.state.shouldLoadResults ?
-            this.renderResults(this.state.results[this.state.specificleague], this.state.teams)
+            this.renderResults(this.state.results[this.state.specificleague], this.state.specificTeams)
             : this.renderPrelive(this.state.prelive[this.state.specificleague]);
     } else {
         contents = this.state.loading

@@ -319,6 +319,13 @@ namespace Tracker.Sites
                         SportId = 1,
                         Nickname = playerName,
                     };
+                    foreach(var pl in players)
+                    {
+                        if(pl.Nickname == player.Nickname)
+                        {
+                            continue;
+                        }
+                    }
                     foreach (var team in teams)
                     {
                         if (team.Name == playerLink.AdditionalData)

@@ -14,9 +14,8 @@ namespace WebApi.TransportObjects
         public ConcurrentDictionary<string, HashSet<Results>> ResultsEvents = new ConcurrentDictionary<string,HashSet<Results>>();
         public ConcurrentDictionary<string, HashSet<Prelive>> PreliveEvents = new ConcurrentDictionary<string, HashSet<Prelive>>();
         public ConcurrentDictionary<string, string> TeamLogos = new ConcurrentDictionary<string, string>();
-
-        public ConcurrentDictionary<string, ConcurrentDictionary<Team,HashSet<Player>>> TeamsInLeagues =
-            new ConcurrentDictionary<string, ConcurrentDictionary<Team, HashSet<Player>>>();
+        public ConcurrentDictionary<string, HashSet<Team>> TeamsInLeague = new ConcurrentDictionary<string, HashSet<Team>>();
+        public List<Player> Players = new List<Player>();
 
         public DateTime LastUpdate = DateTime.UtcNow;
     }
