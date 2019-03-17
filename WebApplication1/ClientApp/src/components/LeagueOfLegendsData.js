@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Navbar, Button, ButtonToolBar, Table, Dropdown } from 'react-bootstrap';
+import { Navbar, Button, ButtonToolbar, Table } from 'react-bootstrap';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 export class LeagueOfLegendsData extends Component {
    
@@ -20,7 +21,6 @@ export class LeagueOfLegendsData extends Component {
           loadedspecificLeague: false,
           shouldLoadPrelive: false,
           shouldLoadResults: false,
-          shouldLoadSpecificTeams: false,
           specificleague: ''
       };
       fetch('api/LeagueOfLegends/GetSport')
@@ -40,6 +40,7 @@ export class LeagueOfLegendsData extends Component {
       this.renderResults = this.renderResults.bind(this);
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
       this.renderLeagueTable = this.renderLeagueTable.bind(this);
+      this.deterimeTeamsToShow = this.deterimeTeamsToShow.bind(this);
     }
     renderLeagueTable(arr) {
         return (
@@ -71,6 +72,12 @@ export class LeagueOfLegendsData extends Component {
             this.renderLeagueTable(arr)
         );
     }   
+    deterimeTeamsToShow(teams) {
+        if (this.state.specificleague.includes("European") && "EUW" in teams) {
+            return teams["EUW"];
+        }
+        return null;
+    }
 
     renderResults(results,teams) {
         let tempRes;
@@ -83,15 +90,31 @@ export class LeagueOfLegendsData extends Component {
                 }
             }
         }
-        {
+        let specificTeams = this.deterimeTeamsToShow(teams);
             let disablePrelive = true;
             if (this.state.specificleague in this.state.prelive)
             {
                 disablePrelive = false;
             }           
-            return (
-                <div>                   
-                    <h1>{this.state.specificleague} Results</h1>
+        return (
+            
+            <div>
+                              
+                <h1>{this.state.specificleague} Results</h1>
+                <ButtonToolbar>  
+
+                    <DropdownButton
+                        alignRight
+                        title="Dropdown right"
+                        id="dropdown-menu-align-right"
+                    >
+                        <Dropdown.Item eventKey="1">Action</Dropdown.Item>
+                        <Dropdown.Item eventKey="2">Another action</Dropdown.Item>
+                        <Dropdown.Item eventKey="3">Something else here</Dropdown.Item>
+                        <Dropdown.Divider />
+                        <Dropdown.Item eventKey="4">Separated link</Dropdown.Item>
+                    </DropdownButton>;
+                    
                     <Button variant="outline-dark" onClick={() =>
                         this.setState({
                         loadedspecificLeague: false,
@@ -103,17 +126,17 @@ export class LeagueOfLegendsData extends Component {
                         shouldLoadResults: false,
                     })}>Upcoming Games</Button>
 
-                    {!teams ? <Dropdown>
+                    {specificTeams ? <Dropdown>
                         <Dropdown.Toggle variant="success" id="dropdown-basic">
                             Teams
                        </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            {teams.map(team => <Dropdown.Item>{team.name}</Dropdown.Item>)}
+                            {specificTeams.map(team => <Dropdown.Item>{team.name}</Dropdown.Item>)}
                         </Dropdown.Menu>
                     </Dropdown> : <h1> No teams to show </h1>}
-                    
- 
+
+                </ButtonToolbar>
                     <Table striped bordered hover variant="dark" className='table'>
                         <thead>
                             <tr>
@@ -153,7 +176,6 @@ export class LeagueOfLegendsData extends Component {
                     </Table>
                 </div>
             );
-        }
     }
 
     renderPrelive(prelive) {
@@ -225,19 +247,10 @@ export class LeagueOfLegendsData extends Component {
 
 render() {
     let contents;
-    if (this.state.shouldLoadSpecificTeams && this.state.specificleague) {
-        fetch('api/LeagueOfLegends/' + this.state.specificleague)
-            .then(response => response.json())
-            .then(data => {
-                this.setState({
-                    specificTeams: data,
-                    shouldLoadSpecificTeams: false
-                });
-            });
-    }
+
     if (this.state.loadedspecificLeague) {       
         contents = this.state.shouldLoadResults ?
-            this.renderResults(this.state.results[this.state.specificleague], this.state.specificTeams)
+            this.renderResults(this.state.results[this.state.specificleague], this.state.teams)
             : this.renderPrelive(this.state.prelive[this.state.specificleague]);
     } else {
         contents = this.state.loading
