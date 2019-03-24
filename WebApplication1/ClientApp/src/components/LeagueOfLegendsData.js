@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Navbar, Button, ButtonToolbar, Table } from 'react-bootstrap';
-import { Dropdown, DropdownButton } from 'react-bootstrap';
+import Dropdown from 'react-bootstrap/Dropdown';
 
 export class LeagueOfLegendsData extends Component {
    
@@ -102,18 +102,6 @@ export class LeagueOfLegendsData extends Component {
                               
                 <h1>{this.state.specificleague} Results</h1>
                 <ButtonToolbar>  
-
-                    <DropdownButton
-                        alignRight
-                        title="Dropdown right"
-                        id="dropdown-menu-align-right"
-                    >
-                        <Dropdown.Item eventKey="1">Action</Dropdown.Item>
-                        <Dropdown.Item eventKey="2">Another action</Dropdown.Item>
-                        <Dropdown.Item eventKey="3">Something else here</Dropdown.Item>
-                        <Dropdown.Divider />
-                        <Dropdown.Item eventKey="4">Separated link</Dropdown.Item>
-                    </DropdownButton>;
                     
                     <Button variant="outline-dark" onClick={() =>
                         this.setState({
@@ -126,15 +114,16 @@ export class LeagueOfLegendsData extends Component {
                         shouldLoadResults: false,
                     })}>Upcoming Games</Button>
 
-                    {specificTeams ? <Dropdown>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
-                            Teams
-                       </Dropdown.Toggle>
 
-                        <Dropdown.Menu>
-                            {specificTeams.map(team => <Dropdown.Item>{team.name}</Dropdown.Item>)}
-                        </Dropdown.Menu>
-                    </Dropdown> : <h1> No teams to show </h1>}
+                    {specificTeams ? specificTeams.map(team => < Navbar >
+                        <Navbar.Header>
+                            <Navbar.Brand>
+                                <a>{team.name}</a>
+                            </Navbar.Brand>
+                        </Navbar.Header>
+                    </Navbar>)
+                      
+                        : <h1> No teams to show </h1>}
 
                 </ButtonToolbar>
                     <Table striped bordered hover variant="dark" className='table'>
@@ -260,7 +249,18 @@ render() {
 
     return (
            
-        <div>                    
+        <div>    
+            <Dropdown>
+                <Dropdown.Toggle variant="success" id="dropdown-basic">
+                    Dropdown Button
+  </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                    <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+                    <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
+                    <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+                </Dropdown.Menu>
+            </Dropdown>
             {contents}
       </div>
     );
