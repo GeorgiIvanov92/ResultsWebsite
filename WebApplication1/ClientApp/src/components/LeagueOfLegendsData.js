@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, Button, ButtonToolbar, Table } from 'react-bootstrap';
-import Dropdown from 'react-bootstrap/Dropdown';
+import { Navbar, Button, ButtonToolbar, Table, ListGroup } from 'react-bootstrap';
 
 export class LeagueOfLegendsData extends Component {
    
@@ -21,7 +20,8 @@ export class LeagueOfLegendsData extends Component {
           loadedspecificLeague: false,
           shouldLoadPrelive: false,
           shouldLoadResults: false,
-          specificleague: ''
+          shouldLoadTeams: false,
+          specificleague: '',
       };
       fetch('api/LeagueOfLegends/GetSport')
           .then(response => response.json())
@@ -41,6 +41,7 @@ export class LeagueOfLegendsData extends Component {
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
       this.renderLeagueTable = this.renderLeagueTable.bind(this);
       this.deterimeTeamsToShow = this.deterimeTeamsToShow.bind(this);
+      this.renderTeams = this.renderTeams.bind(this);
     }
     renderLeagueTable(arr) {
         return (
@@ -112,19 +113,17 @@ export class LeagueOfLegendsData extends Component {
                     <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
                         shouldLoadPrelive: true,
                         shouldLoadResults: false,
+                        shouldLoadTeams: false,
                     })}>Upcoming Games</Button>
 
+                    {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
+                        specificTeams: specificTeams,
+                        shouldLoadPrelive: false,
+                        shouldLoadResults: false,
+                        shouldLoadTeams: true,
+                    })}>Teams Info</Button>
 
-                    {specificTeams ? specificTeams.map(team => < Navbar >
-                        <Navbar.Header>
-                            <Navbar.Brand>
-                                <a>{team.name}</a>
-                            </Navbar.Brand>
-                        </Navbar.Header>
-                    </Navbar>)
-                      
-                        : <h1> No teams to show </h1>}
-
+                        : <Button variant="outline-dark" disabled={true}>Teams Info</Button>}
                 </ButtonToolbar>
                     <Table striped bordered hover variant="dark" className='table'>
                         <thead>
@@ -188,7 +187,8 @@ export class LeagueOfLegendsData extends Component {
 
                 <Button variant="outline-dark" onClick={() => this.setState({
                     shouldLoadResults: true,
-                    shouldLoadPrelive: false
+                    shouldLoadPrelive: false,
+                    shouldLoadTeams: false,
                 })}>Results</Button>
 
 
@@ -233,14 +233,68 @@ export class LeagueOfLegendsData extends Component {
         );
     }
 
+    renderTeams() {
+       
+        return (
+            <div>
+                <h1>{this.state.specificleague} Teams</h1>
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    loadedspecificLeague: false,
+                    specificleague: ''
+                })}>Back To All Leagues</Button>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: true,
+                    shouldLoadPrelive: false,
+                    shouldLoadTeams: false,
+                })}>Results</Button>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: false,
+                    shouldLoadPrelive: true,
+                    shouldLoadTeams: false,
+                })}>Prelive</Button>
+
+                <Table striped bordered hover variant="dark" className='table'>
+                    <thead>
+                        <tr>
+                            <th>Logo</th>
+                           <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.state.specificTeams.map(team => 
+                            <tr key={team.name}>
+                                <td>
+                                    <img src={`data:image/png;base64,${this.state.images[team.name]
+                                        || this.state.images[team.name.toLowerCase()]
+                                        || this.state.images[team.name.replace('Esports', '').trim()]
+                                        || this.state.images[team.name.replace('Gaming','').trim()]
+                                        || this.state.images['default']}`} alt={team.name} >
+                                    </img>
+                                    </td>
+                                <td>{team.name}</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </Table>
+            </div>
+        );
+    }
+
 
 render() {
     let contents;
 
-    if (this.state.loadedspecificLeague) {       
-        contents = this.state.shouldLoadResults ?
-            this.renderResults(this.state.results[this.state.specificleague], this.state.teams)
-            : this.renderPrelive(this.state.prelive[this.state.specificleague]);
+    if (this.state.loadedspecificLeague) {        
+        if (this.state.shouldLoadResults) {
+            contents = this.renderResults(this.state.results[this.state.specificleague], this.state.teams);
+        } else if (this.state.shouldLoadPrelive) {
+            contents = this.renderPrelive(this.state.prelive[this.state.specificleague]);
+        } else if (this.state.shouldLoadTeams) {
+            contents = this.renderTeams();
+        }
+        
     } else {
         contents = this.state.loading
             ? <p><em>Loading...</em></p>
@@ -249,18 +303,7 @@ render() {
 
     return (
            
-        <div>    
-            <Dropdown>
-                <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    Dropdown Button
-  </Dropdown.Toggle>
-
-                <Dropdown.Menu>
-                    <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-                    <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-                    <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-                </Dropdown.Menu>
-            </Dropdown>
+        <div>              
             {contents}
       </div>
     );
