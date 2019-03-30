@@ -234,7 +234,17 @@ export class LeagueOfLegendsData extends Component {
     }
 
     renderTeams() {
-       
+        let tempTeams;
+        let LeagueTeams = this.state.specificTeams;
+        for (let a = 0; a < LeagueTeams.length; a++) {
+            for (let i = 0; i < LeagueTeams.length - 1; i++) {
+                if (LeagueTeams[i].winrate < LeagueTeams[i + 1].winrate) {
+                    tempTeams = LeagueTeams[i + 1];
+                    LeagueTeams[i + 1] = LeagueTeams[i];
+                    LeagueTeams[i] = tempTeams;
+                }
+            }
+        }
         return (
             <div>
                 <h1>{this.state.specificleague} Teams</h1>
@@ -259,11 +269,14 @@ export class LeagueOfLegendsData extends Component {
                     <thead>
                         <tr>
                             <th>Logo</th>
-                           <th>Name</th>
+                            <th>Name</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Winrate</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {this.state.specificTeams.map(team => 
+                        {LeagueTeams.map(team => 
                             <tr key={team.name}>
                                 <td>
                                     <img src={`data:image/png;base64,${this.state.images[team.name]
@@ -274,6 +287,9 @@ export class LeagueOfLegendsData extends Component {
                                     </img>
                                     </td>
                                 <td>{team.name}</td>
+                                <td>{team.blueSideWins + team.redSideWins}</td>
+                                <td>{team.blueSideLosses + team.redSideLosses}</td>
+                                <td>{team.winrate}%</td>
                             </tr>
                         )}
                     </tbody>

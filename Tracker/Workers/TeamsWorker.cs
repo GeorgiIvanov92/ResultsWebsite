@@ -21,6 +21,21 @@ namespace Tracker.Workers
                 List<Player> players = new List<Player>();
                 lol.GetLinks();
                 var teams=lol.GetTeams();
+                foreach(var teamFromDb in teamsFromDb)
+                {
+                    bool shouldAddTeam = true;
+                    foreach(var team in teams)
+                    {
+                        if(team.Name == teamFromDb.Name)
+                        {
+                            shouldAddTeam = false;
+                        }
+                    }
+                    if (shouldAddTeam)
+                    {
+                        teams.Add(teamFromDb);
+                    }
+                }
                 if (teams.Count > 0)
                 {
                     dbContext.Player.RemoveRange(playersFromDb);
@@ -32,6 +47,21 @@ namespace Tracker.Workers
                    $" {teams.Count} teams added to Db.");
                   
                     players = lol.GetPlayers(dbContext);
+                    foreach (var playerFromDb in playersFromDb)
+                    {
+                        bool shouldAddTeam = true;
+                        foreach (var player in players)
+                        {
+                            if (player.Nickname == playerFromDb.Nickname)
+                            {
+                                shouldAddTeam = false;
+                            }
+                        }
+                        if (shouldAddTeam)
+                        {
+                            players.Add(playerFromDb);
+                        }
+                    }
                     dbContext.Player.AddRange(players);
                     dbContext.SaveChanges();
 

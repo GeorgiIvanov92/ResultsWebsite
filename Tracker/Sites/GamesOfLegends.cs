@@ -48,21 +48,21 @@ namespace Tracker.Sites
         public List<Team> GetTeams()
         {
             List<Team> teams = new List<Team>();
-            Parallel.ForEach(links, (teamLink) =>
+           foreach(var teamLink in links)
             {
                 try
                 {
                     var responseString = client.GetStringAsync(teamLink.Uri).Result;
                     if (responseString == null)
                     {
-                        return;
+                        continue;
                     }
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(responseString);
                     var teamName = doc.DocumentNode.SelectSingleNode("//h1[contains(@class,'panel-title')]")?.InnerText;
                     if (teamName == null)
                     {
-                        return;
+                        continue;
                     }
                     Team team = new Team()
                     {
@@ -288,10 +288,14 @@ namespace Tracker.Sites
                 }
                 catch (Exception ex)
                 {
-                    return;
+                    var dt = DateTime.UtcNow;
+                    while (dt.AddSeconds(10) > DateTime.UtcNow)
+                    {
+
+                    }
                 }
 
-            });
+            };
             return teams;
         }
         public List<Player> GetPlayers(TrackerDBContext db)
@@ -362,7 +366,14 @@ namespace Tracker.Sites
                                         }
                                         if (columns[i].InnerText.Contains("KDA"))
                                         {
-                                            player.KDA = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
+                                            try
+                                            {
+                                                player.KDA = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
+                                            }
+                                            catch
+                                            {
+
+                                            }
                                             continue;
                                         }
                                         if (columns[i].InnerText.Contains("CS per Minute"))
