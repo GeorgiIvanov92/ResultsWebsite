@@ -10,6 +10,7 @@ using Tracker.Models;
 using WebApi.TransportObjects;
 using WebApi.Models;
 using WebApplication1.Models;
+using System.Net.Http;
 
 namespace WebApi.Cache
 {
@@ -17,8 +18,11 @@ namespace WebApi.Cache
     {
         private static Object _lock = new Object();
         private static Dictionary<int, string> DefaultImagesById;
+        private static HttpClient Client;
+        private static string MappingServiceUrl = string.Empty;
         static CacheCreator()
-        {
+        {           
+            Client = new HttpClient();
             DefaultImagesById = new Dictionary<int, string>()
             {
                 { 1,"defaultLoLLogo" },
@@ -28,6 +32,7 @@ namespace WebApi.Cache
         }
         public static Sport CreateSportCacheById(int sportId, TrackerDBContext db, IConfiguration Configuration)
         {
+            MappingServiceUrl = Configuration.GetSection("MappingServiceUrl").Value;
             Sport sport = new Sport();
             ConcurrentDictionary<string, HashSet<Results>> ResultEvents = new ConcurrentDictionary<string, HashSet<Results>>();
             ConcurrentDictionary<string, HashSet<Prelive>> PreliveEvents = new ConcurrentDictionary<string, HashSet<Prelive>>();
@@ -126,21 +131,53 @@ namespace WebApi.Cache
                     if (teams.ContainsKey(team.Region))
                     {
                         lock (_lock)
-                        {
-                            teams[team.Region].Add(team);
+                        {                          
+                                teams[team.Region].Add(team);
+                            
                         }
                     }
                     else
                     {
                         lock (_lock)
                         {
-                            teams.TryAdd(team.Region, new HashSet<Team>() { team });
+                            var masterLeague = GetMasterLeagueFromMappingService
+                            ($"{MappingServiceUrl}/Mapping/GetLeague", sportId, team.Region).Result;
+                            if (masterLeague == null || masterLeague.Equals("Bad POST params") || masterLeague.Equals("Could Not Locate League"))
+                            {
+                                teams.TryAdd(team.Region, new HashSet<Team>() { team });
+                            }
+                            else
+                            {
+                                team.Region = masterLeague;
+                                if (teams.ContainsKey(masterLeague))
+                                {
+                                    teams[team.Region].Add(team);
+                                }
+                                else
+                                {
+                                    teams.TryAdd(team.Region, new HashSet<Team>() { team });
+                                }
+                            }
                         }
                     }               
                 }
             });
             sport.TeamsInLeague = teams;
                 return sport;
-        } 
+        }
+        private static async Task<string> GetMasterLeagueFromMappingService(string url,int sportId, string leagueName)
+        {
+            var values = new Dictionary<string, string>
+            {
+                { "league", $"{leagueName}@{sportId.ToString()}" },  
+            };
+
+            var content = new FormUrlEncodedContent(values);
+
+            var response = await Client.PostAsync(url, content);
+
+            return await response.Content.ReadAsStringAsync();
+        }
     }
+
 }

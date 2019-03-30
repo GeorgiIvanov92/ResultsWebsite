@@ -74,10 +74,7 @@ export class LeagueOfLegendsData extends Component {
         );
     }   
     deterimeTeamsToShow(teams) {
-        if (this.state.specificleague.includes("European") && "EUW" in teams) {
-            return teams["EUW"];
-        }
-        return null;
+        return teams[this.state.specificleague];
     }
 
     renderResults(results,teams) {
