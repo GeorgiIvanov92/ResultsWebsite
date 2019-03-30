@@ -141,7 +141,8 @@ namespace WebApi.Cache
                         lock (_lock)
                         {
                             var masterLeague = GetMasterLeagueFromMappingService
-                            ($"{MappingServiceUrl}/Mapping/GetLeague", sportId, team.Region).Result;
+                            ($"{MappingServiceUrl}/Mapping/GetLeague", sportId, team.Name.ToLowerInvariant().Contains("academy") ?
+                            $"{team.Region}Academy" : team.Region).Result;
                             if (masterLeague == null || masterLeague.Equals("Bad POST params") || masterLeague.Equals("Could Not Locate League"))
                             {
                                 teams.TryAdd(team.Region, new HashSet<Team>() { team });

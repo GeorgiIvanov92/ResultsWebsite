@@ -46,7 +46,11 @@ namespace MappingService.Controllers
                         ?? "Could Not Locate League";
                 case "NA":
                     return resultsFromSport.FirstOrDefault(res => res.LeagueName.ToLowerInvariant()
-                    .Contains("championship series"))?.LeagueName
+                    .Contains("lol championship series"))?.LeagueName
+                        ?? "Could Not Locate League";
+                case "NAAcademy":
+                    return resultsFromSport.FirstOrDefault(res => res.LeagueName.ToLowerInvariant()
+                    .Contains("america academy"))?.LeagueName
                         ?? "Could Not Locate League";
                 case "BR":
                     return resultsFromSport.FirstOrDefault(res => res.LeagueName.ToLowerInvariant()
