@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Navbar, Button, ButtonToolbar, Table, ListGroup } from 'react-bootstrap';
+import { Navbar, Button, ButtonToolbar, Table } from 'react-bootstrap';
+import './Style/SpecificTeamStyle.css';
 
 export class LeagueOfLegendsData extends Component {
    
@@ -21,6 +22,8 @@ export class LeagueOfLegendsData extends Component {
           shouldLoadPrelive: false,
           shouldLoadResults: false,
           shouldLoadTeams: false,
+          shouldLoadSpecificTeam: false,
+          specificTeam: [],
           specificleague: '',
       };
       fetch('api/LeagueOfLegends/GetSport')
@@ -40,8 +43,8 @@ export class LeagueOfLegendsData extends Component {
       this.renderResults = this.renderResults.bind(this);
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
       this.renderLeagueTable = this.renderLeagueTable.bind(this);
-      this.deterimeTeamsToShow = this.deterimeTeamsToShow.bind(this);
       this.renderTeams = this.renderTeams.bind(this);
+      this.renderSpecificTeam = this.renderSpecificTeam.bind(this);
     }
     renderLeagueTable(arr) {
         return (
@@ -73,9 +76,6 @@ export class LeagueOfLegendsData extends Component {
             this.renderLeagueTable(arr)
         );
     }   
-    deterimeTeamsToShow(teams) {
-        return teams[this.state.specificleague];
-    }
 
     renderResults(results,teams) {
         let tempRes;
@@ -88,7 +88,7 @@ export class LeagueOfLegendsData extends Component {
                 }
             }
         }
-        let specificTeams = this.deterimeTeamsToShow(teams);
+        let specificTeams = teams[this.state.specificleague];
             let disablePrelive = true;
             if (this.state.specificleague in this.state.prelive)
             {
@@ -111,12 +111,14 @@ export class LeagueOfLegendsData extends Component {
                         shouldLoadPrelive: true,
                         shouldLoadResults: false,
                         shouldLoadTeams: false,
-                    })}>Upcoming Games</Button>
+                        shouldLoadSpecificTeam: false,
+                    })}>Prelive</Button>
 
                     {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
                         specificTeams: specificTeams,
                         shouldLoadPrelive: false,
                         shouldLoadResults: false,
+                        shouldLoadSpecificTeam: false,
                         shouldLoadTeams: true,
                     })}>Teams Info</Button>
 
@@ -174,6 +176,7 @@ export class LeagueOfLegendsData extends Component {
                 }
             }
         }
+        let specificTeams = this.state.teams[this.state.specificleague];
         return (
             <div>
                 <h1>{this.state.specificleague} Upcoming Games</h1> 
@@ -186,7 +189,18 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadResults: true,
                     shouldLoadPrelive: false,
                     shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
                 })}>Results</Button>
+
+                {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
+                    specificTeams: specificTeams,
+                    shouldLoadPrelive: false,
+                    shouldLoadResults: false,
+                    shouldLoadSpecificTeam: false,
+                    shouldLoadTeams: true,
+                })}>Teams Info</Button>
+
+                    : <Button variant="outline-dark" disabled={true}>Teams Info</Button>}
 
 
                 <Table striped bordered hover variant="dark" className='table'>
@@ -254,12 +268,14 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadResults: true,
                     shouldLoadPrelive: false,
                     shouldLoadTeams: false,
-                })}>Results</Button>
+                    shouldLoadSpecificTeam: false,
+                })}>Results</Button>   
 
                 <Button variant="outline-dark" onClick={() => this.setState({
                     shouldLoadResults: false,
                     shouldLoadPrelive: true,
                     shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
                 })}>Prelive</Button>
 
                 <Table striped bordered hover variant="dark" className='table'>
@@ -273,13 +289,70 @@ export class LeagueOfLegendsData extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {LeagueTeams.map(team => 
-                            <tr key={team.name}>
+                        {LeagueTeams.map(team =>
+                            <tr onClick={() => this.setState({
+                                shouldLoadResults: false,
+                                shouldLoadPrelive: false,
+                                shouldLoadTeams: false,
+                                shouldLoadSpecificTeam: true,
+                                specificTeam: team,
+                            })} key = { team.name } >
                                 <td>
                                     <img src={`data:image/png;base64,${this.state.images[team.name]
                                         || this.state.images[team.name.toLowerCase()]
+                                        || this.state.images[team.name.toUpperCase()]
+                                        || this.state.images[team.name[0].toLowerCase()]
+                                        || this.state.images[team.name[0].toUpperCase()]
+
+                                        || this.state.images[team.name.trim().split(' ')[0]]
+                                        || this.state.images[team.name.trim().split(' ')[0].toLowerCase()]
+                                        || this.state.images[team.name.trim().split(' ')[0].toUpperCase()]
+                                        || this.state.images[team.name.trim().split(' ')[0][0].toUpperCase()]
+                                        || this.state.images[team.name.trim().split(' ')[0][team.name.trim().split(' ')[0].length - 1].toUpperCase()]
+                                        || this.state.images[team.name.trim().split(' ')[0][team.name.trim().split(' ')[0].length - 1].toLowerCase()]
+
                                         || this.state.images[team.name.replace('Esports', '').trim()]
-                                        || this.state.images[team.name.replace('Gaming','').trim()]
+                                        || this.state.images[team.name.replace('Esports', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('Esports', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('Esports', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('Esports', '').trim()[0].toLowerCase()]
+
+                                        || this.state.images[team.name.replace('eSports', '').trim()]
+                                        || this.state.images[team.name.replace('eSports', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('eSports', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('eSports', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('eSports', '').trim()[0].toLowerCase()]
+
+                                        || this.state.images[team.name.replace('Gaming', '').trim()]
+                                        || this.state.images[team.name.replace('Gaming', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('Gaming', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('Gaming', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('Gaming', '').trim()[0].toLowerCase()]
+
+                                        || this.state.images[team.name.replace('Team', '').trim()]
+                                        || this.state.images[team.name.replace('Team', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('Team', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('Team', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('Team', '').trim()[0].toLowerCase()]
+
+                                        || this.state.images[team.name.replace('e-Sports Club', '').trim()]
+                                        || this.state.images[team.name.replace('e-Sports Club', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('e-Sports Club', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('e-Sports Club', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('e-Sports Club', '').trim()[0].toLowerCase()]
+
+                                        || this.state.images[team.name.replace('e-Sports', '').trim()]
+                                        || this.state.images[team.name.replace('e-Sports', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('e-Sports', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('e-Sports', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('e-Sports', '').trim()[0].toLowerCase()]
+
+                                        || this.state.images[team.name.replace('Gamers', '').trim()]
+                                        || this.state.images[team.name.replace('Gamers', '').trim().toUpperCase()]
+                                        || this.state.images[team.name.replace('Gamers', '').trim().toLowerCase()]
+                                        || this.state.images[team.name.replace('Gamers', '').trim()[0].toUpperCase()]
+                                        || this.state.images[team.name.replace('Gamers', '').trim()[0].toLowerCase()]
+
                                         || this.state.images['default']}`} alt={team.name} >
                                     </img>
                                     </td>
@@ -295,6 +368,161 @@ export class LeagueOfLegendsData extends Component {
         );
     }
 
+    renderSpecificTeam() {
+        let team = this.state.specificTeam;
+        let players = [];
+        this.state.players.forEach(function (player) {
+            if (player.teamId === team.id) {
+                players.push(player);
+            }
+        });
+        return (
+            <div>
+                <div className='row'>
+                    <div className='column'>
+                <img src={`data:image/png;base64,${this.state.images[team.name]
+                    || this.state.images[team.name.toLowerCase()]
+                    || this.state.images[team.name.toUpperCase()]
+                    || this.state.images[team.name[0].toLowerCase()]
+                    || this.state.images[team.name[0].toUpperCase()]
+
+                    || this.state.images[team.name.trim().split(' ')[0]]
+                    || this.state.images[team.name.trim().split(' ')[0].toLowerCase()]
+                    || this.state.images[team.name.trim().split(' ')[0].toUpperCase()]
+                    || this.state.images[team.name.trim().split(' ')[0][0].toUpperCase()]
+                    || this.state.images[team.name.trim().split(' ')[0][team.name.trim().split(' ')[0].length - 1].toUpperCase()]
+                    || this.state.images[team.name.trim().split(' ')[0][team.name.trim().split(' ')[0].length - 1].toLowerCase()]
+
+                    || this.state.images[team.name.replace('Esports', '').trim()]
+                    || this.state.images[team.name.replace('Esports', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('Esports', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('Esports', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('Esports', '').trim()[0].toLowerCase()]
+
+                    || this.state.images[team.name.replace('eSports', '').trim()]
+                    || this.state.images[team.name.replace('eSports', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('eSports', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('eSports', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('eSports', '').trim()[0].toLowerCase()]
+
+                    || this.state.images[team.name.replace('Gaming', '').trim()]
+                    || this.state.images[team.name.replace('Gaming', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('Gaming', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('Gaming', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('Gaming', '').trim()[0].toLowerCase()]
+
+                    || this.state.images[team.name.replace('Team', '').trim()]
+                    || this.state.images[team.name.replace('Team', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('Team', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('Team', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('Team', '').trim()[0].toLowerCase()]
+
+                    || this.state.images[team.name.replace('e-Sports Club', '').trim()]
+                    || this.state.images[team.name.replace('e-Sports Club', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('e-Sports Club', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('e-Sports Club', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('e-Sports Club', '').trim()[0].toLowerCase()]
+
+                    || this.state.images[team.name.replace('e-Sports', '').trim()]
+                    || this.state.images[team.name.replace('e-Sports', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('e-Sports', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('e-Sports', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('e-Sports', '').trim()[0].toLowerCase()]
+
+                    || this.state.images[team.name.replace('Gamers', '').trim()]
+                    || this.state.images[team.name.replace('Gamers', '').trim().toUpperCase()]
+                    || this.state.images[team.name.replace('Gamers', '').trim().toLowerCase()]
+                    || this.state.images[team.name.replace('Gamers', '').trim()[0].toUpperCase()]
+                    || this.state.images[team.name.replace('Gamers', '').trim()[0].toLowerCase()]
+
+                    || this.state.images['default']}`} alt={team.name} >
+                        </img>
+                    </div>
+                    <div className='column'>
+                        <h1>{team.name}</h1>
+                        </div>
+                    </div>
+                
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    loadedspecificLeague: false,
+                    specificleague: ''
+                })}>Back To All Leagues</Button>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: true,
+                    shouldLoadPrelive: false,
+                    shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
+                })}>Results</Button>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: false,
+                    shouldLoadPrelive: true,
+                    shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
+                })}>Prelive</Button>              
+                <h2 style={{textAlign: 'center'}}> Player Stats </h2>
+                <Table striped bordered hover variant='dark' className='table'>
+                    <thead>
+                        <tr>
+                            <th>Nickname</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>KDA</th>
+                            <th>CS Per Minute</th>
+                            <th>Gold Per Minute</th>
+                            <th>Gold Percentage In Team</th>
+                            <th>Kill Participation</th>
+                            <th>Damage Per Minute</th>
+                            <th>Damage Percent</th>
+                            <th>Kills & Assits Per Minute</th>
+                            <th>Solo Kills</th>
+                            <th>Pentakills</th>
+                            <th>Vision Score Per Minute</th>
+                            <th>Wards Per Minute</th>
+                            <th>Vision Wards Per Minute</th>
+                            <th>Wards Cleared Per Minute</th>
+                            <th>CS Difference at 15 min</th>
+                            <th>Gold Difference at 15 min</th>
+                            <th>XP Difference at 15 min</th>
+                            <th>First Blood Participation</th>
+                            <th>First Blood Victim</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {players.map(player =>
+                            <tr key={player.nickName}>
+                                <td>{player.nickname}</td>
+                                <td>{player.wins}</td>
+                                <td>{player.losses}</td>
+                                <td>{player.kda}</td>
+                                <td>{player.csPerMinute}</td>
+                                <td>{player.goldPerMinute}</td>
+                                <td>{player.goldPercent}%</td>
+                                <td>{player.killParticipation}%</td>
+                                <td>{player.damagePerMinute}</td>
+                                <td>{player.damagePercent}%</td>
+                                <td>{player.killsAndAssistsPerMinute}</td>
+                                <td>{player.soloKills}</td>
+                                <td>{player.pentakills}</td>
+                                <td>{player.visionScorePerMinute}</td>
+                                <td>{player.wardPerMinute}</td>
+                                <td>{player.visionWardsPerMinute}</td>
+                                <td>{player.wardsClearedPerMinute}</td>
+                                <td>{player.csDifferenceAt15}</td>
+                                <td>{player.goldDifferenceAt15}</td>
+                                <td>{player.xpDifferenceAt15}</td>
+                                <td>{player.firstBloodParticipationPercent}%</td>
+                                <td>{player.firstBloodVictimPercent}%</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </Table>
+
+            </div>
+            );
+    }
+
 
 render() {
     let contents;
@@ -306,6 +534,8 @@ render() {
             contents = this.renderPrelive(this.state.prelive[this.state.specificleague]);
         } else if (this.state.shouldLoadTeams) {
             contents = this.renderTeams();
+        } else if (this.state.shouldLoadSpecificTeam) {
+            contents = this.renderSpecificTeam();
         }
         
     } else {

@@ -72,6 +72,14 @@ namespace MappingService.Controllers
                     return resultsFromSport.FirstOrDefault(res => res.LeagueName.ToLowerInvariant()
                     .Contains("oceanic pro league"))?.LeagueName
                         ?? "Could Not Locate League";
+                case "JP":
+                    return resultsFromSport.FirstOrDefault(res => res.LeagueName.ToLowerInvariant()
+                    .Contains("japan"))?.LeagueName
+                        ?? "Could Not Locate League";
+                case "VN":
+                    return resultsFromSport.FirstOrDefault(res => res.LeagueName.ToLowerInvariant()
+                    .Contains("vietnam"))?.LeagueName
+                        ?? "Could Not Locate League";
 
             }
             return "Could Not Locate League";
