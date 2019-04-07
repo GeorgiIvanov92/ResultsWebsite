@@ -120,9 +120,9 @@ export class LeagueOfLegendsData extends Component {
                         shouldLoadResults: false,
                         shouldLoadSpecificTeam: false,
                         shouldLoadTeams: true,
-                    })}>Teams Info</Button>
+                    })}>Teams</Button>
 
-                        : <Button variant="outline-dark" disabled={true}>Teams Info</Button>}
+                        : <Button variant="outline-dark" disabled={true}>Teams</Button>}
                 </ButtonToolbar>
                     <Table striped bordered hover variant="dark" className='table'>
                         <thead>
@@ -198,9 +198,9 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadResults: false,
                     shouldLoadSpecificTeam: false,
                     shouldLoadTeams: true,
-                })}>Teams Info</Button>
+                })}>Teams</Button>
 
-                    : <Button variant="outline-dark" disabled={true}>Teams Info</Button>}
+                    : <Button variant="outline-dark" disabled={true}>Teams</Button>}
 
 
                 <Table striped bordered hover variant="dark" className='table'>
@@ -246,6 +246,10 @@ export class LeagueOfLegendsData extends Component {
 
     renderTeams() {
         let tempTeams;
+        let disablePrelive = true;
+        if (this.state.specificleague in this.state.prelive) {
+            disablePrelive = false;
+        }           
         let LeagueTeams = this.state.specificTeams;
         for (let a = 0; a < LeagueTeams.length; a++) {
             for (let i = 0; i < LeagueTeams.length - 1; i++) {
@@ -271,9 +275,9 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadSpecificTeam: false,
                 })}>Results</Button>   
 
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadResults: false,
+                <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
                     shouldLoadPrelive: true,
+                    shouldLoadResults: false,
                     shouldLoadTeams: false,
                     shouldLoadSpecificTeam: false,
                 })}>Prelive</Button>
@@ -376,6 +380,10 @@ export class LeagueOfLegendsData extends Component {
                 players.push(player);
             }
         });
+        let disablePrelive = true;
+        if (this.state.specificleague in this.state.prelive) {
+            disablePrelive = false;
+        }  
         return (
             <div>
                 <div className='row'>
@@ -455,12 +463,12 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadSpecificTeam: false,
                 })}>Results</Button>
 
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadResults: false,
+                <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
                     shouldLoadPrelive: true,
+                    shouldLoadResults: false,
                     shouldLoadTeams: false,
                     shouldLoadSpecificTeam: false,
-                })}>Prelive</Button>              
+                })}>Prelive</Button>            
                 <h2 style={{textAlign: 'center'}}> Player Stats </h2>
                 <Table striped bordered hover variant='dark' className='table'>
                     <thead>
@@ -516,6 +524,89 @@ export class LeagueOfLegendsData extends Component {
                                 <td>{player.firstBloodVictimPercent}%</td>
                             </tr>
                         )}
+                    </tbody>
+                </Table>
+
+
+                <h2 style={{ textAlign: 'center' }}> Team Stats </h2>
+                <Table striped bordered hover variant="dark" className='table'>
+                    <thead>
+                        <tr>
+                            <th>Winrate</th>
+                            <th>Blue Side Wins</th>
+                            <th>Blue Side Losses</th>
+                            <th>Red Side Wins</th>
+                            <th>Red Side Losses</th>
+                            <th>Average Game Time</th>
+                            <th>Gold Per Minute</th>
+                            <th>Gold Difference Per Minute</th>
+                            <th>Gold Difference At 15 Mins</th>
+                            <th>CS Per Minute</th>
+                            <th>CS Difference At 15 Mins</th>
+                            <th>Tower Difference At 15 Mins</th>
+                            <th>First Tower Taken</th>
+                            <th>Dragons Per Game</th>
+                            <th>Dragons At 15 Mins</th>
+                            <th>Heralds Per Game</th>
+                            <th>Barons Per Game</th>
+                            <th>Damage Per Minute</th>
+                            <th>First Blood</th>
+                            <th>Kills Per Game</th>
+                            <th>Deaths Per Game</th>
+                            <th>KD Ratio</th>
+                            <th>Wards Per Minute</th>
+                            <th>Wards Cleared Per Minute</th>
+                            <th>Wards Cleared</th>
+                            <th>Cloud Drakes Killed</th>
+                            <th>Cloud Drakes Lost</th>
+                            <th>Ocean Drakes Killed</th>
+                            <th>Ocean Drakes Lost</th>
+                            <th>Infernal Drakes Killed</th>
+                            <th>Infernal Drakes Lost</th>
+                            <th>Mountain Drakes Killed</th>
+                            <th>Mountain Drakes Lost</th>
+                            <th>Elder Drakes Killed</th>
+                            <th>Elder Drakes Lost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr key={team.winrate}>
+                            <td>{team.winrate}%</td>
+                                <td>{team.blueSideWins}</td>
+                                <td>{team.blueSideLosses}</td>
+                                <td>{team.redSideWins}</td>
+                                <td>{team.redSideLosses}</td>
+                                <td>{team.averageGameTime}</td>
+                                <td>{team.goldPerMinute}</td>
+                                <td>{team.goldDifferencePerMinute}</td>
+                                <td>{team.goldDifferenceAt15}</td>
+                                <td>{team.csPerMinute}</td>
+                                <td>{team.csDifferenceAt15}</td>
+                                <td>{team.towerDifferenceAt15}</td>
+                                <td>{team.firstTowerPercent}%</td>
+                                <td>{team.dragonsPerGame}</td>
+                                <td>{team.dragonsAt15}</td>
+                                <td>{team.heraldPerGame}</td>
+                                <td>{team.nashorsPerGame}</td>
+                                <td>{team.damagePerMinute}</td>
+                                <td>{team.firstBloodPercent}%</td>
+                                <td>{team.killsPerGame}</td>
+                                <td>{team.deathsPerGame}</td>
+                                <td>{team.kdRatio}</td>
+                                <td>{team.wardsPerMinute}</td>
+                                <td>{team.wardsClearedPerMinute}</td>
+                                <td>{team.wardsClearedPercent}%</td>
+                                <td>{team.cloudDrakesKilled}</td>
+                                <td>{team.cloudDrakesLost}</td>
+                                <td>{team.oceanDrakesKilled}</td>
+                                <td>{team.oceanDrakesLost}</td>
+                                <td>{team.infernalDrakesKilled}</td>
+                                <td>{team.infernalDrakesLost}</td>
+                                <td>{team.mountainDrakesKilled}</td>
+                                <td>{team.mountainDrakesLost}</td>
+                                <td>{team.elderDrakesKilled}</td>
+                                <td>{team.elderDrakesLost}</td>
+                            </tr>
                     </tbody>
                 </Table>
 

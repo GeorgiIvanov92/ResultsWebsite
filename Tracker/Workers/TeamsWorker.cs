@@ -37,11 +37,9 @@ namespace Tracker.Workers
                     }
                 }
                 if (teams.Count > 0)
-                {
-                    dbContext.Player.RemoveRange(playersFromDb);
+                {                   
                     dbContext.Team.RemoveRange(teamsFromDb);
                     dbContext.Team.AddRange(teams);
-                    dbContext.SaveChanges();
 
                     Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
                    $" {teams.Count} teams added to Db.");
@@ -62,8 +60,12 @@ namespace Tracker.Workers
                             players.Add(playerFromDb);
                         }
                     }
+                    dbContext.Player.RemoveRange(playersFromDb);
                     dbContext.Player.AddRange(players);
                     dbContext.SaveChanges();
+
+
+
 
                     Console.WriteLine($"Finished Getting Players at {DateTime.Now.ToShortTimeString()}." +
                    $" {players.Count} players added to Db.");
