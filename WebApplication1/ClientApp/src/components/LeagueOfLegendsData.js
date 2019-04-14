@@ -625,7 +625,7 @@ export class LeagueOfLegendsData extends Component {
                             <th>Nickname</th>
                             <th>Wins</th>
                             <th>Losses</th>
-                            <th>KDA</th>
+                            <th>KDA</th> 
                             <th>CS Per Minute</th>
                             <th>Gold Per Minute</th>
                             <th>Gold Percentage In Team</th>
@@ -823,7 +823,7 @@ export class LeagueOfLegendsData extends Component {
                 <Table striped bordered hover variant='dark' className='table'>
                     <thead>
                         <tr>
-                            <th>Nickname</th>
+                            <th onClick={() => this.sortBy('nickname', this.state.playersInLeague)}>Nickname</th>
                             <th onClick={() => this.sortBy('wins', this.state.playersInLeague)}>Wins</th>
                             <th onClick={() => this.sortBy('losses', this.state.playersInLeague)}>Losses</th>
                             <th onClick={() => this.sortBy('kda', this.state.playersInLeague)}>KDA</th>
@@ -849,7 +849,7 @@ export class LeagueOfLegendsData extends Component {
                     </thead>
                     <tbody>
                         {this.state.playersInLeague.map(player =>
-                            <tr key={player.nickName}>
+                            <tr key={player.nickname}>
                                 <td>{player.nickname}</td>
                                 <td>{player.wins}</td>
                                 <td>{player.losses}</td>

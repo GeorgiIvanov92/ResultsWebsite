@@ -121,7 +121,25 @@ namespace WebApi.Cache
             sport.LastUpdate = DateTime.UtcNow;
 
             var teamsFromDb = db.Team.ToList();
-            sport.Players = db.Player.ToList();
+            var players = db.Player.ToList();
+            var playersToAdd = new List<Player>();
+            foreach(var player in players)
+            {
+                bool shouldAddPlayer = true;
+                foreach(var playerToAdd in playersToAdd)
+                {
+                    if(player.Nickname == playerToAdd.Nickname)
+                    {
+                        shouldAddPlayer = false;
+                        break;
+                    }
+                }
+                if (shouldAddPlayer)
+                {
+                    playersToAdd.Add(player);
+                }
+            }
+            sport.Players = playersToAdd;
             ConcurrentDictionary<string, HashSet<Team>> teams = new ConcurrentDictionary<string, HashSet<Team>>();
 
             Parallel.ForEach(teamsFromDb, (team) =>
