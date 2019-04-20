@@ -6,7 +6,6 @@ import './NavMenu.css';
 import leagueLogo from './Resources/Images/leagueLogo.png';
 import dotaLogo from './Resources/Images/dotaLogo.png';
 import csLogo from './Resources/Images/csLogo.png';
-
 export class NavMenu extends Component {
   displayName = NavMenu.name
 
@@ -19,7 +18,7 @@ export class NavMenu extends Component {
           </Navbar.Brand>
           <Navbar.Toggle />
         </Navbar.Header>
-        <Navbar.Collapse>
+            <Navbar.Collapse>                
           <Nav>
             <LinkContainer to={'/'} exact>
               <NavItem>

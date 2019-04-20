@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, Button, ButtonToolbar, Table } from 'react-bootstrap';
 import './Style/SpecificTeamStyle.css';
-
+import Autosuggest from 'react-autosuggest';
 export class LeagueOfLegendsData extends Component {
    
 
@@ -29,6 +29,8 @@ export class LeagueOfLegendsData extends Component {
           specificleague: '',
           haveSortedTeamsInLeague: false,
           ascending: true,
+          value: '',
+          searchTeamResults: [],
       };
       fetch('api/LeagueOfLegends/GetSport')
           .then(response => response.json())
@@ -52,6 +54,10 @@ export class LeagueOfLegendsData extends Component {
       this.renderPlayers = this.renderPlayers.bind(this);
       this.sortBy = this.sortBy.bind(this);
       this.compareBy = this.compareBy.bind(this);
+      this.onSuggestionsFetchRequested = this.onSuggestionsFetchRequested.bind(this);
+      this.onSuggestionsClearRequested = this.onSuggestionsClearRequested.bind(this);
+      this.getSuggestionValue = this.getSuggestionValue.bind(this);
+      this.renderSuggestion = this.renderSuggestion.bind(this);
     }
     renderLeagueTable(arr) {
         return (
@@ -907,10 +913,54 @@ export class LeagueOfLegendsData extends Component {
             this.setState({ playersInLeague: arrayCopy, ascending: true });
         }
     }
+    onSuggestionsFetchRequested(team) {
+        let viableTeams = [];
+        let allTeams = this.state.teams;
+        for (var key in this.state.teams) {
+
+            allTeams[key].forEach(function (t) {
+                if (t.name.toLowerCase().includes(team.value.toLowerCase())) {
+                    viableTeams.push(t);
+                }
+            });
+        }
+        this.setState({
+            searchTeamResults: viableTeams,
+        });
+    }
+    onSuggestionsClearRequested() {
+        this.setState({
+            searchTeamResults: []
+        });
+    }
+    getSuggestionValue(suggestion) {
+        return suggestion.name;
+    }
+    renderSuggestion(suggestion) {
+        return (
+
+            <span>
+                <img src={`data:image/png;base64,${suggestion.name in this.state.images ?
+                    this.state.images[suggestion.name] : this.state.images['default']}`} alt={suggestion.name} >
+                </img>
+                {suggestion.name}
+            </ span>
+        );
+    }
+    onChange = (event, { newValue, method }) => {
+        this.setState({
+            value: newValue
+        });
+    };
 
 render() {
     let contents;
-
+    const { value } = this.state;
+    const inputProps = {
+        placeholder: "Find Team",
+        value,
+        onChange: this.onChange
+    };
     if (this.state.loadedspecificLeague) {        
         if (this.state.shouldLoadResults) {
             contents = this.renderResults(this.state.results[this.state.specificleague], this.state.teams);
@@ -931,8 +981,14 @@ render() {
     }
 
     return (
-           
-        <div>              
+        <div>     
+            <Autosuggest
+                suggestions={this.state.searchTeamResults}
+                onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+                getSuggestionValue={this.getSuggestionValue}
+                renderSuggestion={this.renderSuggestion}
+                inputProps={inputProps} />
             {contents}
       </div>
     );
