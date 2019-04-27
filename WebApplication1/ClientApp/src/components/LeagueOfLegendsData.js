@@ -34,20 +34,7 @@ export class LeagueOfLegendsData extends Component {
           ascending: true,
           value: '',
           searchTeamResults: [],
-      };
-      fetch('api/LeagueOfLegends/GetSport')
-          .then(response => response.json())
-          .then(data => {
-              this.setState({
-                  sport: data,
-                  results: data.resultsEvents,
-                  images: data.teamLogos,
-                  prelive: data.preliveEvents,
-                  teams: data.teamsInLeague,
-                  players: data.players,
-                  loading: false
-              });
-          });
+      };     
       
       this.renderResults = this.renderResults.bind(this);
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
@@ -55,14 +42,56 @@ export class LeagueOfLegendsData extends Component {
       this.renderTeams = this.renderTeams.bind(this);
       this.renderSpecificTeam = this.renderSpecificTeam.bind(this);
       this.renderPlayers = this.renderPlayers.bind(this);
-      this.sortBy = this.sortBy.bind(this);
+      this.sortBy = this.sortBy.bind(this); 
+
+
       this.compareBy = this.compareBy.bind(this);
       this.onSuggestionsFetchRequested = this.onSuggestionsFetchRequested.bind(this);
       this.onSuggestionsClearRequested = this.onSuggestionsClearRequested.bind(this);
       this.getSuggestionValue = this.getSuggestionValue.bind(this);
       this.renderSuggestion = this.renderSuggestion.bind(this);
+
+    }
+    componentDidMount() {
+        let urlParam = this.props.location.pathname.split("/");
+        if (urlParam.length === 3) {
+            fetch('api/LeagueOfLegends/GetSport')
+                .then(response => response.json())
+                .then(data => {
+                    this.setState({
+                        sport: data,
+                        results: data.resultsEvents,
+                        images: data.teamLogos,
+                        prelive: data.preliveEvents,
+                        teams: data.teamsInLeague,
+                        players: data.players,
+                        loading: false,
+                        specificleague: this.props.location.pathname.split('/')[2],
+                        shouldLoadResults: true,
+                        loadedspecificLeague: true,
+                    });
+                });
+        } else {
+            fetch('api/LeagueOfLegends/GetSport')
+                .then(response => response.json())
+                .then(data => {
+                    this.setState({
+                        sport: data,
+                        results: data.resultsEvents,
+                        images: data.teamLogos,
+                        prelive: data.preliveEvents,
+                        teams: data.teamsInLeague,
+                        players: data.players,
+                        loading: false,
+                        specificleague: '',
+                        shouldLoadResults: false,
+                        loadedspecificLeague: false,
+                    });
+                });
+        }
     }
     renderLeagueTable(arr) {
+
         return (
             <div>
                 <h1>League of Legends</h1> 
@@ -91,9 +120,81 @@ export class LeagueOfLegendsData extends Component {
         return (
             this.renderLeagueTable(arr)
         );
-    }   
+    }      
+    renderMenuTabs() {
+        let specificTeams = this.state.teams[this.state.specificleague];
+        let disablePrelive = true;
+        if (this.state.specificleague in this.state.prelive) {
+            disablePrelive = false;
+        }           
+        return (
+            <ButtonToolbar>
 
-    renderResults(results,teams) {
+                <Button variant="outline-dark" onClick={() =>
+                    this.setState({
+                        loadedspecificLeague: false,
+                        specificleague: '',
+                        playersInLeague: [],
+                    })}>Back To All Leagues</Button>
+
+                <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadResults: true,
+                    shouldLoadPrelive: false,
+                    shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
+                    shouldloadPlayers: false,
+                    playersInLeague: [],
+                    haveSortedTeamsInLeague: false,
+                })}>Results</Button> 
+
+                <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
+                    shouldLoadPrelive: true,
+                    shouldLoadResults: false,
+                    shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
+                    shouldloadPlayers: false,
+                    playersInLeague: [],
+                })}>Prelive</Button>
+
+                {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
+                    specificTeams: specificTeams,
+                    shouldLoadPrelive: false,
+                    shouldLoadResults: false,
+                    shouldLoadSpecificTeam: false,
+                    shouldLoadTeams: true,
+                    shouldloadPlayers: false,
+                    playersInLeague: [],
+                })}>Teams</Button>
+
+                    : <Button variant="outline-dark" disabled={true}>Teams</Button>}
+
+                {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
+                    shouldLoadPrelive: false,
+                    shouldLoadResults: false,
+                    shouldLoadSpecificTeam: false,
+                    shouldLoadTeams: false,
+                    shouldloadPlayers: true,
+                    playersInLeague: [],
+                })}>Players</Button>
+
+                    : <Button variant="outline-dark" disabled={true}>Players</Button>}
+
+                <Button variant="outline-dark" onClick={() => navigator.clipboard.writeText(
+                    this.props.location.protocol + this.props.location.origin + "/leagueoflegends/" + this.state.Utilities.replaceAll(this.state.specificleague," ","%20"))}
+                    >Copy League URL to Clipboard</Button>
+            </ButtonToolbar>
+            );
+    }
+
+    renderResults(results, teams) {
+        if (!results) {
+            this.setState({
+                loadedspecificLeague: false,
+                specificleague: '',
+                playersInLeague: [],
+            });
+            return <h1>Loading...</h1>
+        }       
         let tempRes;
         for (let a = 0; a < results.length; a++) {
             for (let i = 0; i < results.length - 1; i++) {
@@ -103,59 +204,12 @@ export class LeagueOfLegendsData extends Component {
                     results[i] = tempRes;
                 }
             }
-        }
-        let specificTeams = teams[this.state.specificleague];
-            let disablePrelive = true;
-            if (this.state.specificleague in this.state.prelive)
-            {
-                disablePrelive = false;
-            }           
+        }        
         return (
             
             <div>
-                              
                 <h1>{this.state.specificleague} Results</h1>
-                <ButtonToolbar>
-
-                    <Button variant="outline-dark" onClick={() =>
-                        this.setState({
-                            loadedspecificLeague: false,
-                            specificleague: '',
-                            playersInLeague: [],
-                        })}>Back To All Leagues</Button>
-
-                    <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
-                        shouldLoadPrelive: true,
-                        shouldLoadResults: false,
-                        shouldLoadTeams: false,
-                        shouldLoadSpecificTeam: false,
-                        shouldloadPlayers: false,
-                        playersInLeague: [],
-                    })}>Prelive</Button>
-
-                    {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
-                        specificTeams: specificTeams,
-                        shouldLoadPrelive: false,
-                        shouldLoadResults: false,
-                        shouldLoadSpecificTeam: false,
-                        shouldLoadTeams: true,
-                        shouldloadPlayers: false,
-                        playersInLeague: [],
-                    })}>Teams</Button>
-
-                        : <Button variant="outline-dark" disabled={true}>Teams</Button>}
-
-                    {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
-                        shouldLoadPrelive: false,
-                        shouldLoadResults: false,
-                        shouldLoadSpecificTeam: false,
-                        shouldLoadTeams: false,
-                        shouldloadPlayers: true,
-                        playersInLeague: [],
-                    })}>Players</Button>
-
-                        : <Button variant="outline-dark" disabled={true}>Players</Button>}
-                </ButtonToolbar>
+                 {this.renderMenuTabs()}
                     <Table striped bordered hover variant="dark" className='table'>
                         <thead>
                             <tr>
@@ -208,47 +262,11 @@ export class LeagueOfLegendsData extends Component {
                 }
             }
         }
-        let specificTeams = this.state.teams[this.state.specificleague];
+       
         return (
             <div>
-                <h1>{this.state.specificleague} Upcoming Games</h1> 
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    loadedspecificLeague: false,
-                    specificleague: '',
-                    playersInLeague: [],
-                })}>Back To All Leagues</Button>
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadResults: true,
-                    shouldLoadPrelive: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Results</Button>
-
-                {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
-                    specificTeams: specificTeams,
-                    shouldLoadPrelive: false,
-                    shouldLoadResults: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldLoadTeams: true,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Teams</Button>
-
-                    : <Button variant="outline-dark" disabled={true}>Teams</Button>}
-
-                {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadPrelive: false,
-                    shouldLoadResults: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldLoadTeams: false,
-                    shouldloadPlayers: true,
-                    playersInLeague: [],
-                })}>Players</Button>
-
-                    : <Button variant="outline-dark" disabled={true}>Players</Button>}
+                <h1>{this.state.specificleague} Prelive Games</h1>
+                {this.renderMenuTabs()}
 
                 <Table striped bordered hover variant="dark" className='table'>
                     <thead>
@@ -293,10 +311,6 @@ export class LeagueOfLegendsData extends Component {
 
     renderTeams() {
         let tempTeams;
-        let disablePrelive = true;
-        if (this.state.specificleague in this.state.prelive) {
-            disablePrelive = false;
-        }
         if (!this.state.haveSortedTeamsInLeague) {
             let LeagueTeams = this.state.specificTeams;
             for (let a = 0; a < LeagueTeams.length; a++) {
@@ -313,43 +327,7 @@ export class LeagueOfLegendsData extends Component {
         return (
             <div>
                 <h1>{this.state.specificleague} Teams</h1>
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    loadedspecificLeague: false,
-                    shouldLoadSpecificTeam: false,
-                    specificleague: '',
-                    playersInLeague: [],
-                    haveSortedTeamsInLeague: false,
-                })}>Back To All Leagues</Button>
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadResults: true,
-                    shouldLoadPrelive: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                    haveSortedTeamsInLeague: false,
-                })}>Results</Button>   
-
-                <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
-                    shouldLoadPrelive: true,
-                    shouldLoadResults: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                    haveSortedTeamsInLeague: false,
-                })}>Prelive</Button>
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadPrelive: false,
-                    shouldLoadResults: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldLoadTeams: false,
-                    shouldloadPlayers: true,
-                    playersInLeague: [],
-                    haveSortedTeamsInLeague: false,
-                })}>Players</Button>
+                {this.renderMenuTabs()}
 
                 <Table striped bordered hover variant="dark" className='table'>
                     <thead>
@@ -462,11 +440,7 @@ export class LeagueOfLegendsData extends Component {
             if (player.teamId === team.id) {
                 players.push(player);
             }
-        });
-        let disablePrelive = true;
-        if (this.state.specificleague in this.state.prelive) {
-            disablePrelive = false;
-        }  
+        });       
         return (
             <div>
                 <div className='row'>
@@ -479,48 +453,7 @@ export class LeagueOfLegendsData extends Component {
                         </div>
                     </div>
                 
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    loadedspecificLeague: false,
-                    specificleague: '',
-                    shouldLoadSpecificTeam: false,
-                })}>Back To All Leagues</Button>
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadResults: true,
-                    shouldLoadPrelive: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Results</Button>
-
-                <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
-                    shouldLoadPrelive: true,
-                    shouldLoadResults: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Prelive</Button>        
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    specificTeams: specificTeams,
-                    shouldLoadPrelive: false,
-                    shouldLoadResults: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldLoadTeams: true,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Teams</Button>
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadPrelive: false,
-                    shouldLoadResults: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldLoadTeams: false,
-                    shouldloadPlayers: true,
-                    playersInLeague: [],
-                })}>Players</Button>
+                {this.renderMenuTabs()}
 
                 <h2 style={{textAlign: 'center'}}> Player Stats </h2>
                 <Table striped bordered hover variant='dark' className='table'>
@@ -668,14 +601,9 @@ export class LeagueOfLegendsData extends Component {
     }
     
     renderPlayers() {
-        let disablePrelive = true;
-        let specificTeams = this.state.teams[this.state.specificleague];
         if (this.state.playersInLeague.length === 0) {
             let players = this.state.players;
-            let playersInLeague = [];
-            if (this.state.specificleague in this.state.prelive) {
-                disablePrelive = false;
-            }
+            let playersInLeague = [];            
             this.state.teams[this.state.specificleague].forEach(function (team) {
 
                 players.forEach(function (player) {
@@ -686,44 +614,13 @@ export class LeagueOfLegendsData extends Component {
                 });
             });
             this.setState({ playersInLeague: playersInLeague })
-        }
+        }       
 
         return (
             <div>
                 <h2 style={{ textAlign: 'center' }}> Players In {this.state.specificleague} </h2>
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    loadedspecificLeague: false,
-                    specificleague: '',
-                    playersInLeague: [],
-                })}>Back To All Leagues</Button>
+                {this.renderMenuTabs()}
 
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    shouldLoadResults: true,
-                    shouldLoadPrelive: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Results</Button>
-
-                <Button variant="outline-dark" disabled={disablePrelive} onClick={() => this.setState({
-                    shouldLoadPrelive: true,
-                    shouldLoadResults: false,
-                    shouldLoadTeams: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Prelive</Button>
-
-                <Button variant="outline-dark" onClick={() => this.setState({
-                    specificTeams: specificTeams,
-                    shouldLoadPrelive: false,
-                    shouldLoadResults: false,
-                    shouldLoadSpecificTeam: false,
-                    shouldLoadTeams: true,
-                    shouldloadPlayers: false,
-                    playersInLeague: [],
-                })}>Teams</Button>
                 <Table striped bordered hover variant='dark' className='table'>
                     <thead>
                         <tr>
@@ -836,7 +733,7 @@ export class LeagueOfLegendsData extends Component {
     }
     renderSuggestion(suggestion) {
         return (
-            <div onClick={ () => this.setState({
+            <div onClick={() => this.setState({
                 shouldLoadSpecificTeam: true,
                 specificTeam: suggestion,
                 specificleague: this.state.Utilities.findTeamSpecificLeague(suggestion.name, this.state.teams),
@@ -847,8 +744,7 @@ export class LeagueOfLegendsData extends Component {
                 playersInLeague: [],
                 haveSortedTeamsInLeague: false,
                 loadedspecificLeague: true
-            })}>
-                <img                   
+            })}><img                   
                     src={this.state.Utilities.getImageString(this.state.images, suggestion.name)} alt='teamImage'></img>
                 {suggestion.name}
             </div>
@@ -858,8 +754,7 @@ export class LeagueOfLegendsData extends Component {
         this.setState({
             value: newValue
         });
-    };
-    
+    };       
 
 render() {
     let contents;
@@ -871,6 +766,12 @@ render() {
     };
     if (this.state.shouldLoadSpecificTeam) {
         contents = this.renderSpecificTeam();
+    }
+    else if (this.state.shouldLoadResults && this.state.specificleague === '') {
+        this.setState({
+            shouldLoadResults: false,
+            loadedspecificLeague: false,
+        })
     }
     else if (this.state.loadedspecificLeague) {        
         if (this.state.shouldLoadResults) {

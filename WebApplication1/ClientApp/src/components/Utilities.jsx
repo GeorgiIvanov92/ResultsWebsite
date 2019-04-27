@@ -73,4 +73,7 @@ export class Utilities extends Component {
         return correctLeague;
 
     }
+    replaceAll = (str, find, replace) => {
+        return str.replace(new RegExp(find, 'g'), replace);
+    }
 }

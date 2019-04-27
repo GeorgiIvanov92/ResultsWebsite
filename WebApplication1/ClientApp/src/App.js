@@ -14,6 +14,7 @@ export default class App extends Component {
       <Layout>
         <Route exact path='/' component={Home} />
             <Route path='/leagueOfLegends' component={LeagueOfLegendsData} />
+            <Route path='leagueOfLegends/:league' component={LeagueOfLegendsData} />
             <Route path='/counterstrike' component={CounterStrikeData} />
             <Route path='/dota' component={Dota2Data} />
       </Layout>
