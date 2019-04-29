@@ -21,6 +21,7 @@ namespace WebApplication1.Models
         public virtual DbSet<Prelive> Prelive { get; set; }
         public virtual DbSet<Player> Player { get; set; }
         public virtual DbSet<Team> Team { get; set; }
+        public virtual DbSet<ChampionStat> ChampionStat { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

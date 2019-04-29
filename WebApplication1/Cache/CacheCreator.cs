@@ -58,41 +58,7 @@ namespace WebApi.Cache
 
                 }
             });
-            sport.ResultsEvents = ResultEvents;
-            ConcurrentDictionary<string, string> images = new ConcurrentDictionary<string, string>();
-            var defaultImageByteArray = System.IO.File.ReadAllBytes
-                              (Configuration.GetSection("ImagePathReader").Value + DefaultImagesById[sportId] + ".png");
-            var defaultImageString = Convert.ToBase64String(defaultImageByteArray);
-            images.TryAdd("default", defaultImageString);
-            Parallel.ForEach(ResultEvents, (league) =>
-            {
-                var results2 = league.Value;
-                foreach (var res in results2)
-                {
-                    try
-                    {
-                        if (!images.ContainsKey(res.HomeTeam))
-                        {
-                            var imageByteArray = System.IO.File.ReadAllBytes
-                                (Configuration.GetSection("ImagePathReader").Value + res.HomeTeam + ".png");
-                            var imageString = Convert.ToBase64String(imageByteArray);
-                            images.TryAdd(res.HomeTeam.Trim(), imageString);
-                        }
-                        else if (!images.ContainsKey(res.AwayTeam))
-                        {
-                            var imageByteArray = System.IO.File.ReadAllBytes
-                                                            (Configuration.GetSection("ImagePathReader").Value + res.AwayTeam + ".png");
-                            var imageString = Convert.ToBase64String(imageByteArray);
-                            images.TryAdd(res.AwayTeam.Trim(), imageString);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        continue;
-                    }
-                }
-            });
-            sport.TeamLogos = images;
+            sport.ResultsEvents = ResultEvents;           
 
             var preliveEventsFromDb = db.Prelive.ToList();
 
@@ -125,6 +91,10 @@ namespace WebApi.Cache
             var playersToAdd = new List<Player>();
             foreach(var player in players)
             {
+                if(player.SportId != sportId)
+                {
+                    continue;
+                }
                 bool shouldAddPlayer = true;
                 foreach(var playerToAdd in playersToAdd)
                 {
@@ -182,7 +152,64 @@ namespace WebApi.Cache
                 }
             });
             sport.TeamsInLeague = teams;
-                return sport;
+            ConcurrentDictionary<string, string> images = new ConcurrentDictionary<string, string>();
+            var defaultImageByteArray = System.IO.File.ReadAllBytes
+                              (Configuration.GetSection("ImagePathReader").Value + DefaultImagesById[sportId] + ".png");
+            var defaultImageString = Convert.ToBase64String(defaultImageByteArray);
+            images.TryAdd("default", defaultImageString);
+            Parallel.ForEach(ResultEvents, (league) =>
+            {
+                foreach (var res in league.Value)
+                {
+                    try
+                    {
+                        if (!images.ContainsKey(res.HomeTeam))
+                        {
+                            var imageByteArray = System.IO.File.ReadAllBytes
+                                (Configuration.GetSection("ImagePathReader").Value + res.HomeTeam + ".png");
+                            var imageString = Convert.ToBase64String(imageByteArray);
+                            images.TryAdd(res.HomeTeam.Trim(), imageString);
+                        }
+                        else if (!images.ContainsKey(res.AwayTeam))
+                        {
+                            var imageByteArray = System.IO.File.ReadAllBytes
+                                                            (Configuration.GetSection("ImagePathReader").Value + res.AwayTeam + ".png");
+                            var imageString = Convert.ToBase64String(imageByteArray);
+                            images.TryAdd(res.AwayTeam.Trim(), imageString);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        continue;
+                    }
+                }
+            });
+            Parallel.ForEach(teams, (league) =>
+            {
+                    foreach (var team in league.Value)
+                    {
+                        try
+                        {
+                            if (!images.ContainsKey(team.Name))
+                            {
+                                var imageByteArray = System.IO.File.ReadAllBytes
+                                    (Configuration.GetSection("ImagePathReader").Value + team.Name + ".png");
+                                var imageString = Convert.ToBase64String(imageByteArray);
+                                images.TryAdd(team.Name.Trim(), imageString);
+                            }                           
+                        }
+                        catch (Exception ex)
+                        {
+                            continue;
+                        }
+                }
+            });
+            sport.TeamLogos = images;
+            if (sportId == 1)
+            {
+                sport.ChampionStats = db.ChampionStat.ToList();
+            }
+            return sport;
         }
         private static async Task<string> GetMasterLeagueFromMappingService(string url,int sportId, string leagueName)
         {

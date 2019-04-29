@@ -19,6 +19,7 @@ export class LeagueOfLegendsData extends Component {
           prelive: [],
           teams: [],
           players: [],
+          playerStats: [],
           specificTeams: [],
           loading: true,
           loadedspecificLeague: false,
@@ -65,6 +66,7 @@ export class LeagueOfLegendsData extends Component {
                         prelive: data.preliveEvents,
                         teams: data.teamsInLeague,
                         players: data.players,
+                        playerStats: data.championStats,
                         loading: false,
                         specificleague: this.props.location.pathname.split('/')[2],
                         shouldLoadResults: true,
@@ -82,6 +84,7 @@ export class LeagueOfLegendsData extends Component {
                         prelive: data.preliveEvents,
                         teams: data.teamsInLeague,
                         players: data.players,
+                        playerStats: data.championStats,
                         loading: false,
                         specificleague: '',
                         shouldLoadResults: false,
@@ -91,7 +94,13 @@ export class LeagueOfLegendsData extends Component {
         }
     }
     renderLeagueTable(arr) {
-
+        let prelive = this.state.prelive;
+        for (var key in prelive) {
+            if (!arr.includes(key)) {
+                arr.push(key);
+            }
+        }
+    
         return (
             <div>
                 <h1>League of Legends</h1> 
@@ -108,7 +117,7 @@ export class LeagueOfLegendsData extends Component {
                             </Navbar.Brand>
                         </Navbar.Header>
                     </Navbar>
-                    )}
+                )}              
             </div>
         );
         }
@@ -117,6 +126,7 @@ export class LeagueOfLegendsData extends Component {
         Object.keys(results).forEach(function (key) {
             arr.push(key);
         });
+        
         return (
             this.renderLeagueTable(arr)
         );
@@ -135,6 +145,10 @@ export class LeagueOfLegendsData extends Component {
                         loadedspecificLeague: false,
                         specificleague: '',
                         playersInLeague: [],
+                        shouldLoadPrelive: false,
+                        shouldLoadTeams: false,
+                        shouldLoadSpecificTeam: false,
+                        shouldloadPlayers: false,
                     })}>Back To All Leagues</Button>
 
                 <Button variant="outline-dark" onClick={() => this.setState({
@@ -189,9 +203,8 @@ export class LeagueOfLegendsData extends Component {
     renderResults(results, teams) {
         if (!results) {
             this.setState({
-                loadedspecificLeague: false,
-                specificleague: '',
-                playersInLeague: [],
+                shouldLoadResults: false,
+                shouldLoadPrelive: true,
             });
             return <h1>Loading...</h1>
         }       
@@ -252,6 +265,16 @@ export class LeagueOfLegendsData extends Component {
     }
 
     renderPrelive(prelive) {
+        if (!prelive) {
+            this.setState({
+                shouldLoadPrelive: false,
+                loadedspecificLeague: false,
+                specificleague: '',
+                playersInLeague: [],
+            });
+            return;
+        }
+        
         let tempRes;
         for (let a = 0; a < prelive.length; a++) {
             for (let i = 0; i < prelive.length - 1; i++) {
@@ -272,10 +295,10 @@ export class LeagueOfLegendsData extends Component {
                     <thead>
                         <tr>
                             <th>Game Date</th>
-                            <th>Home Team</th>
-                            <th>Home Logo</th>                            
-                            <th>Away Logo</th>
+                            <th>Home Logo</th>
+                            <th>Home Team</th>                            
                             <th>Away Team</th>
+                            <th>Away Logo</th>
                             <th>Best Of</th>
                         </tr>
                     </thead>
@@ -295,11 +318,12 @@ export class LeagueOfLegendsData extends Component {
                                 <img src={`data:image/png;base64,${pre.homeTeam in this.state.images ?
                                     this.state.images[pre.homeTeam] : this.state.images['default']}`} alt={pre.homeTeam} >
                                 </img>
-                                <td>{pre.homeTeam}</td>          
-                                <td>{pre.awayTeam}</td>
+                                <td>{pre.homeTeam}</td>    
                                 <img src={`data:image/png;base64,${pre.awayTeam in this.state.images ?
                                     this.state.images[pre.awayTeam] : this.state.images['default']}`} alt={pre.awayTeam} >
                                 </img>
+                                <td>{pre.awayTeam}</td>
+                                
                                 <td>{pre.bestOf}</td>
                             </tr>
                         )}

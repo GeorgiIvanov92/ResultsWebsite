@@ -32,7 +32,7 @@ namespace WebApplication1.Controllers
             var sport = _cache.Get("CSGO") as Sport;
             if (sport.LastUpdate < DateTime.UtcNow.AddSeconds(-int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value)))
             {
-                _cache.Set("CSGO", CacheCreator.CreateSportCacheById(1, db, Configuration));
+                _cache.Set("CSGO", CacheCreator.CreateSportCacheById(2, db, Configuration));
                 sport = _cache.Get("CSGO") as Sport;
             }
             return sport;

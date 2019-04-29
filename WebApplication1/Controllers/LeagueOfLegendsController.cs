@@ -28,7 +28,7 @@ namespace WebApplication1.Controllers
             _cache = memoryCache;
         }
 
-        [HttpGet("[action]")]
+        [HttpGet("GetSport")]
         public Sport GetSport()
         {
             var sport = _cache.Get("LeagueOfLegends") as Sport;
@@ -38,22 +38,6 @@ namespace WebApplication1.Controllers
                 sport = _cache.Get("LeagueOfLegends") as Sport;
             }
                 return sport;
-        }
-        [HttpGet("{league}")]
-        public HashSet<Team> GetSpecificLeague(string league)
-        {
-            var sport = _cache.Get("LeagueOfLegends") as Sport;
-            if (sport.LastUpdate < DateTime.UtcNow.AddSeconds(-int.Parse(Configuration.GetSection("CacheRefreshRateInSeconds").Value)))
-            {
-                _cache.Set("LeagueOfLegends", CacheCreator.CreateSportCacheById(1, db, Configuration));
-                sport = _cache.Get("LeagueOfLegends") as Sport;
-            }
-            if (league.Contains("European"))
-            {
-                return sport.TeamsInLeague["EUW"];
-            }
-            return null;
-            
         }
     }
 }

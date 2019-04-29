@@ -15,6 +15,7 @@ namespace Tracker.Sites
         private static readonly string _allTeamsLink = "http://gol.gg/teams/list/season-S9/split-Spring/region-ALL/tournament-ALL/week-ALL/";
         private static readonly string _teamsUrl = "http://gol.gg/teams/";
         private static List<Link> PlayerLinks = new List<Link>();
+        private Dictionary<string,List<ChampionStat>> ChampionStats;
         private Regex scriptResultsRegex = new Regex(@"data : \[([\d,]+)]", RegexOptions.Compiled | RegexOptions.Multiline);
         public override void GetLinks()
         {
@@ -77,12 +78,12 @@ namespace Tracker.Sites
                             var columns = table.SelectNodes(".//td");
                             for (int i = 0; i < columns.Count - 1; i += 2)
                             {
-                                if (columns[i].InnerText.Contains("Region"))
+                                if (columns[i].InnerText.Contains("Region") && columns[i].InnerText != "-")
                                 {
                                     team.Region = columns[i + 1].InnerText;
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Win Rate"))
+                                if (columns[i].InnerText.Contains("Win Rate") && columns[i].InnerText != "-")
                                 {
                                     var winrateArr = columns[i + 1].InnerText.Replace("W", "").Replace("L", "").Split(" - ");
                                     var wins = int.Parse(winrateArr[0].Trim());
@@ -92,7 +93,7 @@ namespace Tracker.Sites
                                     team.Winrate = winrate;
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Average game duration"))
+                                if (columns[i].InnerText.Contains("Average game duration") && columns[i].InnerText != "-")
                                 {
                                     var timeString = columns[i + 1].InnerText.Replace(":", ",");
                                     var time = float.Parse(timeString);
@@ -107,37 +108,37 @@ namespace Tracker.Sites
                             var columns = table.SelectNodes(".//td");
                             for (int i = 0; i < columns.Count - 1; i += 2)
                             {
-                                if (columns[i].InnerText.Contains("Gold Per Minute"))
+                                if (columns[i].InnerText.Contains("Gold Per Minute") && columns[i+1].InnerText != "-")
                                 {
                                     team.GoldPerMinute = int.Parse(columns[i + 1].InnerText);
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Gold Differential per Minute"))
+                                if (columns[i].InnerText.Contains("Gold Differential per Minute") && columns[i+1].InnerText != "-")
                                 {
                                     team.GoldDifferencePerMinute = int.Parse(columns[i + 1].InnerText);
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Gold Differential at 15 min"))
+                                if (columns[i].InnerText.Contains("Gold Differential at 15 min") && columns[i+1].InnerText != "-")
                                 {
                                     team.GoldDifferenceAt15 = int.Parse(columns[i + 1].InnerText);
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("CS Per Minute"))
+                                if (columns[i].InnerText.Contains("CS Per Minute") && columns[i+1].InnerText != "-")
                                 {
                                     team.CSPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("CS Differential at 15 min"))
+                                if (columns[i].InnerText.Contains("CS Differential at 15 min") && columns[i+1].InnerText != "-")
                                 {
                                     team.CSDifferenceAt15 = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Tower Differential at 15 min"))
+                                if (columns[i].InnerText.Contains("Tower Differential at 15 min") && columns[i+1].InnerText != "-")
                                 {
                                     team.TowerDifferenceAt15 = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("First Tower"))
+                                if (columns[i].InnerText.Contains("First Tower") && columns[i+1].InnerText != "-")
                                 {
                                     var percentString = columns[i + 1].InnerText.Replace("%", "").Replace(".", ",").Trim().Replace("&nbsp;\n", "").Trim();
                                     team.FirstTowerPercent = (int)(float.Parse(percentString));
@@ -298,10 +299,10 @@ namespace Tracker.Sites
             };
             return teams;
         }
-        public List<Player> GetPlayers(TrackerDBContext db)
+        public List<Player> GetPlayers(List<Team> teams)
         {
             List<Player> players = new List<Player>();
-            List<Team> teams = db.Team.ToList();
+            ChampionStats = new Dictionary<string, List<ChampionStat>>();
             foreach (var playerLink in PlayerLinks)
             {
                 try
@@ -338,7 +339,7 @@ namespace Tracker.Sites
                             break;
                         }
                     }
-                    if (player.TeamId == 0)
+                    if (player.TeamId == null)
                     {
                         continue;
                     }
@@ -364,10 +365,11 @@ namespace Tracker.Sites
                                             player.Losses = losses;
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("KDA"))
+                                        if (columns[i].InnerText.Contains("KDA") && columns[i+1].InnerText != "-")
                                         {
                                             try
                                             {
+                                                
                                                 player.KDA = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             }
                                             catch
@@ -513,6 +515,34 @@ namespace Tracker.Sites
                                     }
                                 }));
                             }
+                            if (table.InnerText.Contains("Champion") && !table.InnerText.Contains("Score"))
+                            {
+                                var columns = table.SelectNodes(".//td");
+                                tasks.Add(Task.Factory.StartNew(() =>
+                                {
+                                    for (int i = 0; i < columns.Count - 5; i += 4)
+                                    {
+                                        ChampionStat stat = new ChampionStat();
+                                        stat.ChampionName = columns[i].InnerText;
+                                        stat.GamesPlayed = int.Parse(columns[i + 1].InnerText);
+                                        stat.WinratePercent = float.Parse(columns[i + 2].InnerText.Replace(".", ",").Replace("%", "").Replace("&nbsp;\n", "").Trim());
+                                        if(columns[i+3].InnerText == "-")
+                                        {
+                                            continue;
+                                        }
+                                        stat.KDA = float.Parse(columns[i + 3].InnerText.Replace(".", ",").Trim());
+                                        if (ChampionStats.ContainsKey(player.Nickname))
+                                        {
+                                            ChampionStats[player.Nickname].Add(stat);
+                                        }
+                                        else
+                                        {
+                                            ChampionStats.Add(player.Nickname, new List<ChampionStat>() { stat });
+                                        }
+
+                                    }
+                                }));
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -535,6 +565,25 @@ namespace Tracker.Sites
             return players;
 
         }
-         
+        public List<ChampionStat> GetChampionStats(List<Player> playersFromDb)
+        {
+            List<ChampionStat> stats = new List<ChampionStat>();
+            foreach (var champ in ChampionStats)
+            {
+                foreach (var stat in champ.Value)
+                {
+                    foreach (var playerFromDb in playersFromDb)
+                    {
+                        if (champ.Key == playerFromDb.Nickname)
+                        {
+                            stat.PlayerId = playerFromDb.PlayerId;
+                            stats.Add(stat);
+                        }
+                    }
+                }
+            }
+            return stats;
+        }
+
     }
 }

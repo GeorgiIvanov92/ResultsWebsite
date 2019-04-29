@@ -40,31 +40,34 @@ namespace Tracker.Workers
                 {                   
                     dbContext.Team.RemoveRange(teamsFromDb);
                     dbContext.Team.AddRange(teams);
-
+                    dbContext.SaveChanges();
                     Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
                    $" {teams.Count} teams added to Db.");
                   
-                    players = lol.GetPlayers(dbContext);
+                    players = lol.GetPlayers(teams);
                     foreach (var playerFromDb in playersFromDb)
                     {
-                        bool shouldAddTeam = true;
+                        bool shouldAddPlayer = true;
                         foreach (var player in players)
                         {
                             if (player.Nickname == playerFromDb.Nickname)
                             {
-                                shouldAddTeam = false;
+                                shouldAddPlayer = false;
                             }
                         }
-                        if (shouldAddTeam)
+                        if (shouldAddPlayer)
                         {
                             players.Add(playerFromDb);
                         }
                     }
                     dbContext.Player.RemoveRange(playersFromDb);
                     dbContext.Player.AddRange(players);
+
+                    var champStats = lol.GetChampionStats(players);
+                    var champsStatsFromDb = dbContext.ChampionStat.ToList();
+                    dbContext.RemoveRange(champsStatsFromDb);
+                    dbContext.AddRange(champStats);
                     dbContext.SaveChanges();
-
-
 
 
                     Console.WriteLine($"Finished Getting Players at {DateTime.Now.ToShortTimeString()}." +

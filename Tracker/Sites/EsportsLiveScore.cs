@@ -66,6 +66,10 @@ namespace Tracker
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(page);
                     var finishedMatchesNodes = doc.DocumentNode.SelectSingleNode("//div[contains(@id,'finished')]").SelectNodes(".//div[contains(@id,'event_id')]");
+                    if(finishedMatchesNodes == null)
+                    {
+                        continue;
+                    }
                     foreach (var gameNode in finishedMatchesNodes)
                     {
                         try
