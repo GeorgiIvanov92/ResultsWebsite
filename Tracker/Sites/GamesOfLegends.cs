@@ -526,11 +526,13 @@ namespace Tracker.Sites
                                         stat.ChampionName = columns[i].InnerText;
                                         stat.GamesPlayed = int.Parse(columns[i + 1].InnerText);
                                         stat.WinratePercent = float.Parse(columns[i + 2].InnerText.Replace(".", ",").Replace("%", "").Replace("&nbsp;\n", "").Trim());
+                                        stat.WinratePercent = Math.Round(stat.WinratePercent, 2);
                                         if(columns[i+3].InnerText == "-")
                                         {
                                             continue;
                                         }
                                         stat.KDA = float.Parse(columns[i + 3].InnerText.Replace(".", ",").Trim());
+                                        stat.KDA = Math.Round(stat.KDA, 2);
                                         if (ChampionStats.ContainsKey(player.Nickname))
                                         {
                                             ChampionStats[player.Nickname].Add(stat);
@@ -565,24 +567,9 @@ namespace Tracker.Sites
             return players;
 
         }
-        public List<ChampionStat> GetChampionStats(List<Player> playersFromDb)
+        public Dictionary<string,List<ChampionStat>> GetChampionStats()
         {
-            List<ChampionStat> stats = new List<ChampionStat>();
-            foreach (var champ in ChampionStats)
-            {
-                foreach (var stat in champ.Value)
-                {
-                    foreach (var playerFromDb in playersFromDb)
-                    {
-                        if (champ.Key == playerFromDb.Nickname)
-                        {
-                            stat.PlayerId = playerFromDb.PlayerId;
-                            stats.Add(stat);
-                        }
-                    }
-                }
-            }
-            return stats;
+            return ChampionStats;          
         }
 
     }

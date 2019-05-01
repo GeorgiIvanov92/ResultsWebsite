@@ -63,10 +63,26 @@ namespace Tracker.Workers
                     dbContext.Player.RemoveRange(playersFromDb);
                     dbContext.Player.AddRange(players);
 
-                    var champStats = lol.GetChampionStats(players);
+                    var champStats = lol.GetChampionStats();
+                    List<ChampionStat> stats = new List<ChampionStat>();
                     var champsStatsFromDb = dbContext.ChampionStat.ToList();
                     dbContext.RemoveRange(champsStatsFromDb);
-                    dbContext.AddRange(champStats);
+                    dbContext.SaveChanges();
+                    foreach (var champ in champStats) 
+                    {
+                        foreach (var stat in champ.Value)
+                        {
+                            foreach (var player in players)
+                            {
+                                if (champ.Key == player.Nickname)
+                                {
+                                    stat.PlayerId = player.PlayerId;
+                                    stats.Add(stat);
+                                }
+                            }
+                        }
+                    }                   
+                    dbContext.AddRange(stats);
                     dbContext.SaveChanges();
 
 

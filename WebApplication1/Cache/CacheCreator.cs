@@ -11,6 +11,7 @@ using WebApi.TransportObjects;
 using WebApi.Models;
 using WebApplication1.Models;
 using System.Net.Http;
+using System.IO;
 
 namespace WebApi.Cache
 {
@@ -153,57 +154,20 @@ namespace WebApi.Cache
             });
             sport.TeamsInLeague = teams;
             ConcurrentDictionary<string, string> images = new ConcurrentDictionary<string, string>();
+            DirectoryInfo d = new DirectoryInfo(Configuration.GetSection("ImagePathReader").Value);
+            FileInfo[] files = d.GetFiles("*.png");
             var defaultImageByteArray = System.IO.File.ReadAllBytes
                               (Configuration.GetSection("ImagePathReader").Value + DefaultImagesById[sportId] + ".png");
             var defaultImageString = Convert.ToBase64String(defaultImageByteArray);
             images.TryAdd("default", defaultImageString);
-            Parallel.ForEach(ResultEvents, (league) =>
+            foreach (var image in files)
             {
-                foreach (var res in league.Value)
-                {
-                    try
-                    {
-                        if (!images.ContainsKey(res.HomeTeam))
-                        {
-                            var imageByteArray = System.IO.File.ReadAllBytes
-                                (Configuration.GetSection("ImagePathReader").Value + res.HomeTeam + ".png");
-                            var imageString = Convert.ToBase64String(imageByteArray);
-                            images.TryAdd(res.HomeTeam.Trim(), imageString);
-                        }
-                        else if (!images.ContainsKey(res.AwayTeam))
-                        {
-                            var imageByteArray = System.IO.File.ReadAllBytes
-                                                            (Configuration.GetSection("ImagePathReader").Value + res.AwayTeam + ".png");
-                            var imageString = Convert.ToBase64String(imageByteArray);
-                            images.TryAdd(res.AwayTeam.Trim(), imageString);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        continue;
-                    }
-                }
-            });
-            Parallel.ForEach(teams, (league) =>
-            {
-                    foreach (var team in league.Value)
-                    {
-                        try
-                        {
-                            if (!images.ContainsKey(team.Name))
-                            {
-                                var imageByteArray = System.IO.File.ReadAllBytes
-                                    (Configuration.GetSection("ImagePathReader").Value + team.Name + ".png");
-                                var imageString = Convert.ToBase64String(imageByteArray);
-                                images.TryAdd(team.Name.Trim(), imageString);
-                            }                           
-                        }
-                        catch (Exception ex)
-                        {
-                            continue;
-                        }
-                }
-            });
+                var byteArray = System.IO.File.ReadAllBytes
+                                  (image.FullName);
+                var imageString = Convert.ToBase64String(byteArray);
+                images.TryAdd(image.Name.Replace(image.Extension,"").ToLowerInvariant(), imageString);
+                sport.TeamLogos = images;
+            }
             sport.TeamLogos = images;
             if (sportId == 1)
             {

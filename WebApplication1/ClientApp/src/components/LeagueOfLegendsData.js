@@ -4,6 +4,7 @@ import './Style/SpecificTeamStyle.css';
 import Autosuggest from 'react-autosuggest';
 import './Utilities';
 import { Utilities } from './Utilities';
+import ReactDOM  from 'react-dom';
 export class LeagueOfLegendsData extends Component {
    
 
@@ -20,6 +21,7 @@ export class LeagueOfLegendsData extends Component {
           teams: [],
           players: [],
           playerStats: [],
+          specificStats: [],
           specificTeams: [],
           loading: true,
           loadedspecificLeague: false,
@@ -43,7 +45,8 @@ export class LeagueOfLegendsData extends Component {
       this.renderTeams = this.renderTeams.bind(this);
       this.renderSpecificTeam = this.renderSpecificTeam.bind(this);
       this.renderPlayers = this.renderPlayers.bind(this);
-      this.sortBy = this.sortBy.bind(this); 
+      this.sortBy = this.sortBy.bind(this);
+      this.sortStatsBy = this.sortStatsBy.bind(this);
 
 
       this.compareBy = this.compareBy.bind(this);
@@ -106,7 +109,7 @@ export class LeagueOfLegendsData extends Component {
                 <h1>League of Legends</h1> 
                 {arr.map(league =>
 
-                    <Navbar inverse style={{ width: '50%' }} onClick={() => this.setState({
+                    <Navbar key={league} inverse style={{ width: '50%' }} onClick={() => this.setState({
                         loadedspecificLeague: true,
                         shouldLoadResults: true,
                         specificleague: league
@@ -136,7 +139,11 @@ export class LeagueOfLegendsData extends Component {
         let disablePrelive = true;
         if (this.state.specificleague in this.state.prelive) {
             disablePrelive = false;
-        }           
+        }
+        let disableResults = true;
+        if (this.state.specificleague in this.state.results) {
+            disableResults = false;
+        }
         return (
             <ButtonToolbar>
 
@@ -145,19 +152,21 @@ export class LeagueOfLegendsData extends Component {
                         loadedspecificLeague: false,
                         specificleague: '',
                         playersInLeague: [],
+                        specificStats: [],
                         shouldLoadPrelive: false,
                         shouldLoadTeams: false,
                         shouldLoadSpecificTeam: false,
                         shouldloadPlayers: false,
                     })}>Back To All Leagues</Button>
 
-                <Button variant="outline-dark" onClick={() => this.setState({
+                <Button variant="outline-dark" disabled={disableResults} onClick={() => this.setState({
                     shouldLoadResults: true,
                     shouldLoadPrelive: false,
                     shouldLoadTeams: false,
                     shouldLoadSpecificTeam: false,
                     shouldloadPlayers: false,
                     playersInLeague: [],
+                    specificStats: [],
                     haveSortedTeamsInLeague: false,
                 })}>Results</Button> 
 
@@ -168,6 +177,7 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadSpecificTeam: false,
                     shouldloadPlayers: false,
                     playersInLeague: [],
+                    specificStats: [],
                 })}>Prelive</Button>
 
                 {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
@@ -178,6 +188,7 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadTeams: true,
                     shouldloadPlayers: false,
                     playersInLeague: [],
+                    specificStats: [],
                 })}>Teams</Button>
 
                     : <Button variant="outline-dark" disabled={true}>Teams</Button>}
@@ -189,6 +200,7 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadTeams: false,
                     shouldloadPlayers: true,
                     playersInLeague: [],
+                    specificStats: [],
                 })}>Players</Button>
 
                     : <Button variant="outline-dark" disabled={true}>Players</Button>}
@@ -249,11 +261,11 @@ export class LeagueOfLegendsData extends Component {
                                                 minute: 'numeric',
                                             })}</td>
                                     <td>{result.homeTeam}</td>
-                                    <img src={`data:image/png;base64,${result.homeTeam in this.state.images ?
+                                <img alt='' src={`data:image/png;base64,${result.homeTeam in this.state.images ?
                                         this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
                                     <td>{result.homeScore}</td>
                                     <td>{result.awayScore}</td>
-                                    <img src={`data:image/png;base64,${result.awayTeam in this.state.images ?
+                                <img alt='' src={`data:image/png;base64,${result.awayTeam in this.state.images ?
                                         this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
                                     <td>{result.awayTeam}</td>
                                 </tr>
@@ -315,13 +327,9 @@ export class LeagueOfLegendsData extends Component {
                                             hour: 'numeric',
                                             minute: 'numeric',
                                     })}</td>
-                                <img src={`data:image/png;base64,${pre.homeTeam in this.state.images ?
-                                    this.state.images[pre.homeTeam] : this.state.images['default']}`} alt={pre.homeTeam} >
-                                </img>
+                                <img alt=''src={this.state.Utilities.getImageString(this.state.images, pre.homeTeam)}></img>
                                 <td>{pre.homeTeam}</td>    
-                                <img src={`data:image/png;base64,${pre.awayTeam in this.state.images ?
-                                    this.state.images[pre.awayTeam] : this.state.images['default']}`} alt={pre.awayTeam} >
-                                </img>
+                                <img alt=''src={this.state.Utilities.getImageString(this.state.images, pre.awayTeam)}></img>
                                 <td>{pre.awayTeam}</td>
                                 
                                 <td>{pre.bestOf}</td>
@@ -406,7 +414,7 @@ export class LeagueOfLegendsData extends Component {
                                 haveSortedTeamsInLeague: false,
                             })} key={team.name} >
                                 <td>
-                                    <img src={this.state.Utilities.getImageString(this.state.images,team.name)}></img>
+                                    <img alt='' src={this.state.Utilities.getImageString(this.state.images,team.name)}></img>
                                 </td>
                                 <td>{team.name}</td>
                                 <td>{team.winrate}%</td>
@@ -456,20 +464,33 @@ export class LeagueOfLegendsData extends Component {
         let team = this.state.specificTeam;
         let players = [];
         let specificTeams = this.state.teams[this.state.specificleague];
-        if (!specificTeams) {
+        let specificStats = [];
+        let champStats = this.state.playerStats;
+        if (!specificTeams || specificTeams.length === 0) {
 
             specificTeams = this.state.teams[this.state.Utilities.findTeamSpecificLeague(team, this.state.teams)];
-        }
-        this.state.players.forEach(function (player) {
-            if (player.teamId === team.id) {
-                players.push(player);
+        }      
+            this.state.players.forEach(function (player) {
+                if (player.teamId === team.id) {
+                    players.push(player);
+                    specificStats.push(champStats.filter(stat => stat.playerId === player.playerId));
+                }
+        });
+        if (specificStats.length > 0 && (!this.state.specificStats || this.state.specificStats.length === 0)) {
+            specificStats = specificStats.filter(stat => stat[0]);
+            for (let i = 0; i < specificStats.length; i++) {               
+                    this.sortStatsBy('gamesPlayed', specificStats, specificStats[i][0].player.nickname);
             }
-        });       
+                this.setState({
+                    specificStats: specificStats
+            });
+
+        }
         return (
             <div>
                 <div className='row'>
                     <div className='column'>
-                        <img src={this.state.Utilities.getImageString(this.state.images,team.name)}>
+                        <img alt='' src={this.state.Utilities.getImageString(this.state.images,team.name)}>
                         </img>
                     </div>
                     <div className='column'>
@@ -620,6 +641,39 @@ export class LeagueOfLegendsData extends Component {
                     </tbody>
                 </Table>
 
+                {this.state.specificStats ?
+                    <div>                       
+                        {this.state.specificStats.map(stats =>
+                            
+                            <div>
+                            <h2 style={{ textAlign: 'center' }}> {stats[0].player.nickname} Champion Stats </h2>
+                                <Table striped bordered hover variant="dark" className='table'>
+                                    <thead>
+                                        <tr key={stats[0].player.nickname}>
+                                            <th onClick={() => this.sortStatsBy('championName', this.state.specificStats,stats[0].player.nickname)}>Champion Name</th>
+                                            <th onClick={() => this.sortStatsBy('gamesPlayed', this.state.specificStats, stats[0].player.nickname)}>Games Played</th>
+                                            <th onClick={() => this.sortStatsBy('winratePercent', this.state.specificStats, stats[0].player.nickname)}>Winrate</th>
+                                            <th onClick={() => this.sortStatsBy('kda', this.state.specificStats, stats[0].player.nickname)}>KDA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {stats.map(stat =>
+                                            <tr key={stat.championName + stat.playerId}>
+                                                <td>{stat.championName}</td>
+                                                <td>{stat.gamesPlayed}</td>
+                                                <td>{stat.winratePercent}%</td>
+                                                <td>{stat.kda}</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </Table>                                
+                                </div>
+                            )}
+                        </div>
+                     : <h2>No Champion Stats Recorded</h2>}
+
+                
+
             </div>
             );
     }
@@ -732,6 +786,22 @@ export class LeagueOfLegendsData extends Component {
             this.setState({ playersInLeague: arrayCopy, ascending: true });
         }
     }
+    sortStatsBy(key, array, playerName) {
+        let arrayCopy = array;
+        let indexOfInterest = 0;
+        for (let i = 0; i < array.length; i++) {
+            if (array[i][0].player.nickname === playerName) {
+                indexOfInterest = i;
+                break;
+            }
+        }
+        arrayCopy[indexOfInterest].sort(this.compareBy(key));
+        if (this.state.ascending) {
+            this.setState({ playersInLeague: arrayCopy, ascending: false });
+        } else {
+            this.setState({ playersInLeague: arrayCopy, ascending: true });
+        }
+    }
     onSuggestionsFetchRequested(team) {
         let viableTeams = [];
         let allTeams = this.state.teams;
@@ -767,8 +837,9 @@ export class LeagueOfLegendsData extends Component {
                 shouldloadPlayers: false,
                 playersInLeague: [],
                 haveSortedTeamsInLeague: false,
-                loadedspecificLeague: true
-            })}><img                   
+                loadedspecificLeague: true,
+                specificStats: [],
+            })}><img alt=''                  
                     src={this.state.Utilities.getImageString(this.state.images, suggestion.name)} alt='teamImage'></img>
                 {suggestion.name}
             </div>

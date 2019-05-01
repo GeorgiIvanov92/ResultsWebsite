@@ -1,62 +1,32 @@
-﻿import React, { Component } from 'react';
+﻿import { Component } from 'react';
 export class Utilities extends Component {
 
 
     getImageString = (images, teamName) => {
-        return `data:image/png;base64,${images[teamName]
-            || images[teamName.toLowerCase()]
-            || images[teamName.toUpperCase()]
+        return `data:image/png;base64,${
+            images[teamName.toLowerCase()]
             || images[teamName[0].toLowerCase()]
-            || images[teamName[0].toUpperCase()]
 
-            || images[teamName.trim().split(' ')[0]]
-            || images[teamName.trim().split(' ')[0].toLowerCase()]
-            || images[teamName.trim().split(' ')[0].toUpperCase()]
-            || images[teamName.trim().split(' ')[0][0].toUpperCase()]
-            || images[teamName.trim().split(' ')[0][teamName.trim().split(' ')[0].length - 1].toUpperCase()]
-            || images[teamName.trim().split(' ')[0][teamName.trim().split(' ')[0].length - 1].toLowerCase()]
+            || images[teamName.toLowerCase().trim().split(' ')[0]]
+            || images[teamName.toLowerCase().trim().split(' ')[0][teamName.trim().split(' ')[0].length - 1]]
 
-            || images[teamName.replace('Esports', '').trim()]
-            || images[teamName.replace('Esports', '').trim().toUpperCase()]
-            || images[teamName.replace('Esports', '').trim().toLowerCase()]
-            || images[teamName.replace('Esports', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('Esports', '').trim()[0].toLowerCase()]
+            || images[teamName.toLowerCase().replace('esports', '').trim()]
+            || images[teamName.toLowerCase().replace('esports', '').trim()[0]]
 
-            || images[teamName.replace('eSports', '').trim()]
-            || images[teamName.replace('eSports', '').trim().toUpperCase()]
-            || images[teamName.replace('eSports', '').trim().toLowerCase()]
-            || images[teamName.replace('eSports', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('eSports', '').trim()[0].toLowerCase()]
+            || images[teamName.toLowerCase().replace('gaming', '').trim()]
+            || images[teamName.toLowerCase().replace('gaming', '').trim()[0]]
 
-            || images[teamName.replace('Gaming', '').trim()]
-            || images[teamName.replace('Gaming', '').trim().toUpperCase()]
-            || images[teamName.replace('Gaming', '').trim().toLowerCase()]
-            || images[teamName.replace('Gaming', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('Gaming', '').trim()[0].toLowerCase()]
+            || images[teamName.toLowerCase().replace('team', '').trim()]
+            || images[teamName.toLowerCase().replace('team', '').trim()[0]]
 
-            || images[teamName.replace('Team', '').trim()]
-            || images[teamName.replace('Team', '').trim().toUpperCase()]
-            || images[teamName.replace('Team', '').trim().toLowerCase()]
-            || images[teamName.replace('Team', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('Team', '').trim()[0].toLowerCase()]
+            || images[teamName.toLowerCase().replace('e-sports club', '').trim()]
+            || images[teamName.toLowerCase().replace('e-sports club', '').trim()[0]]
 
-            || images[teamName.replace('e-Sports Club', '').trim()]
-            || images[teamName.replace('e-Sports Club', '').trim().toUpperCase()]
-            || images[teamName.replace('e-Sports Club', '').trim().toLowerCase()]
-            || images[teamName.replace('e-Sports Club', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('e-Sports Club', '').trim()[0].toLowerCase()]
+            || images[teamName.toLowerCase().replace('e-sports', '').trim()]
+            || images[teamName.toLowerCase().replace('e-sports', '').trim()[0]]
 
-            || images[teamName.replace('e-Sports', '').trim()]
-            || images[teamName.replace('e-Sports', '').trim().toUpperCase()]
-            || images[teamName.replace('e-Sports', '').trim().toLowerCase()]
-            || images[teamName.replace('e-Sports', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('e-Sports', '').trim()[0].toLowerCase()]
-
-            || images[teamName.replace('Gamers', '').trim()]
-            || images[teamName.replace('Gamers', '').trim().toUpperCase()]
-            || images[teamName.replace('Gamers', '').trim().toLowerCase()]
-            || images[teamName.replace('Gamers', '').trim()[0].toUpperCase()]
-            || images[teamName.replace('Gamers', '').trim()[0].toLowerCase()]
+            || images[teamName.toLowerCase().replace('gamers', '').trim()]
+            || images[teamName.toLowerCase().replace('gamers', '').trim()[0]]
 
             || images['default']}`;
 
