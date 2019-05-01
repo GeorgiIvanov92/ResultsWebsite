@@ -86,7 +86,7 @@ namespace Tracker.Workers
                     dbContext.SaveChanges();
 
 
-                    Console.WriteLine($"Finished Getting Players at {DateTime.Now.ToShortTimeString()}." +
+                     Console.WriteLine($"Finished Getting Players at {DateTime.Now.ToShortTimeString()}." +
                    $" {players.Count} players added to Db.");
                 }
                 Console.WriteLine($"Sampling Teams and Players again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");

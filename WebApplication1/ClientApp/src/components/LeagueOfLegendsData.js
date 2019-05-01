@@ -98,7 +98,13 @@ export class LeagueOfLegendsData extends Component {
     }
     renderLeagueTable(arr) {
         let prelive = this.state.prelive;
-        for (var key in prelive) {
+        for (let key in prelive) {
+            if (!arr.includes(key)) {
+                arr.push(key);
+            }
+        }
+        let teams = this.state.teams;
+        for (let key in teams) {
             if (!arr.includes(key)) {
                 arr.push(key);
             }
@@ -261,12 +267,10 @@ export class LeagueOfLegendsData extends Component {
                                                 minute: 'numeric',
                                             })}</td>
                                     <td>{result.homeTeam}</td>
-                                <img alt='' src={`data:image/png;base64,${result.homeTeam in this.state.images ?
-                                        this.state.images[result.homeTeam] : this.state.images['default']}`} alt={result.homeTeam} />
+                                <img alt='' src={this.state.Utilities.getImageString(this.state.images, result.homeTeam)} />
                                     <td>{result.homeScore}</td>
-                                    <td>{result.awayScore}</td>
-                                <img alt='' src={`data:image/png;base64,${result.awayTeam in this.state.images ?
-                                        this.state.images[result.awayTeam] : this.state.images['default']}`} alt={result.awayTeam} />
+                                <td>{result.awayScore}</td>
+                                <img alt='' src={this.state.Utilities.getImageString(this.state.images, result.awayTeam)} />
                                     <td>{result.awayTeam}</td>
                                 </tr>
                             )}
@@ -279,9 +283,9 @@ export class LeagueOfLegendsData extends Component {
     renderPrelive(prelive) {
         if (!prelive) {
             this.setState({
+                shouldLoadTeams: true,
                 shouldLoadPrelive: false,
-                loadedspecificLeague: false,
-                specificleague: '',
+                specificTeams: this.state.teams[this.state.specificleague],
                 playersInLeague: [],
             });
             return;
@@ -343,6 +347,18 @@ export class LeagueOfLegendsData extends Component {
 
     renderTeams() {
         let tempTeams;
+        if (!this.state.specificTeams) {
+            this.setState({
+                loadedspecificLeague: false,
+                specificleague: '',
+                playersInLeague: [],
+                specificStats: [],               
+                shouldLoadPrelive: false,
+                shouldLoadTeams: false,
+                shouldLoadSpecificTeam: false,
+                shouldloadPlayers: false,
+            })
+        }
         if (!this.state.haveSortedTeamsInLeague) {
             let LeagueTeams = this.state.specificTeams;
             for (let a = 0; a < LeagueTeams.length; a++) {
