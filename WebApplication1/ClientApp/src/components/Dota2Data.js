@@ -1,6 +1,7 @@
 ﻿import React, { Component } from 'react';
 import { Navbar, Button, Table } from 'react-bootstrap';
-
+import { Results } from './RenderTabs/Results';
+import { Prelive } from './RenderTabs/Prelive';
 export class Dota2Data extends Component {
 
 
@@ -68,7 +69,7 @@ export class Dota2Data extends Component {
 
     renderResults(results) {
         let tempRes;
-        //bubble sport by game date
+        //bubble sort by game date
         for (let a = 0; a < results.length; a++) {
             for (let i = 0; i < results.length - 1; i++) {
                 if (results[i].gameDate < results[i + 1].gameDate) {

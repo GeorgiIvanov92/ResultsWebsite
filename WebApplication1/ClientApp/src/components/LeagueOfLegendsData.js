@@ -4,7 +4,12 @@ import './Style/SpecificTeamStyle.css';
 import Autosuggest from 'react-autosuggest';
 import './Utilities';
 import { Utilities } from './Utilities';
-import ReactDOM  from 'react-dom';
+import ReactDOM from 'react-dom';
+import { Results } from './RenderTabs/Results';
+import { Prelive } from './RenderTabs/Prelive';
+import { Teams } from './RenderTabs/Teams';
+import { SpecificTeam } from './RenderTabs/SpecificTeam';
+import { Players } from './RenderTabs/Players';
 export class LeagueOfLegendsData extends Component {
    
 
@@ -21,7 +26,6 @@ export class LeagueOfLegendsData extends Component {
           teams: [],
           players: [],
           playerStats: [],
-          specificStats: [],
           specificTeams: [],
           loading: true,
           loadedspecificLeague: false,
@@ -39,12 +43,8 @@ export class LeagueOfLegendsData extends Component {
           searchTeamResults: [],
       };     
       
-      this.renderResults = this.renderResults.bind(this);
       this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
       this.renderLeagueTable = this.renderLeagueTable.bind(this);
-      this.renderTeams = this.renderTeams.bind(this);
-      this.renderSpecificTeam = this.renderSpecificTeam.bind(this);
-      this.renderPlayers = this.renderPlayers.bind(this);
       this.sortBy = this.sortBy.bind(this);
       this.sortStatsBy = this.sortStatsBy.bind(this);
 
@@ -158,7 +158,6 @@ export class LeagueOfLegendsData extends Component {
                         loadedspecificLeague: false,
                         specificleague: '',
                         playersInLeague: [],
-                        specificStats: [],
                         shouldLoadPrelive: false,
                         shouldLoadTeams: false,
                         shouldLoadSpecificTeam: false,
@@ -172,7 +171,6 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadSpecificTeam: false,
                     shouldloadPlayers: false,
                     playersInLeague: [],
-                    specificStats: [],
                     haveSortedTeamsInLeague: false,
                 })}>Results</Button> 
 
@@ -183,7 +181,6 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadSpecificTeam: false,
                     shouldloadPlayers: false,
                     playersInLeague: [],
-                    specificStats: [],
                 })}>Prelive</Button>
 
                 {specificTeams ? <Button variant="outline-dark" onClick={() => this.setState({
@@ -194,7 +191,6 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadTeams: true,
                     shouldloadPlayers: false,
                     playersInLeague: [],
-                    specificStats: [],
                 })}>Teams</Button>
 
                     : <Button variant="outline-dark" disabled={true}>Teams</Button>}
@@ -206,7 +202,6 @@ export class LeagueOfLegendsData extends Component {
                     shouldLoadTeams: false,
                     shouldloadPlayers: true,
                     playersInLeague: [],
-                    specificStats: [],
                 })}>Players</Button>
 
                     : <Button variant="outline-dark" disabled={true}>Players</Button>}
@@ -216,564 +211,7 @@ export class LeagueOfLegendsData extends Component {
                     >Copy League URL to Clipboard</Button>
             </ButtonToolbar>
             );
-    }
-
-    renderResults(results, teams) {
-        if (!results) {
-            this.setState({
-                shouldLoadResults: false,
-                shouldLoadPrelive: true,
-            });
-            return <h1>Loading...</h1>
-        }       
-        let tempRes;
-        for (let a = 0; a < results.length; a++) {
-            for (let i = 0; i < results.length - 1; i++) {
-                if (results[i].gameDate < results[i + 1].gameDate) {
-                    tempRes = results[i + 1];
-                    results[i + 1] = results[i];
-                    results[i] = tempRes;
-                }
-            }
-        }        
-        return (
-            
-            <div>
-                <h1>{this.state.specificleague} Results</h1>
-                 {this.renderMenuTabs()}
-                    <Table striped bordered hover variant="dark" className='table'>
-                        <thead>
-                            <tr>
-                                <th>Game Date</th>
-                                <th>Home Team</th>
-                                <th>Home Logo</th>
-                                <th>Home Score</th>
-                                <th>Away Score</th>
-                                <th>Away Logo</th>
-                                <th>Away Team</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {results.map(result =>
-                                <tr key={result.gameDate + "@" + result.homeTeam}>
-
-                                    <td>{new Date(result.gameDate)
-                                        .toLocaleDateString('en-GB',
-                                            {
-                                                day: 'numeric',
-                                                month: 'short',
-                                                year: 'numeric',
-                                                hour: 'numeric',
-                                                minute: 'numeric',
-                                            })}</td>
-                                    <td>{result.homeTeam}</td>
-                                <img alt='' src={this.state.Utilities.getImageString(this.state.images, result.homeTeam)} />
-                                    <td>{result.homeScore}</td>
-                                <td>{result.awayScore}</td>
-                                <img alt='' src={this.state.Utilities.getImageString(this.state.images, result.awayTeam)} />
-                                    <td>{result.awayTeam}</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </Table>
-                </div>
-            );
-    }
-
-    renderPrelive(prelive) {
-        if (!prelive) {
-            this.setState({
-                shouldLoadTeams: true,
-                shouldLoadPrelive: false,
-                specificTeams: this.state.teams[this.state.specificleague],
-                playersInLeague: [],
-            });
-            return;
-        }
-        
-        let tempRes;
-        for (let a = 0; a < prelive.length; a++) {
-            for (let i = 0; i < prelive.length - 1; i++) {
-                if (prelive[i].gameDate > prelive[i + 1].gameDate) {
-                    tempRes = prelive[i + 1];
-                    prelive[i + 1] = prelive[i];
-                    prelive[i] = tempRes;
-                }
-            }
-        }
-       
-        return (
-            <div>
-                <h1>{this.state.specificleague} Prelive Games</h1>
-                {this.renderMenuTabs()}
-
-                <Table striped bordered hover variant="dark" className='table'>
-                    <thead>
-                        <tr>
-                            <th>Game Date</th>
-                            <th>Home Logo</th>
-                            <th>Home Team</th>                            
-                            <th>Away Team</th>
-                            <th>Away Logo</th>
-                            <th>Best Of</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {prelive.map(pre =>
-                            <tr key={pre.gameDate + "@" + pre.homeTeam}>
-
-                                <td>{new Date(pre.gameDate)
-                                    .toLocaleDateString('en-GB',
-                                        {
-                                            day: 'numeric',
-                                            month: 'short',
-                                            year: 'numeric',
-                                            hour: 'numeric',
-                                            minute: 'numeric',
-                                    })}</td>
-                                <img alt=''src={this.state.Utilities.getImageString(this.state.images, pre.homeTeam)}></img>
-                                <td>{pre.homeTeam}</td>    
-                                <img alt=''src={this.state.Utilities.getImageString(this.state.images, pre.awayTeam)}></img>
-                                <td>{pre.awayTeam}</td>
-                                
-                                <td>{pre.bestOf}</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </div>
-        );
-    }
-
-    renderTeams() {
-        let tempTeams;
-        if (!this.state.specificTeams) {
-            this.setState({
-                loadedspecificLeague: false,
-                specificleague: '',
-                playersInLeague: [],
-                specificStats: [],               
-                shouldLoadPrelive: false,
-                shouldLoadTeams: false,
-                shouldLoadSpecificTeam: false,
-                shouldloadPlayers: false,
-            })
-        }
-        if (!this.state.haveSortedTeamsInLeague) {
-            let LeagueTeams = this.state.specificTeams;
-            for (let a = 0; a < LeagueTeams.length; a++) {
-                for (let i = 0; i < LeagueTeams.length - 1; i++) {
-                    if (LeagueTeams[i].winrate < LeagueTeams[i + 1].winrate) {
-                        tempTeams = LeagueTeams[i + 1];
-                        LeagueTeams[i + 1] = LeagueTeams[i];
-                        LeagueTeams[i] = tempTeams;
-                    }
-                }
-            }
-            this.setState({ specificTeams: LeagueTeams, haveSortedTeamsInLeague: true });
-        }
-        return (
-            <div>
-                <h1>{this.state.specificleague} Teams</h1>
-                {this.renderMenuTabs()}
-
-                <Table striped bordered hover variant="dark" className='table'>
-                    <thead>
-                        <tr>
-                            <th>Team Logo</th>
-                            <th onClick={() => this.sortBy('name', this.state.specificTeams)}>Team Name</th>
-                            <th onClick={() => this.sortBy('winrate', this.state.specificTeams)}>Winrate</th>
-                            <th onClick={() => this.sortBy('blueSideWins', this.state.specificTeams)}>Blue Side Wins</th>
-                            <th onClick={() => this.sortBy('blueSideLosses', this.state.specificTeams)}>Blue Side Losses</th>
-                            <th onClick={() => this.sortBy('redSideWins', this.state.specificTeams)}>Red Side Wins</th>
-                            <th onClick={() => this.sortBy('redSideLosses', this.state.specificTeams)}>Red Side Losses</th>
-                            <th onClick={() => this.sortBy('averageGameTime', this.state.specificTeams)}>Average Game Time</th>
-                            <th onClick={() => this.sortBy('goldPerMinute', this.state.specificTeams)}>Gold Per Minute</th>
-                            <th onClick={() => this.sortBy('goldDifferencePerMinute', this.state.specificTeams)}>Gold Difference Per Minute</th>
-                            <th onClick={() => this.sortBy('goldDifferenceAt15', this.state.specificTeams)}>Gold Difference At 15 Mins</th>
-                            <th onClick={() => this.sortBy('csPerMinute', this.state.specificTeams)}>CS Per Minute</th>
-                            <th onClick={() => this.sortBy('csDifferenceAt15', this.state.specificTeams)}>CS Difference At 15 Mins</th>
-                            <th onClick={() => this.sortBy('towerDifferenceAt15', this.state.specificTeams)}>Tower Difference At 15 Mins</th>
-                            <th onClick={() => this.sortBy('firstTowerPercent', this.state.specificTeams)}>First Tower Taken</th>
-                            <th onClick={() => this.sortBy('dragonsPerGame', this.state.specificTeams)}>Dragons Per Game</th>
-                            <th onClick={() => this.sortBy('dragonsAt15', this.state.specificTeams)}>Dragons At 15 Mins</th>
-                            <th onClick={() => this.sortBy('heraldPerGame', this.state.specificTeams)}>Heralds Per Game</th>
-                            <th onClick={() => this.sortBy('nashorsPerGame', this.state.specificTeams)}>Barons Per Game</th>
-                            <th onClick={() => this.sortBy('damagePerMinute', this.state.specificTeams)}>Damage Per Minute</th>
-                            <th onClick={() => this.sortBy('firstBloodPercent', this.state.specificTeams)}>First Blood</th>
-                            <th onClick={() => this.sortBy('killsPerGame', this.state.specificTeams)}>Kills Per Game</th>
-                            <th onClick={() => this.sortBy('deathsPerGame', this.state.specificTeams)}>Deaths Per Game</th>
-                            <th onClick={() => this.sortBy('kdRatio', this.state.specificTeams)}>KD Ratio</th>
-                            <th onClick={() => this.sortBy('wardsPerMinute', this.state.specificTeams)}>Wards Per Minute</th>
-                            <th onClick={() => this.sortBy('wardsClearedPerMinute', this.state.specificTeams)}>Wards Cleared Per Minute</th>
-                            <th onClick={() => this.sortBy('wardsClearedPercent', this.state.specificTeams)}>Wards Cleared</th>
-                            <th onClick={() => this.sortBy('cloudDrakesKilled', this.state.specificTeams)}>Cloud Drakes Killed</th>
-                            <th onClick={() => this.sortBy('cloudDrakesLost', this.state.specificTeams)}>Cloud Drakes Lost</th>
-                            <th onClick={() => this.sortBy('oceanDrakesKilled', this.state.specificTeams)}>Ocean Drakes Killed</th>
-                            <th onClick={() => this.sortBy('oceanDrakesLost', this.state.specificTeams)}>Ocean Drakes Lost</th>
-                            <th onClick={() => this.sortBy('infernalDrakesKilled', this.state.specificTeams)}>Infernal Drakes Killed</th>
-                            <th onClick={() => this.sortBy('infernalDrakesLost', this.state.specificTeams)}>Infernal Drakes Lost</th>
-                            <th onClick={() => this.sortBy('mountainDrakesKilled', this.state.specificTeams)}>Mountain Drakes Killed</th>
-                            <th onClick={() => this.sortBy('mountainDrakesLost', this.state.specificTeams)}>Mountain Drakes Lost</th>
-                            <th onClick={() => this.sortBy('elderDrakesKilled', this.state.specificTeams)}>Elder Drakes Killed</th>
-                            <th onClick={() => this.sortBy('elderDrakesLost', this.state.specificTeams)}>Elder Drakes Lost</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {this.state.specificTeams.map(team =>
-                            <tr onClick={() => this.setState({
-                                shouldLoadResults: false,
-                                shouldLoadPrelive: false,
-                                shouldLoadTeams: false,
-                                shouldLoadSpecificTeam: true,
-                                specificTeam: team,
-                                haveSortedTeamsInLeague: false,
-                            })} key={team.name} >
-                                <td>
-                                    <img alt='' src={this.state.Utilities.getImageString(this.state.images,team.name)}></img>
-                                </td>
-                                <td>{team.name}</td>
-                                <td>{team.winrate}%</td>
-                                <td>{team.blueSideWins}</td>
-                                <td>{team.blueSideLosses}</td>
-                                <td>{team.redSideWins}</td>
-                                <td>{team.redSideLosses}</td>
-                                <td>{team.averageGameTime}</td>
-                                <td>{team.goldPerMinute}</td>
-                                <td>{team.goldDifferencePerMinute}</td>
-                                <td>{team.goldDifferenceAt15}</td>
-                                <td>{team.csPerMinute}</td>
-                                <td>{team.csDifferenceAt15}</td>
-                                <td>{team.towerDifferenceAt15}</td>
-                                <td>{team.firstTowerPercent}%</td>
-                                <td>{team.dragonsPerGame}</td>
-                                <td>{team.dragonsAt15}</td>
-                                <td>{team.heraldPerGame}</td>
-                                <td>{team.nashorsPerGame}</td>
-                                <td>{team.damagePerMinute}</td>
-                                <td>{team.firstBloodPercent}%</td>
-                                <td>{team.killsPerGame}</td>
-                                <td>{team.deathsPerGame}</td>
-                                <td>{team.kdRatio}</td>
-                                <td>{team.wardsPerMinute}</td>
-                                <td>{team.wardsClearedPerMinute}</td>
-                                <td>{team.wardsClearedPercent}%</td>
-                                <td>{team.cloudDrakesKilled}</td>
-                                <td>{team.cloudDrakesLost}</td>
-                                <td>{team.oceanDrakesKilled}</td>
-                                <td>{team.oceanDrakesLost}</td>
-                                <td>{team.infernalDrakesKilled}</td>
-                                <td>{team.infernalDrakesLost}</td>
-                                <td>{team.mountainDrakesKilled}</td>
-                                <td>{team.mountainDrakesLost}</td>
-                                <td>{team.elderDrakesKilled}</td>
-                                <td>{team.elderDrakesLost}</td>
-                            </tr>
-                            )};
-                    </tbody>
-                </Table>
-            </div >
-        );
-    }
-
-    renderSpecificTeam() {
-        let team = this.state.specificTeam;
-        let players = [];
-        let specificTeams = this.state.teams[this.state.specificleague];
-        let specificStats = [];
-        let champStats = this.state.playerStats;
-        if (!specificTeams || specificTeams.length === 0) {
-
-            specificTeams = this.state.teams[this.state.Utilities.findTeamSpecificLeague(team, this.state.teams)];
-        }      
-            this.state.players.forEach(function (player) {
-                if (player.teamId === team.id) {
-                    players.push(player);
-                    specificStats.push(champStats.filter(stat => stat.playerId === player.playerId));
-                }
-        });
-        if (specificStats.length > 0 && (!this.state.specificStats || this.state.specificStats.length === 0)) {
-            specificStats = specificStats.filter(stat => stat[0]);
-            for (let i = 0; i < specificStats.length; i++) {               
-                    this.sortStatsBy('gamesPlayed', specificStats, specificStats[i][0].player.nickname);
-            }
-                this.setState({
-                    specificStats: specificStats
-            });
-
-        }
-        return (
-            <div>
-                <div className='row'>
-                    <div className='column'>
-                        <img alt='' src={this.state.Utilities.getImageString(this.state.images,team.name)}>
-                        </img>
-                    </div>
-                    <div className='column'>
-                        <h1>{team.name}</h1>
-                        </div>
-                    </div>
-                
-                {this.renderMenuTabs()}
-
-                <h2 style={{textAlign: 'center'}}> Player Stats </h2>
-                <Table striped bordered hover variant='dark' className='table'>
-                    <thead>
-                        <tr>
-                            <th>Nickname</th>
-                            <th>Wins</th>
-                            <th>Losses</th>
-                            <th>KDA</th> 
-                            <th>CS Per Minute</th>
-                            <th>Gold Per Minute</th>
-                            <th>Gold Percentage In Team</th>
-                            <th>Kill Participation</th>
-                            <th>Damage Per Minute</th>
-                            <th>Damage Percent</th>
-                            <th>Kills & Assits Per Minute</th>
-                            <th>Solo Kills</th>
-                            <th>Pentakills</th>
-                            <th>Vision Score Per Minute</th>
-                            <th>Wards Per Minute</th>
-                            <th>Vision Wards Per Minute</th>
-                            <th>Wards Cleared Per Minute</th>
-                            <th>CS Difference at 15 min</th>
-                            <th>Gold Difference at 15 min</th>
-                            <th>XP Difference at 15 min</th>
-                            <th>First Blood Participation</th>
-                            <th>First Blood Victim</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {players.map(player =>
-                            <tr key={player.nickName}>
-                                <td>{player.nickname}</td>
-                                <td>{player.wins}</td>
-                                <td>{player.losses}</td>
-                                <td>{player.kda}</td>
-                                <td>{player.csPerMinute}</td>
-                                <td>{player.goldPerMinute}</td>
-                                <td>{player.goldPercent}%</td>
-                                <td>{player.killParticipation}%</td>
-                                <td>{player.damagePerMinute}</td>
-                                <td>{player.damagePercent}%</td>
-                                <td>{player.killsAndAssistsPerMinute}</td>
-                                <td>{player.soloKills}</td>
-                                <td>{player.pentakills}</td>
-                                <td>{player.visionScorePerMinute}</td>
-                                <td>{player.wardPerMinute}</td>
-                                <td>{player.visionWardsPerMinute}</td>
-                                <td>{player.wardsClearedPerMinute}</td>
-                                <td>{player.csDifferenceAt15}</td>
-                                <td>{player.goldDifferenceAt15}</td>
-                                <td>{player.xpDifferenceAt15}</td>
-                                <td>{player.firstBloodParticipationPercent}%</td>
-                                <td>{player.firstBloodVictimPercent}%</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-
-
-                <h2 style={{ textAlign: 'center' }}> Team Stats </h2>
-                <Table striped bordered hover variant="dark" className='table'>
-                    <thead>
-                        <tr>
-                            <th>Winrate</th>
-                            <th>Blue Side Wins</th>
-                            <th>Blue Side Losses</th>
-                            <th>Red Side Wins</th>
-                            <th>Red Side Losses</th>
-                            <th>Average Game Time</th>
-                            <th>Gold Per Minute</th>
-                            <th>Gold Difference Per Minute</th>
-                            <th>Gold Difference At 15 Mins</th>
-                            <th>CS Per Minute</th>
-                            <th>CS Difference At 15 Mins</th>
-                            <th>Tower Difference At 15 Mins</th>
-                            <th>First Tower Taken</th>
-                            <th>Dragons Per Game</th>
-                            <th>Dragons At 15 Mins</th>
-                            <th>Heralds Per Game</th>
-                            <th>Barons Per Game</th>
-                            <th>Damage Per Minute</th>
-                            <th>First Blood</th>
-                            <th>Kills Per Game</th>
-                            <th>Deaths Per Game</th>
-                            <th>KD Ratio</th>
-                            <th>Wards Per Minute</th>
-                            <th>Wards Cleared Per Minute</th>
-                            <th>Wards Cleared</th>
-                            <th>Cloud Drakes Killed</th>
-                            <th>Cloud Drakes Lost</th>
-                            <th>Ocean Drakes Killed</th>
-                            <th>Ocean Drakes Lost</th>
-                            <th>Infernal Drakes Killed</th>
-                            <th>Infernal Drakes Lost</th>
-                            <th>Mountain Drakes Killed</th>
-                            <th>Mountain Drakes Lost</th>
-                            <th>Elder Drakes Killed</th>
-                            <th>Elder Drakes Lost</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr key={team.winrate}>
-                            <td>{team.winrate}%</td>
-                                <td>{team.blueSideWins}</td>
-                                <td>{team.blueSideLosses}</td>
-                                <td>{team.redSideWins}</td>
-                                <td>{team.redSideLosses}</td>
-                                <td>{team.averageGameTime}</td>
-                                <td>{team.goldPerMinute}</td>
-                                <td>{team.goldDifferencePerMinute}</td>
-                                <td>{team.goldDifferenceAt15}</td>
-                                <td>{team.csPerMinute}</td>
-                                <td>{team.csDifferenceAt15}</td>
-                                <td>{team.towerDifferenceAt15}</td>
-                                <td>{team.firstTowerPercent}%</td>
-                                <td>{team.dragonsPerGame}</td>
-                                <td>{team.dragonsAt15}</td>
-                                <td>{team.heraldPerGame}</td>
-                                <td>{team.nashorsPerGame}</td>
-                                <td>{team.damagePerMinute}</td>
-                                <td>{team.firstBloodPercent}%</td>
-                                <td>{team.killsPerGame}</td>
-                                <td>{team.deathsPerGame}</td>
-                                <td>{team.kdRatio}</td>
-                                <td>{team.wardsPerMinute}</td>
-                                <td>{team.wardsClearedPerMinute}</td>
-                                <td>{team.wardsClearedPercent}%</td>
-                                <td>{team.cloudDrakesKilled}</td>
-                                <td>{team.cloudDrakesLost}</td>
-                                <td>{team.oceanDrakesKilled}</td>
-                                <td>{team.oceanDrakesLost}</td>
-                                <td>{team.infernalDrakesKilled}</td>
-                                <td>{team.infernalDrakesLost}</td>
-                                <td>{team.mountainDrakesKilled}</td>
-                                <td>{team.mountainDrakesLost}</td>
-                                <td>{team.elderDrakesKilled}</td>
-                                <td>{team.elderDrakesLost}</td>
-                            </tr>
-                    </tbody>
-                </Table>
-
-                {this.state.specificStats ?
-                    <div>                       
-                        {this.state.specificStats.map(stats =>
-                            
-                            <div>
-                            <h2 style={{ textAlign: 'center' }}> {stats[0].player.nickname} Champion Stats </h2>
-                                <Table striped bordered hover variant="dark" className='table'>
-                                    <thead>
-                                        <tr key={stats[0].player.nickname}>
-                                            <th onClick={() => this.sortStatsBy('championName', this.state.specificStats,stats[0].player.nickname)}>Champion Name</th>
-                                            <th onClick={() => this.sortStatsBy('gamesPlayed', this.state.specificStats, stats[0].player.nickname)}>Games Played</th>
-                                            <th onClick={() => this.sortStatsBy('winratePercent', this.state.specificStats, stats[0].player.nickname)}>Winrate</th>
-                                            <th onClick={() => this.sortStatsBy('kda', this.state.specificStats, stats[0].player.nickname)}>KDA</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {stats.map(stat =>
-                                            <tr key={stat.championName + stat.playerId}>
-                                                <td>{stat.championName}</td>
-                                                <td>{stat.gamesPlayed}</td>
-                                                <td>{stat.winratePercent}%</td>
-                                                <td>{stat.kda}</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </Table>                                
-                                </div>
-                            )}
-                        </div>
-                     : <h2>No Champion Stats Recorded</h2>}
-
-                
-
-            </div>
-            );
-    }
-    
-    renderPlayers() {
-        if (this.state.playersInLeague.length === 0) {
-            let players = this.state.players;
-            let playersInLeague = [];            
-            this.state.teams[this.state.specificleague].forEach(function (team) {
-
-                players.forEach(function (player) {
-
-                    if (team.id === player.teamId) {
-                        playersInLeague.push(player);
-                    }
-                });
-            });
-            this.setState({ playersInLeague: playersInLeague })
-        }       
-
-        return (
-            <div>
-                <h2 style={{ textAlign: 'center' }}> Players In {this.state.specificleague} </h2>
-                {this.renderMenuTabs()}
-
-                <Table striped bordered hover variant='dark' className='table'>
-                    <thead>
-                        <tr>
-                            <th onClick={() => this.sortBy('nickname', this.state.playersInLeague)}>Nickname</th>
-                            <th onClick={() => this.sortBy('wins', this.state.playersInLeague)}>Wins</th>
-                            <th onClick={() => this.sortBy('losses', this.state.playersInLeague)}>Losses</th>
-                            <th onClick={() => this.sortBy('kda', this.state.playersInLeague)}>KDA</th>
-                            <th onClick={() => this.sortBy('csPerMinute', this.state.playersInLeague)}>CS Per Minute</th>
-                            <th onClick={() => this.sortBy('goldPerMinute', this.state.playersInLeague)}>Gold Per Minute</th>
-                            <th onClick={() => this.sortBy('goldPercent', this.state.playersInLeague)}>Gold Percentage In Team</th>
-                            <th onClick={() => this.sortBy('killParticipation', this.state.playersInLeague)}>Kill Participation</th>
-                            <th onClick={() => this.sortBy('damagePerMinute', this.state.playersInLeague)}>Damage Per Minute</th>
-                            <th onClick={() => this.sortBy('damagePercent', this.state.playersInLeague)}>Damage Percent</th>
-                            <th onClick={() => this.sortBy('killsAndAssistsPerMinute', this.state.playersInLeague)}>Kills & Assits Per Minute</th>
-                            <th onClick={() => this.sortBy('soloKills', this.state.playersInLeague)}>Solo Kills</th>
-                            <th onClick={() => this.sortBy('pentakills', this.state.playersInLeague)}>Pentakills</th>
-                            <th onClick={() => this.sortBy('visionScorePerMinute', this.state.playersInLeague)}>Vision Score Per Minute</th>
-                            <th onClick={() => this.sortBy('wardPerMinute', this.state.playersInLeague)}>Wards Per Minute</th>
-                            <th onClick={() => this.sortBy('visionWardsPerMinute', this.state.playersInLeague)}>Vision Wards Per Minute</th>
-                            <th onClick={() => this.sortBy('wardsClearedPerMinute', this.state.playersInLeague)}>Wards Cleared Per Minute</th>
-                            <th onClick={() => this.sortBy('csDifferenceAt15', this.state.playersInLeague)}>CS Difference at 15 min</th>
-                            <th onClick={() => this.sortBy('goldDifferenceAt15', this.state.playersInLeague)}>Gold Difference at 15 min</th>
-                            <th onClick={() => this.sortBy('xpDifferenceAt15', this.state.playersInLeague)}>XP Difference at 15 min</th>
-                            <th onClick={() => this.sortBy('firstBloodParticipationPercent', this.state.playersInLeague)}>First Blood Participation</th>
-                            <th onClick={() => this.sortBy('firstBloodVictimPercent', this.state.playersInLeague)}>First Blood Victim</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {this.state.playersInLeague.map(player =>
-                            <tr key={player.nickname}>
-                                <td>{player.nickname}</td>
-                                <td>{player.wins}</td>
-                                <td>{player.losses}</td>
-                                <td>{player.kda}</td>
-                                <td>{player.csPerMinute}</td>
-                                <td>{player.goldPerMinute}</td>
-                                <td>{player.goldPercent}%</td>
-                                <td>{player.killParticipation}%</td>
-                                <td>{player.damagePerMinute}</td>
-                                <td>{player.damagePercent}%</td>
-                                <td>{player.killsAndAssistsPerMinute}</td>
-                                <td>{player.soloKills}</td>
-                                <td>{player.pentakills}</td>
-                                <td>{player.visionScorePerMinute}</td>
-                                <td>{player.wardPerMinute}</td>
-                                <td>{player.visionWardsPerMinute}</td>
-                                <td>{player.wardsClearedPerMinute}</td>
-                                <td>{player.csDifferenceAt15}</td>
-                                <td>{player.goldDifferenceAt15}</td>
-                                <td>{player.xpDifferenceAt15}</td>
-                                <td>{player.firstBloodParticipationPercent}%</td>
-                                <td>{player.firstBloodVictimPercent}%</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </Table>
-            </div>
-        );
-    }
+    }            
 
     compareBy(key) {
         if (this.state.ascending) {
@@ -854,7 +292,6 @@ export class LeagueOfLegendsData extends Component {
                 playersInLeague: [],
                 haveSortedTeamsInLeague: false,
                 loadedspecificLeague: true,
-                specificStats: [],
             })}><img alt=''                  
                     src={this.state.Utilities.getImageString(this.state.images, suggestion.name)} alt='teamImage'></img>
                 {suggestion.name}
@@ -865,10 +302,22 @@ export class LeagueOfLegendsData extends Component {
         this.setState({
             value: newValue
         });
-    };       
+    };      
+
+    clickedOnTeam = (team) => {
+        this.setState({
+            shouldLoadResults: false,
+            shouldLoadPrelive: false,
+            shouldLoadTeams: false,
+            shouldLoadSpecificTeam: true,
+            specificTeam: team,
+            haveSortedTeamsInLeague: false,
+        });
+    }
 
 render() {
     let contents;
+    let menuTabs;
     const { value } = this.state;
     const inputProps = {
         placeholder: "Find Team",
@@ -876,7 +325,17 @@ render() {
         onChange: this.onChange,
     };
     if (this.state.shouldLoadSpecificTeam) {
-        contents = this.renderSpecificTeam();
+        menuTabs = this.renderMenuTabs();
+        contents = (
+            <SpecificTeam
+                specificTeam={this.state.specificTeam}
+                images={this.state.images}
+                specificleague={this.state.specificleague}
+                players={this.state.players}
+                sortStatsBy={this.sortStatsBy}
+                playerStats={this.state.playerStats}
+            />
+        );
     }
     else if (this.state.shouldLoadResults && this.state.specificleague === '') {
         this.setState({
@@ -884,18 +343,74 @@ render() {
             loadedspecificLeague: false,
         })
     }
-    else if (this.state.loadedspecificLeague) {        
+    else if (this.state.loadedspecificLeague) {
+        menuTabs = this.renderMenuTabs();
         if (this.state.shouldLoadResults) {
-            contents = this.renderResults(this.state.results[this.state.specificleague], this.state.teams);
+            if (!this.state.results[this.state.specificleague]) {
+                this.setState({
+                    shouldLoadResults: false,
+                    shouldLoadPrelive: true,
+                });
+            } else {
+                contents = (
+                    <Results
+                        results={this.state.results[this.state.specificleague]}
+                        images={this.state.images}
+                        specificleague={this.state.specificleague}
+                    />
+                );
+            }
         } else if (this.state.shouldLoadPrelive) {
-            contents = this.renderPrelive(this.state.prelive[this.state.specificleague]);
+            if (!this.state.prelive[this.state.specificleague]) {
+                this.setState({
+                    shouldLoadTeams: true,
+                    shouldLoadPrelive: false,
+                    specificTeams: this.state.teams[this.state.specificleague],
+                    playersInLeague: [],
+                });
+            } else {
+                contents = (
+                    <Prelive
+                        prelive={this.state.prelive[this.state.specificleague]}
+                        images={this.state.images}
+                        specificleague={this.state.specificleague}
+                    />
+                );
+            }
         } else if (this.state.shouldLoadTeams) {
-            contents = this.renderTeams();        
+            if (!this.state.specificTeams) {
+                this.setState({
+                    loadedspecificLeague: false,
+                    specificleague: '',
+                    playersInLeague: [],
+                    shouldLoadPrelive: false,
+                    shouldLoadTeams: false,
+                    shouldLoadSpecificTeam: false,
+                    shouldloadPlayers: false,
+                })
+            } else {
+                contents = (
+                    <Teams
+                        teams={this.state.specificTeams}
+                        images={this.state.images}
+                        specificleague={this.state.specificleague}
+                        sortBy={this.sortBy}
+                        clickedOnTeam={this.clickedOnTeam}
+                    />
+                );
+            }
         } else if (this.state.shouldloadPlayers) {
-            contents = this.renderPlayers();
+            contents = (
+                <Players
+                    players={this.state.players}
+                    teamsInLeague={this.state.teams[this.state.specificleague]}
+                    specificleague={this.state.specificleague}
+                    sortBy={this.sortBy}
+                />
+            );
         }
-        
-    } else {
+
+    } else {       
         contents = this.state.loading
             ? <p><em>Loading...</em></p>
             : this.determineLeaguesToAdd(this.state.results);
@@ -910,6 +425,7 @@ render() {
                 getSuggestionValue={this.getSuggestionValue}
                 renderSuggestion={this.renderSuggestion}
                 inputProps={inputProps} />
+            {menuTabs}
             {contents}
       </div>
     );
