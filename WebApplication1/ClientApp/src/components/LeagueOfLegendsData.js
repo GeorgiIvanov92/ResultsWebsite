@@ -10,6 +10,7 @@ import { Prelive } from './RenderTabs/Prelive';
 import { Teams } from './RenderTabs/Teams';
 import { SpecificTeam } from './RenderTabs/SpecificTeam';
 import { Players } from './RenderTabs/Players';
+import { Leagues } from './RenderTabs/Leagues';
 export class LeagueOfLegendsData extends Component {
    
 
@@ -43,8 +44,6 @@ export class LeagueOfLegendsData extends Component {
           searchTeamResults: [],
       };     
       
-      this.determineLeaguesToAdd = this.determineLeaguesToAdd.bind(this);
-      this.renderLeagueTable = this.renderLeagueTable.bind(this);
       this.sortBy = this.sortBy.bind(this);
       this.sortStatsBy = this.sortStatsBy.bind(this);
 
@@ -96,50 +95,7 @@ export class LeagueOfLegendsData extends Component {
                 });
         }
     }
-    renderLeagueTable(arr) {
-        let prelive = this.state.prelive;
-        for (let key in prelive) {
-            if (!arr.includes(key)) {
-                arr.push(key);
-            }
-        }
-        let teams = this.state.teams;
-        for (let key in teams) {
-            if (!arr.includes(key)) {
-                arr.push(key);
-            }
-        }
     
-        return (
-            <div>
-                <h1>League of Legends</h1> 
-                {arr.map(league =>
-
-                    <Navbar key={league} inverse style={{ width: '50%' }} onClick={() => this.setState({
-                        loadedspecificLeague: true,
-                        shouldLoadResults: true,
-                        specificleague: league
-                    })}>
-                        <Navbar.Header>
-                            <Navbar.Brand>
-                                <a>{league}</a>
-                            </Navbar.Brand>
-                        </Navbar.Header>
-                    </Navbar>
-                )}              
-            </div>
-        );
-        }
-    determineLeaguesToAdd(results) {
-        let arr = [];
-        Object.keys(results).forEach(function (key) {
-            arr.push(key);
-        });
-        
-        return (
-            this.renderLeagueTable(arr)
-        );
-    }      
     renderMenuTabs() {
         let specificTeams = this.state.teams[this.state.specificleague];
         let disablePrelive = true;
@@ -314,6 +270,13 @@ export class LeagueOfLegendsData extends Component {
             haveSortedTeamsInLeague: false,
         });
     }
+    clickedOnLeague = (league) => {
+        this.setState({
+            loadedspecificLeague: true,
+            shouldLoadResults: true,
+            specificleague: league
+        });
+    }
 
 render() {
     let contents;
@@ -413,7 +376,11 @@ render() {
     } else {       
         contents = this.state.loading
             ? <p><em>Loading...</em></p>
-            : this.determineLeaguesToAdd(this.state.results);
+            : <Leagues
+                data={this.state.sport}
+                gameName="League of Legends"
+                clickedOnLeague={this.clickedOnLeague}
+            />
     }
 
     return (
