@@ -115,7 +115,7 @@ export class Teams extends React.Component {
                                 <td>{team.elderDrakesKilled}</td>
                                 <td>{team.elderDrakesLost}</td>
                             </tr>
-                        )};
+                        )}
                     </tbody>
                 </Table>
             </div >

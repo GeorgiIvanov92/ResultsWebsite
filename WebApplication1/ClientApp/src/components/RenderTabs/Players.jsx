@@ -25,7 +25,9 @@ export class Players extends React.Component {
                     }
                 });
             });
-            this.setState({ playersInLeague: playersInLeague });
+            if (playersInLeague.length > 0) {
+                this.setState({ playersInLeague: playersInLeague });
+            }
         }
 
         return (

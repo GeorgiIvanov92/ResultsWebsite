@@ -40,7 +40,6 @@ namespace Tracker.Workers
                 {                   
                     dbContext.Team.RemoveRange(teamsFromDb);
                     dbContext.Team.AddRange(teams);
-                    dbContext.SaveChanges();
                     Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
                    $" {teams.Count} teams added to Db.");
                   

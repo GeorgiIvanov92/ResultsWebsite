@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
+using Tracker.RabbitMQ;
 using WebApi.Cache;
 using WebApplication1.Models;
 
@@ -72,10 +73,13 @@ namespace WebApplication1
                 {
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
-            });            
+            });         
+            
             cache.Set("LeagueOfLegends", CacheCreator.CreateSportCacheById(1,db,Configuration));
             cache.Set("CSGO", CacheCreator.CreateSportCacheById(2, db, Configuration));
             cache.Set("Dota2", CacheCreator.CreateSportCacheById(3, db, Configuration));
+
+            RabbitMQMessageReceiver r = new RabbitMQMessageReceiver();
         }
     }
 }
