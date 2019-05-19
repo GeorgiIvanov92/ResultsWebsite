@@ -6,6 +6,7 @@ using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Tracker.Models;
+using Tracker.TransportObject;
 
 namespace Tracker.RabbitMQ
 {
@@ -36,11 +37,9 @@ namespace Tracker.RabbitMQ
                                  autoAck: true,
                                  consumer: consumer);
         }
-        public static void Send(string messageBody)
-        {
-            var message = messageBody;
-            var body = Encoding.UTF8.GetBytes(message);            
-            body = ObjectToByteArray(new Prelive() { HomeTeam="SKT"});
+        public static void Send(LiveEvent liveEvent)
+        {         
+            var body = ObjectToByteArray(liveEvent);
             var properties = Channel.CreateBasicProperties();
             properties.Persistent = true;
 

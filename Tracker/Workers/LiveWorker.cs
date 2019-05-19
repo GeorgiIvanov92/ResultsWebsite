@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Tracker.RabbitMQ;
+using Tracker.TransportObject;
 
 namespace Tracker.Workers
 {
@@ -9,7 +10,12 @@ namespace Tracker.Workers
     {
         public static void LiveWorkerInit()
         {
-            RabbitMQMessageSender.Send("zdr");
+            LiveEvent live = new LiveEvent();
+            live.HomeTeam = new LiveTeam();
+            live.HomeTeam.TeamName = "SKT";
+            live.MapNumber = 1;
+            live.Sport = TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends;
+            RabbitMQMessageSender.Send(live);
             while (true)
             {
                                

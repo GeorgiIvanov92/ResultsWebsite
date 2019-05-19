@@ -37,7 +37,7 @@ namespace Tracker.RabbitMQ
             BinaryFormatter formatter = new BinaryFormatter();
             formatter.Binder = new CustomizedBinder();
             MemoryStream ms = new MemoryStream(e.Body);
-            object asd = formatter.Deserialize(ms);
+            var LiveEvent = formatter.Deserialize(ms);
         }
     }
 }
