@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Tracker.Models
 {
+    [System.Serializable]
     public class Prelive
     {
         [Key]

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -24,7 +26,7 @@ namespace Tracker.RabbitMQ
                                  autoDelete: false,
                                  arguments: null);
 
-            Consumer = new EventingBasicConsumer(Channel);
+            Consumer = new EventingBasicConsumer(Channel); 
             Consumer.Received += MessageReceived;
             Channel.BasicConsume(queue: "task_queue",
                                  autoAck: true,
@@ -32,7 +34,10 @@ namespace Tracker.RabbitMQ
         }       
         public void MessageReceived(object sender, BasicDeliverEventArgs e)
         {
-            var asd = Encoding.UTF8.GetString(e.Body);
+            BinaryFormatter formatter = new BinaryFormatter();
+            formatter.Binder = new CustomizedBinder();
+            MemoryStream ms = new MemoryStream(e.Body);
+            object asd = formatter.Deserialize(ms);
         }
     }
 }

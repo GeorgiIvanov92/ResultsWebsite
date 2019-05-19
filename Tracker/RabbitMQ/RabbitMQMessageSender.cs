@@ -40,7 +40,7 @@ namespace Tracker.RabbitMQ
         {
             var message = messageBody;
             var body = Encoding.UTF8.GetBytes(message);            
-            body = ObjectToByteArray(new Aki());
+            body = ObjectToByteArray(new Prelive() { HomeTeam="SKT"});
             var properties = Channel.CreateBasicProperties();
             properties.Persistent = true;
 
@@ -61,14 +61,5 @@ namespace Tracker.RabbitMQ
             }
         }
         
-    }
-    [Serializable]
-    public class Aki
-    {
-        public string ak1 { get; set; }
-        public Aki()
-        {
-            ak1 = "Aki1";
-        }
-    }
+    }   
 }

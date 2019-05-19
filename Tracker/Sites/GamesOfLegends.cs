@@ -356,7 +356,7 @@ namespace Tracker.Sites
                                 {
                                     for (int i = 0; i < columns.Count - 1; i += 2)
                                     {
-                                        if (columns[i].InnerText.Contains("Record"))
+                                        if (columns[i].InnerText.Contains("Record") && columns[i + 1].InnerText != "-")
                                         {
                                             var winrateArr = columns[i + 1].InnerText.Replace("W", "").Replace("L", "").Split(" - ");
                                             var wins = int.Parse(winrateArr[0].Trim());
@@ -378,22 +378,22 @@ namespace Tracker.Sites
                                             }
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("CS per Minute"))
+                                        if (columns[i].InnerText.Contains("CS per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.CSPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Gold Per Minute"))
+                                        if (columns[i].InnerText.Contains("Gold Per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.GoldPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Gold%"))
+                                        if (columns[i].InnerText.Contains("Gold%") && columns[i + 1].InnerText != "-")
                                         {
                                             player.GoldPercent = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Replace("%", "").Trim());
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Kill Participation"))
+                                        if (columns[i].InnerText.Contains("Kill Participation") && columns[i + 1].InnerText != "-")
                                         {
                                             player.KillParticipation = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Replace("%", "").Trim());
                                             continue;
@@ -408,33 +408,33 @@ namespace Tracker.Sites
                                 {
                                     for (int i = 0; i < columns.Count - 1; i += 2)
                                     {
-                                        if (columns[i].InnerText.Contains("Ahead in CS at 15 min"))
+                                        if (columns[i].InnerText.Contains("Ahead in CS at 15 min") && columns[i+1].InnerText != "-")
                                         {
                                             var percentString = columns[i + 1].InnerText.Replace("%", "").Replace(".", ",").Trim().Replace("&nbsp;\n", "").Trim();
                                             player.AheadInCSAt15Percent = float.Parse(percentString);
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("CS Differential at 15 min"))
+                                        if (columns[i].InnerText.Contains("CS Differential at 15 min") && columns[i + 1].InnerText != "-")
                                         {
                                             player.CSDifferenceAt15 = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Gold Differential at 15 min"))
+                                        if (columns[i].InnerText.Contains("Gold Differential at 15 min") && columns[i + 1].InnerText != "-")
                                         {
                                             player.GoldDifferenceAt15 = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("XP Differential at 15 min"))
+                                        if (columns[i].InnerText.Contains("XP Differential at 15 min") && columns[i + 1].InnerText != "-")
                                         {
                                             player.XPDifferenceAt15 = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("First Blood Participation"))
+                                        if (columns[i].InnerText.Contains("First Blood Participation") && columns[i + 1].InnerText != "-")
                                         {
                                             player.FirstBloodParticipationPercent = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Replace("%", "").Trim());
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("First Blood Victim"))
+                                        if (columns[i].InnerText.Contains("First Blood Victim") && columns[i + 1].InnerText != "-")
                                         {
                                             player.FirstBloodVictimPercent = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Replace("%", "").Trim());
                                             continue;
@@ -450,17 +450,17 @@ namespace Tracker.Sites
                                 {
                                     for (int i = 0; i < columns.Count - 1; i += 2)
                                     {
-                                        if (columns[i].InnerText.Contains("Damage Per Minute"))
+                                        if (columns[i].InnerText.Contains("Damage Per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.DamagePerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Damage%"))
+                                        if (columns[i].InnerText.Contains("Damage%") && columns[i + 1].InnerText != "-")
                                         {
                                             player.DamagePercent = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Replace("%", "").Trim());
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("K+A Per Minute"))
+                                        if (columns[i].InnerText.Contains("K+A Per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.KillsAndAssistsPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
@@ -477,7 +477,7 @@ namespace Tracker.Sites
                                             }
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Pentakills"))
+                                        if (columns[i].InnerText.Contains("Pentakills") && columns[i + 1].InnerText != "-")
                                         {
                                             player.Pentakills = int.Parse(columns[i + 1].InnerText);
                                             continue;
@@ -492,22 +492,22 @@ namespace Tracker.Sites
                                 {
                                     for (int i = 0; i < columns.Count - 1; i += 2)
                                     {
-                                        if (columns[i].InnerText.Contains("Vision score Per Minute"))
+                                        if (columns[i].InnerText.Contains("Vision score Per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.VisionScorePerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Equals("Ward Per Minute: "))
+                                        if (columns[i].InnerText.Equals("Ward Per Minute: ") && columns[i + 1].InnerText != "-")
                                         {
                                             player.WardPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Vision Ward Per Minute"))
+                                        if (columns[i].InnerText.Contains("Vision Ward Per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.VisionWardsPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
                                         }
-                                        if (columns[i].InnerText.Contains("Ward Cleared Per Minute"))
+                                        if (columns[i].InnerText.Contains("Ward Cleared Per Minute") && columns[i + 1].InnerText != "-")
                                         {
                                             player.WardsClearedPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                             continue;
