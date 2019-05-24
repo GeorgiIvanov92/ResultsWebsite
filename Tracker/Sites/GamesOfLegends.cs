@@ -151,28 +151,28 @@ namespace Tracker.Sites
                             var columns = table.SelectNodes(".//td");
                             for (int i = 0; i < columns.Count - 1; i += 2)
                             {
-                                if (columns[i].InnerText.Contains("Damage Per Minute"))
+                                if (columns[i].InnerText.Contains("Damage Per Minute") && columns[i + 1].InnerText != "-")
                                 {
                                     team.DamagePerMinute = int.Parse(columns[i + 1].InnerText);
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("First Blood"))
+                                if (columns[i].InnerText.Contains("First Blood") && columns[i + 1].InnerText != "-")
                                 {
                                     var percentString = columns[i + 1].InnerText.Replace("%", "").Replace(".", ",").Trim().Replace("&nbsp;\n", "").Trim();
                                     team.FirstBloodPercent = (int)(float.Parse(percentString));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Kills Per Game"))
+                                if (columns[i].InnerText.Contains("Kills Per Game") && columns[i + 1].InnerText != "-")
                                 {
                                     team.KillsPerGame = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Deaths Per Game"))
+                                if (columns[i].InnerText.Contains("Deaths Per Game") && columns[i + 1].InnerText != "-")
                                 {
                                     team.DeathsPerGame = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Kill / Death Ratio"))
+                                if (columns[i].InnerText.Contains("Kill / Death Ratio") && columns[i + 1].InnerText != "-")
                                 {
                                     team.KDRatio = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
@@ -185,22 +185,22 @@ namespace Tracker.Sites
                             var columns = table.SelectNodes(".//td");
                             for (int i = 0; i < columns.Count - 1; i += 2)
                             {
-                                if (columns[i].InnerText.Contains("Wards Per Minute"))
+                                if (columns[i].InnerText.Contains("Wards Per Minute") && columns[i + 1].InnerText != "-")
                                 {
                                     team.WardsPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Vision Wards Per Minute"))
+                                if (columns[i].InnerText.Contains("Vision Wards Per Minute") && columns[i + 1].InnerText != "-")
                                 {
                                     team.VisionWardsPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Wards Cleared Per Minute"))
+                                if (columns[i].InnerText.Contains("Wards Cleared Per Minute") && columns[i + 1].InnerText != "-")
                                 {
                                     team.WardsClearedPerMinute = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("% Wards Cleared"))
+                                if (columns[i].InnerText.Contains("% Wards Cleared") && columns[i + 1].InnerText != "-")
                                 {
                                     var percentString = columns[i + 1].InnerText.Replace("%", "").Replace(".", ",").Trim().Replace("&nbsp;\n", "").Trim();
                                     team.WardsClearedPercent = (int)(float.Parse(percentString));
@@ -213,22 +213,22 @@ namespace Tracker.Sites
                             var columns = table.SelectNodes(".//td");
                             for (int i = 0; i < columns.Count - 1; i += 2)
                             {
-                                if (columns[i].InnerText.Contains("Dragons / game"))
+                                if (columns[i].InnerText.Contains("Dragons / game") && columns[i + 1].InnerText != "-")
                                 {
                                     team.DragonsPerGame = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Split('(')[0]);
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Dragons at 15 min"))
+                                if (columns[i].InnerText.Contains("Dragons at 15 min") && columns[i + 1].InnerText != "-")
                                 {
                                     team.DragonsAt15 = float.Parse(columns[i + 1].InnerText.Replace(".", ","));
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Herald / game"))
+                                if (columns[i].InnerText.Contains("Herald / game") && columns[i + 1].InnerText != "-")
                                 {
                                     team.HeraldPerGame = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Split('(')[0]);
                                     continue;
                                 }
-                                if (columns[i].InnerText.Contains("Nashors / game"))
+                                if (columns[i].InnerText.Contains("Nashors / game") && columns[i + 1].InnerText != "-")
                                 {
                                     team.NashorsPerGame = float.Parse(columns[i + 1].InnerText.Replace(".", ",").Split('(')[0]);
                                     continue;
@@ -254,6 +254,11 @@ namespace Tracker.Sites
                             if (scriptResultsRegex.Matches(script).Count == 2)
                             {
                                 var killedDragons = scriptResultsRegex.Matches(script)[0]?.Groups[1].Value.Split(',');
+                                var emptyString = killedDragons.FirstOrDefault(dr => string.IsNullOrEmpty(dr));
+                                if(emptyString != null)
+                                {
+                                    continue;
+                                }
                                 var lostDragons = scriptResultsRegex.Matches(script)[1]?.Groups[1].Value.Split(',');
                                 team.CloudDrakesKilled = int.Parse(killedDragons[0]);
                                 team.OceanDrakesKilled = int.Parse(killedDragons[1]);

@@ -9,6 +9,7 @@ namespace Tracker.TrackerEssentials.Communication
     {
         public enum SportEnum
         {
+            Undefined = 0,
             LeagueOfLegends = 1,
             CounterStrike = 2,
             Dota2 = 3,
