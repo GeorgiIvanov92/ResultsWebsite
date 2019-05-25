@@ -8,6 +8,7 @@ namespace Tracker.TransportObject
     public class LiveEvent
     {
         public TrackerEssentials.Communication.Sports.SportEnum Sport { get; set; }
+        public string LeagueName { get; set; }
         public LiveTeam HomeTeam { get; set; }
         public LiveTeam AwayTeam { get; set; }
         public int GameTime { get; set; }

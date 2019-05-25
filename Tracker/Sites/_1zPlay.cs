@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using Tracker.TrackerEssentials;
+using Tracker.TransportObject;
 
 namespace Tracker.Sites
 {
@@ -46,26 +47,58 @@ namespace Tracker.Sites
                         case "lol":
                             var id = game["live_match"]["id"].ToString();
                             sport = TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends;
-                            uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));                            
-                            break;
+                            uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
+                            _links.Add(new Link(sport, uri));
+                            continue;
                         case "dota2":
                             var dotaIds = game["dota2_matches"].ToString().Replace("[", "").Replace("]", "").Trim().Split(",");
+                            int mapNumber = dotaIds.Length;
+                            int bestOf = int.Parse(game["round"].ToString());
+                            var league = game["league"]["name"].ToString();
                             sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
-                            if (dotaIds.Length == 2)
-                            {
-                                uri = new Uri(string.Format(_specificDota2Url, dotaIds[0].Trim()));
-                                _links.Add(new Link(sport, uri));
-                                uri = new Uri(string.Format(_specificDota2Url, dotaIds[1].Trim()));
-                            }else if(dotaIds.Length == 1)
-                            {
-                                uri = new Uri(string.Format(_specificDota2Url, dotaIds[0].Trim()));
-                            }
-                            break;
+                            uri = new Uri(string.Format(_specificDota2Url, dotaIds[mapNumber-1].Trim()));
+                            _links.Add(new Link(sport, uri,league,mapNumber,bestOf));
+                            continue;
                     }
-                    var response2 = _client.GetStringAsync(uri).Result;
-                    _links.Add(new Link(sport,uri));
                 }
             }
+        }
+        public static void SendActiveGames()
+        {
+            foreach(var link in _links)
+            {
+                try
+                {
+                    switch (link.Sport)
+                    {
+                        case TrackerEssentials.Communication.Sports.SportEnum.Dota2:
+                            var liveEvent = ParseDota2(link);
+                            break;
+
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+            }
+        }
+        private static LiveEvent ParseDota2(Link link)
+        {
+            var json = JObject.Parse(_client.GetStringAsync(link.Uri).Result);
+            LiveEvent ev = new LiveEvent();
+            ev.Sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
+            ev.GameTime = int.Parse(json["game_time"].ToString());
+            ev.MapNumber = link.MapNumber;
+            ev.LeagueName = link.LeagueName;
+            ev.BestOf = link.BestOf;
+            LiveTeam homeTeam = new LiveTeam();
+            homeTeam.TeamName = json["radiant_team"]["name"].ToString();
+            homeTeam.Gold = int.Parse(json["radiant"]["gold"].ToString());
+            homeTeam.Kills = int.Parse(json["radiant"]["score"].ToString());
+            ev.HomeTeam = homeTeam;
+            return ev;
         }
     }
 }
