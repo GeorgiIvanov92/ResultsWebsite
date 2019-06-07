@@ -14,6 +14,10 @@ namespace Tracker.TransportObject
         public int GameTime { get; set; }
         public int BestOf { get; set; }
         public int MapNumber { get; set; }
+
+        // 0 none / 1 home / 2 away
+        public int FirstBlood { get; set; }
+        public int FirstTower { get; set; }
         
     }
 }

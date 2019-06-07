@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using Tracker.RabbitMQ;
 using Tracker.TrackerEssentials;
 using Tracker.TransportObject;
 
@@ -73,6 +74,10 @@ namespace Tracker.Sites
                     {
                         case TrackerEssentials.Communication.Sports.SportEnum.Dota2:
                             var liveEvent = ParseDota2(link);
+                            if(liveEvent != null)
+                            {
+                                RabbitMQMessageSender.Send(liveEvent);
+                            }
                             break;
 
                     }
@@ -93,11 +98,51 @@ namespace Tracker.Sites
             ev.MapNumber = link.MapNumber;
             ev.LeagueName = link.LeagueName;
             ev.BestOf = link.BestOf;
+            switch (json["first_tower"].ToString())
+            {
+                case "radiant":
+                    ev.FirstTower = 2;
+                    break;
+                case "dire":
+                    ev.FirstTower = 1;
+                    break;
+            }
+            switch (json["first_blood"].ToString())
+            {
+                case "radiant":
+                    ev.FirstBlood = 2;
+                    break;
+                case "dire":
+                    ev.FirstBlood = 1;
+                    break;
+            }
             LiveTeam homeTeam = new LiveTeam();
+            homeTeam.Players = new List<LivePlayer>();
             homeTeam.TeamName = json["radiant_team"]["name"].ToString();
             homeTeam.Gold = int.Parse(json["radiant"]["gold"].ToString());
             homeTeam.Kills = int.Parse(json["radiant"]["score"].ToString());
             ev.HomeTeam = homeTeam;
+            LiveTeam awayTeam = new LiveTeam();
+            awayTeam.Players = new List<LivePlayer>();
+            awayTeam.TeamName = json["dire_team"]["name"].ToString();
+            awayTeam.Gold = int.Parse(json["dire"]["gold"].ToString());
+            awayTeam.Kills = int.Parse(json["dire"]["score"].ToString());
+            ev.AwayTeam = awayTeam;
+            foreach (var player in json["players"])
+            {
+                LivePlayer pl = new LivePlayer();
+                pl.Nickname = player["account"]["name"].ToString();
+                pl.ChampionName = player["hero"]["name_en"].ToString();
+                pl.ChampionImageUrl = player["hero"]["image"].ToString();
+                if (player["team"].ToString() == "radiant")
+                {
+                    ev.HomeTeam.Players.Add(pl);
+                }
+                else
+                {
+                    ev.AwayTeam.Players.Add(pl);
+                }
+            }
             return ev;
         }
     }

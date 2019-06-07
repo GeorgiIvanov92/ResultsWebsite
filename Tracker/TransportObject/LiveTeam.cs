@@ -12,5 +12,6 @@ namespace Tracker.TransportObject
         public int Gold { get; set; }
         public int Kills { get; set; }
         public int WinsInSeries { get; set; }
+        public List<LivePlayer> Players { get; set;}
     }
 }
