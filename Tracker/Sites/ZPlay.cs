@@ -205,7 +205,7 @@ namespace Tracker.Sites
             awayTeam.Gold = int.Parse(json["red"]["gold"].ToString());
             awayTeam.Kills = int.Parse(json["red"]["score"].ToString());
             ev.AwayTeam = awayTeam;
-            foreach (var player in json["players"])
+            foreach (var player in json["blue"]["players"])
             {
                 LivePlayer pl = new LivePlayer();
                 pl.Nickname = player["name"].ToString();
@@ -215,7 +215,14 @@ namespace Tracker.Sites
                 {
                     ev.HomeTeam.Players.Add(pl);
                 }
-                else
+            }
+            foreach (var player in json["red"]["players"])
+            {
+                LivePlayer pl = new LivePlayer();
+                pl.Nickname = player["name"].ToString();
+                pl.ChampionName = player["hero"]["name"].ToString();
+                pl.ChampionImageUrl = player["hero"]["image_url"].ToString();
+                if (player["color"].ToString() == "red")
                 {
                     ev.AwayTeam.Players.Add(pl);
                 }
