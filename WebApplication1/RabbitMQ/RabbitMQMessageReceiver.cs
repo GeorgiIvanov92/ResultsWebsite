@@ -28,7 +28,7 @@ namespace Tracker.RabbitMQ
 
             Consumer = new EventingBasicConsumer(Channel); 
             Consumer.Received += MessageReceived;
-            Channel.BasicConsume(queue: "task_queue",
+            Channel.BasicConsume(queue: "task_queue", 
                                  autoAck: true,
                                  consumer: Consumer);
         }       

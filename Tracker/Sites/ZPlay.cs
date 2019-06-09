@@ -9,14 +9,22 @@ using Tracker.TransportObject;
 
 namespace Tracker.Sites
 {
-    class _1zPlay
+    public static class ZPlay
     {
-        private static HttpClient _client = new HttpClient();
+        private static HttpClient _client;
+        private static HttpClientHandler _handler;
         private static List<Link> _links;
         private static string _specificLoLUrl = "http://1zplay.com/api/lol_match/{0}?_={1}";
         private static string _specificDota2Url = "http://1zplay.com/api/dota2_match/{0}?_=1558706649155";
         private static HashSet<string> _csIds = new HashSet<string>();
 
+        static ZPlay()
+        {
+            _handler = new HttpClientHandler();
+            _handler.UseProxy = true;
+            _handler.Proxy = new System.Net.WebProxy("163.172.182.5", 3128);          
+            _client = new HttpClient(_handler);
+        }
         private static string getEpochSeconds()
         {
             long epoch = (long) (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
@@ -39,6 +47,9 @@ namespace Tracker.Sites
                 {
                     TrackerEssentials.Communication.Sports.SportEnum sport = TrackerEssentials.Communication.Sports.SportEnum.Undefined;
                     Uri uri = null;
+                    string league = string.Empty;
+                    int bestOf = 0;
+                    int mapNumber = 0;
                     switch (category)
                     {
                         case "csgo":
@@ -46,16 +57,18 @@ namespace Tracker.Sites
                             _csIds.Add(websocketHandshake);
                             continue;
                         case "lol":
-                            var id = game["live_match"]["id"].ToString();
+                            var id = game["live_match"]?["id"]?.ToString() ?? game["_id"].ToString();
+                            bestOf = int.Parse(game["round"].ToString());
                             sport = TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends;
+                            league = game["league"]["name"].ToString();
                             uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
-                            _links.Add(new Link(sport, uri));
+                            _links.Add(new Link(sport, uri, league) { BestOf = bestOf});
                             continue;
                         case "dota2":
                             var dotaIds = game["dota2_matches"].ToString().Replace("[", "").Replace("]", "").Trim().Split(",");
-                            int mapNumber = dotaIds.Length;
-                            int bestOf = int.Parse(game["round"].ToString());
-                            var league = game["league"]["name"].ToString();
+                            mapNumber = dotaIds.Length;
+                            bestOf = int.Parse(game["round"].ToString());
+                            league = game["league"]["name"].ToString();
                             sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
                             uri = new Uri(string.Format(_specificDota2Url, dotaIds[mapNumber-1].Trim()));
                             _links.Add(new Link(sport, uri,league,mapNumber,bestOf));
@@ -70,13 +83,21 @@ namespace Tracker.Sites
             {
                 try
                 {
+                    LiveEvent live;
                     switch (link.Sport)
                     {
                         case TrackerEssentials.Communication.Sports.SportEnum.Dota2:
-                            var liveEvent = ParseDota2(link);
-                            if(liveEvent != null)
+                            live = ParseDota2(link);
+                            if(live != null) 
                             {
-                                RabbitMQMessageSender.Send(liveEvent);
+                                RabbitMQMessageSender.Send(live);
+                            }
+                            break;
+                        case TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends:
+                            live = ParseLeagueOfLegends(link);
+                            if(live != null)
+                            {
+                                RabbitMQMessageSender.Send(live);
                             }
                             break;
 
@@ -135,6 +156,62 @@ namespace Tracker.Sites
                 pl.ChampionName = player["hero"]["name_en"].ToString();
                 pl.ChampionImageUrl = player["hero"]["image"].ToString();
                 if (player["team"].ToString() == "radiant")
+                {
+                    ev.HomeTeam.Players.Add(pl);
+                }
+                else
+                {
+                    ev.AwayTeam.Players.Add(pl);
+                }
+            }
+            return ev;
+        }
+        private static LiveEvent ParseLeagueOfLegends(Link link)
+        {
+            var json = JObject.Parse(_client.GetStringAsync(link.Uri).Result);
+            LiveEvent ev = new LiveEvent();
+            ev.Sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
+            ev.GameTime = int.Parse(json["game_time"].ToString());
+            ev.MapNumber = link.MapNumber;
+            ev.LeagueName = link.LeagueName;
+            ev.BestOf = link.BestOf;
+            switch (json["first_tower"].ToString())
+            {
+                case "red":
+                    ev.FirstTower = 2;
+                    break;
+                case "blue":
+                    ev.FirstTower = 1;
+                    break;
+            }
+            switch (json["first_blood"].ToString())
+            {
+                case "red":
+                    ev.FirstBlood = 2;
+                    break;
+                case "blue":
+                    ev.FirstBlood = 1;
+                    break;
+            }
+            LiveTeam homeTeam = new LiveTeam();
+            homeTeam.Players = new List<LivePlayer>();
+            homeTeam.TeamName = json["blue_team"]["name"].ToString();
+            homeTeam.Gold = int.Parse(json["blue"]["gold"].ToString());
+            homeTeam.Kills = int.Parse(json["blue"]["score"].ToString());
+            ev.HomeTeam = homeTeam;
+            LiveTeam awayTeam = new LiveTeam();
+            awayTeam.Players = new List<LivePlayer>();
+            awayTeam.TeamName = json["red_team"]["name"].ToString();
+            awayTeam.Gold = int.Parse(json["red"]["gold"].ToString());
+            awayTeam.Kills = int.Parse(json["red"]["score"].ToString());
+            ev.AwayTeam = awayTeam;
+            foreach (var player in json["players"])
+            {
+                LivePlayer pl = new LivePlayer();
+                pl.Nickname = player["name"].ToString();
+                pl.ChampionName = player["hero"]["name"].ToString();
+                pl.ChampionImageUrl = player["hero"]["image_url"].ToString();
+                if (player["color"].ToString() == "blue")
                 {
                     ev.HomeTeam.Players.Add(pl);
                 }
