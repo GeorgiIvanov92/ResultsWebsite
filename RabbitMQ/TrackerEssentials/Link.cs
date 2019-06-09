@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using static Tracker.TrackerEssentials.Communication.Sports;
+using static RabbitMQ.TrackerEssentials.Communication.Sports;
 
-namespace Tracker.TrackerEssentials
+namespace RabbitMQ.TrackerEssentials
 {
     public class Link
     {

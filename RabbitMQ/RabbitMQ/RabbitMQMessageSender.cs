@@ -5,10 +5,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Tracker.Models;
-using Tracker.TransportObject;
+using RabbitMQ.TransportObject;
 
-namespace Tracker.RabbitMQ
+namespace RabbitMQ.RabbitMQ
 {
     public static class RabbitMQMessageSender
     {

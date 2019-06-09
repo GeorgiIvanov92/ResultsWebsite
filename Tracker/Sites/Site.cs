@@ -1,8 +1,8 @@
-﻿using System;
+﻿using RabbitMQ.TrackerEssentials;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
-using Tracker.TrackerEssentials;
 
 namespace Tracker.Sites
 {

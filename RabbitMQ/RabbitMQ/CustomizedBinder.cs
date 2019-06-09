@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Tracker.RabbitMQ
+namespace RabbitMQ.RabbitMQ
 {
     class CustomizedBinder : SerializationBinder
     {

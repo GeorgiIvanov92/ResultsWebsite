@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Tracker.RabbitMQ;
 using Tracker.Sites;
-using Tracker.TransportObject;
 
 namespace Tracker.Workers
 {

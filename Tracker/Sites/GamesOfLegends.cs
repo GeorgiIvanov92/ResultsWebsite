@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using RabbitMQ.TrackerEssentials;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tracker.Models;
-using Tracker.TrackerEssentials;
+using static RabbitMQ.TrackerEssentials.Communication.Sports;
 
 namespace Tracker.Sites
 {
@@ -35,7 +36,7 @@ namespace Tracker.Sites
                     if(teamLink != null)
                     {
                         Uri uri = new Uri(_teamsUrl + teamLink);
-                        Link link = new Link(TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends,uri);
+                        Link link = new Link(SportEnum.LeagueOfLegends,uri);
                         links.Add(link);
                     }
                     
@@ -283,7 +284,7 @@ namespace Tracker.Sites
                                     var uriString = node.Attributes["href"].Value;
                                     uriString = uriString.Substring(2);
                                     var uri = new Uri("http://gol.gg" + uriString);
-                                    Link link = new Link(TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends, uri, team.Name);
+                                    Link link = new Link(SportEnum.LeagueOfLegends, uri, team.Name);
                                     PlayerLinks.Add(link);
                                 }
                             }

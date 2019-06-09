@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using RabbitMQ.TrackerEssentials;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -10,8 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tracker.Models;
-using Tracker.TrackerEssentials;
-using static Tracker.TrackerEssentials.Communication.Sports;
+using static RabbitMQ.TrackerEssentials.Communication.Sports;
 
 namespace Tracker
 {

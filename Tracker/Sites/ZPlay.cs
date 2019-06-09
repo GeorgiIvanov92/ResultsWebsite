@@ -3,9 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
-using Tracker.RabbitMQ;
-using Tracker.TrackerEssentials;
-using Tracker.TransportObject;
+using RabbitMQ.TransportObject;
+using RabbitMQ.TrackerEssentials;
+using static RabbitMQ.TrackerEssentials.Communication.Sports;
+using RabbitMQ.RabbitMQ;
 
 namespace Tracker.Sites
 {
@@ -21,8 +22,8 @@ namespace Tracker.Sites
         static ZPlay()
         {
             _handler = new HttpClientHandler();
-            _handler.UseProxy = true;
-            _handler.Proxy = new System.Net.WebProxy("163.172.182.5", 3128);          
+            //_handler.UseProxy = true;
+            //_handler.Proxy = new System.Net.WebProxy("163.172.182.5", 3128);          
             _client = new HttpClient(_handler);
         }
         private static string getEpochSeconds()
@@ -45,7 +46,7 @@ namespace Tracker.Sites
                 var gameState = game["state"]?.ToString();
                 if (!string.IsNullOrEmpty(category) && gameState != null && gameState == "start")
                 {
-                    TrackerEssentials.Communication.Sports.SportEnum sport = TrackerEssentials.Communication.Sports.SportEnum.Undefined;
+                    SportEnum sport = SportEnum.Undefined;
                     Uri uri = null;
                     string league = string.Empty;
                     int bestOf = 0;
@@ -59,7 +60,7 @@ namespace Tracker.Sites
                         case "lol":
                             var id = game["live_match"]?["id"]?.ToString() ?? game["_id"].ToString();
                             bestOf = int.Parse(game["round"].ToString());
-                            sport = TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends;
+                            sport = SportEnum.LeagueOfLegends;
                             league = game["league"]["name"].ToString();
                             uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
                             _links.Add(new Link(sport, uri, league) { BestOf = bestOf});
@@ -69,7 +70,8 @@ namespace Tracker.Sites
                             mapNumber = dotaIds.Length;
                             bestOf = int.Parse(game["round"].ToString());
                             league = game["league"]["name"].ToString();
-                            sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
+                            sport = SportEnum.Dota2;
+                            sport = SportEnum.Dota2;
                             uri = new Uri(string.Format(_specificDota2Url, dotaIds[mapNumber-1].Trim()));
                             _links.Add(new Link(sport, uri,league,mapNumber,bestOf));
                             continue;
@@ -86,16 +88,16 @@ namespace Tracker.Sites
                     LiveEvent live;
                     switch (link.Sport)
                     {
-                        case TrackerEssentials.Communication.Sports.SportEnum.Dota2:
+                        case SportEnum.Dota2:
                             live = ParseDota2(link);
                             if(live != null) 
                             {
                                 RabbitMQMessageSender.Send(live);
                             }
                             break;
-                        case TrackerEssentials.Communication.Sports.SportEnum.LeagueOfLegends:
+                        case SportEnum.LeagueOfLegends:
                             live = ParseLeagueOfLegends(link);
-                            if(live != null)
+                            if (live != null)
                             {
                                 RabbitMQMessageSender.Send(live);
                             }
@@ -114,7 +116,7 @@ namespace Tracker.Sites
         {
             var json = JObject.Parse(_client.GetStringAsync(link.Uri).Result);
             LiveEvent ev = new LiveEvent();
-            ev.Sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
+            ev.Sport = SportEnum.Dota2;
             ev.GameTime = int.Parse(json["game_time"].ToString());
             ev.MapNumber = link.MapNumber;
             ev.LeagueName = link.LeagueName;
@@ -170,7 +172,7 @@ namespace Tracker.Sites
         {
             var json = JObject.Parse(_client.GetStringAsync(link.Uri).Result);
             LiveEvent ev = new LiveEvent();
-            ev.Sport = TrackerEssentials.Communication.Sports.SportEnum.Dota2;
+            ev.Sport = SportEnum.Dota2;
             ev.GameTime = int.Parse(json["game_time"].ToString());
             ev.MapNumber = link.MapNumber;
             ev.LeagueName = link.LeagueName;

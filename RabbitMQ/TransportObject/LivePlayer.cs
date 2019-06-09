@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tracker.TransportObject
+namespace RabbitMQ.TransportObject
 {
     [System.Serializable]
     public class LivePlayer
