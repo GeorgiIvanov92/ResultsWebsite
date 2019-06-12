@@ -18,7 +18,7 @@ namespace Tracker
         private static Task ImagesTask = new Task(() => ImagesWorker.ImagesWorkerInit(ImagesTrackerTimeSpan));
         private static Task PreliveTask = new Task(() => PreliveWorker.PreliveWorkerInit(PreliveTrackerTimeSpan));
         private static Task TeamsTask = new Task(() => TeamsWorker.TeamsWorkerInit(TeamsTrackerTimeSpan));
-        private static Task LiveTask = new Task(() => LiveWorker.LiveWorkerInit());
+        private static Task LiveTask = new Task(() => LiveWorker.LiveWorkerInit(TimeSpan.FromSeconds(int.Parse(ConfigurationManager.AppSettings["LiveSamplePeriodInSeconds"]))));
         private static bool _createTablesOnStartup = ConfigurationManager.AppSettings["CreateTablesOnStartup"] == "true";
         static void Main(string[] args)
         {
@@ -39,7 +39,10 @@ namespace Tracker
             ImagesTask.Start();
             PreliveTask.Start();
             TeamsTask.Start();
-            LiveTask.Start();
+            if (ConfigurationManager.AppSettings["TrackLive"] == "true")
+            {
+                LiveTask.Start();
+            }
             while (true)
             {
 

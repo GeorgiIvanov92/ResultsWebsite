@@ -5,6 +5,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.TransportObject;
 
 namespace RabbitMQ.RabbitMQ
 {
@@ -14,7 +15,7 @@ namespace RabbitMQ.RabbitMQ
         private IConnection Connection;
         private IModel Channel;
         private EventingBasicConsumer Consumer;
-        delegate void asd(BasicDeliverEventArgs ea);
+        public event EventHandler<LiveEventArgs> LiveEventReached;
         public RabbitMQMessageReceiver()
         {
             Factory = new ConnectionFactory() { HostName = "localhost" };
@@ -31,13 +32,26 @@ namespace RabbitMQ.RabbitMQ
             Channel.BasicConsume(queue: "task_queue",
                                  autoAck: true,
                                  consumer: Consumer);
-        }       
+        }
+        protected virtual void OnLiveEvent(LiveEventArgs liveEvent)
+        {
+                LiveEventReached?.Invoke(this, liveEvent);
+        }
         public void MessageReceived(object sender, BasicDeliverEventArgs e)
         {
             BinaryFormatter formatter = new BinaryFormatter();
             formatter.Binder = new CustomizedBinder();
             MemoryStream ms = new MemoryStream(e.Body);
-            var LiveEvent = formatter.Deserialize(ms);
+            LiveEvent liveEvent = (LiveEvent)formatter.Deserialize(ms);
+            OnLiveEvent(new LiveEventArgs(liveEvent));
+        }
+        public class LiveEventArgs : EventArgs
+        {
+            public LiveEvent LiveEvent {get; set;}
+            public LiveEventArgs(LiveEvent liveEvent)
+            {
+                LiveEvent = liveEvent;
+            }
         }
     }
 }

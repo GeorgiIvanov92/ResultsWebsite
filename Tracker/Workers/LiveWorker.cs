@@ -8,13 +8,13 @@ namespace Tracker.Workers
 {
     public static class LiveWorker
     {
-        public static void LiveWorkerInit()
+        public static void LiveWorkerInit(TimeSpan timeSpan)
         {            
             while (true)
             {
                 ZPlay.GetActiveGameIds();
                 ZPlay.SendActiveGames();
-                Thread.Sleep(5000);
+                Thread.Sleep(timeSpan);
             }
         }
     }

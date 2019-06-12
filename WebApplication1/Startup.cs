@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.RabbitMQ;
 using WebApi.Cache;
+using WebApi.SignalR;
 using WebApplication1.Models;
 
 namespace WebApplication1
@@ -36,6 +37,7 @@ namespace WebApplication1
             {
                 configuration.RootPath = "ClientApp/build";
             });
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,13 +72,19 @@ namespace WebApplication1
                 {
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
-            });         
-            
+            });
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<LiveEventHub>("/LiveEvents");
+            });
+
             cache.Set("LeagueOfLegends", CacheCreator.CreateSportCacheById(1,db,Configuration));
             cache.Set("CSGO", CacheCreator.CreateSportCacheById(2, db, Configuration));
             cache.Set("Dota2", CacheCreator.CreateSportCacheById(3, db, Configuration));
 
             RabbitMQMessageReceiver r = new RabbitMQMessageReceiver();
+            LiveEventHub hub = new LiveEventHub();
+            r.LiveEventReached += hub.SendEvent;
         }
     }
 }

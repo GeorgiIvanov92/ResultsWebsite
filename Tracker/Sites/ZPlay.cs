@@ -172,7 +172,7 @@ namespace Tracker.Sites
         {
             var json = JObject.Parse(_client.GetStringAsync(link.Uri).Result);
             LiveEvent ev = new LiveEvent();
-            ev.Sport = SportEnum.Dota2;
+            ev.Sport = SportEnum.LeagueOfLegends;
             ev.GameTime = int.Parse(json["game_time"].ToString());
             ev.MapNumber = link.MapNumber;
             ev.LeagueName = link.LeagueName;
