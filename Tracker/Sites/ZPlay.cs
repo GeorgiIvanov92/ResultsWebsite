@@ -34,7 +34,7 @@ namespace Tracker.Sites
         public static void GetActiveGameIds()
         {
             _links = new List<Link>();
-            var response = _client.GetStringAsync("http://1zplay.com/api/live_schedules?_=1558693188967&category=all").Result;
+            var response = _client.GetStringAsync($"http://1zplay.com/api/live_schedules?_={getEpochSeconds()}&category=all").Result;
             if (string.IsNullOrEmpty(response))
             {
                 return;

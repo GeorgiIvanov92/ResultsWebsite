@@ -12,8 +12,16 @@ namespace Tracker.Workers
         {            
             while (true)
             {
-                ZPlay.GetActiveGameIds();
-                ZPlay.SendActiveGames();
+                try
+                {
+                    ZPlay.GetActiveGameIds();
+                    ZPlay.SendActiveGames();
+                    Thread.Sleep(timeSpan);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
                 Thread.Sleep(timeSpan);
             }
         }

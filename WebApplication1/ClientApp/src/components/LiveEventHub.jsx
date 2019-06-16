@@ -1,5 +1,5 @@
 ﻿import React, { Component } from 'react';
-import { HubConnection } from '@aspnet/signalr-client';
+import * as  signalr from '@aspnet/signalr';
 
 export class LiveEventHub extends Component {
     constructor(props) {
@@ -14,21 +14,13 @@ export class LiveEventHub extends Component {
     }
 
     componentDidMount = () => {
-        const nick = window.prompt('Your name:', 'John');
+        const connection = new signalr.HubConnectionBuilder()
+            .withUrl("/LiveEvents")
+            .configureLogging(signalr.LogLevel.Information)
+            .build();
 
-        const hubConnection = new HubConnection('/LiveEvents');
-
-        this.setState({ hubConnection, nick }, () => {
-            this.state.hubConnection
-                .start()
-                .then(() => console.log('Connection started!'))
-                .catch(err => console.log('Error while establishing connection :('));
-
-            this.state.hubConnection.on('sendToAll', (nick, receivedMessage) => {
-                const text = `${nick}: ${receivedMessage}`;
-                const messages = this.state.messages.concat([text]);
-                this.setState({ message: messages });
-            });
+        connection.start().then(function () {
+            console.log("connected");
         });
     }
 
