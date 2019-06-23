@@ -13,7 +13,7 @@ namespace Tracker.Sites
 {
     class GamesOfLegends : Site
     {
-        private static readonly string _allTeamsLink = "http://gol.gg/teams/list/season-S9/split-Spring/region-ALL/tournament-ALL/week-ALL/";
+        private static readonly string _allTeamsLink = "http://gol.gg/teams/list/season-S9/split-Summer/region-ALL/tournament-ALL/week-ALL/";
         private static readonly string _teamsUrl = "http://gol.gg/teams/";
         private static List<Link> PlayerLinks = new List<Link>();
         private Dictionary<string,List<ChampionStat>> ChampionStats;

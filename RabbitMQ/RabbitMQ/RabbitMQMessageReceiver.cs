@@ -33,9 +33,9 @@ namespace RabbitMQ.RabbitMQ
                                  autoAck: true,
                                  consumer: Consumer);
         }
-        protected virtual void OnLiveEvent(LiveEventArgs liveEvent)
+        protected virtual void OnLiveEvent(LiveEventArgs args)
         {
-                LiveEventReached?.Invoke(this, liveEvent);
+                LiveEventReached?.Invoke(this, args);
         }
         public void MessageReceived(object sender, BasicDeliverEventArgs e)
         {

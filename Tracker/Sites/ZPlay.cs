@@ -23,7 +23,7 @@ namespace Tracker.Sites
         {
             _handler = new HttpClientHandler();
             //_handler.UseProxy = true;
-            //_handler.Proxy = new System.Net.WebProxy("163.172.182.5", 3128);          
+            //_handler.Proxy = new System.Net.WebProxy("151.106.10.108", 8080);          
             _client = new HttpClient(_handler);
         }
         private static string getEpochSeconds()

@@ -10,9 +10,15 @@ namespace WebApi.SignalR
 {
     public class LiveEventHub : Hub
     {
-        public void SendEvent(object sender, RabbitMQMessageReceiver.LiveEventArgs e)
+        protected IHubContext<LiveEventHub> _context;
+        public LiveEventHub(IHubContext<LiveEventHub> context)
         {
-            Clients.All.SendAsync("ReceiveMessage",e.LiveEvent);
+            this._context = context; 
+        }
+        public async void SendEvent(object sender, RabbitMQMessageReceiver.LiveEventArgs e)
+        {           
+            
+            await _context.Clients.All.SendAsync("ReceiveMessage", e.LiveEvent);
         }
     }
 }

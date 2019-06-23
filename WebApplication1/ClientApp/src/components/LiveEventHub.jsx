@@ -15,7 +15,7 @@ export class LiveEventHub extends Component {
 
     componentDidMount = () => {
         const connection = new signalr.HubConnectionBuilder()
-            .withUrl("/LiveEvents")
+            .withUrl("/liveEvents")
             .configureLogging(signalr.LogLevel.Information)
             .build();
 
