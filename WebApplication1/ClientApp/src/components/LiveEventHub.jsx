@@ -1,5 +1,5 @@
 ﻿import React, { Component } from 'react';
-import * as  signalr from '@aspnet/signalr';
+import * as  signalR from '@aspnet/signalr';
 
 export class LiveEventHub extends Component {
     constructor(props) {
@@ -14,11 +14,20 @@ export class LiveEventHub extends Component {
     }
 
     componentDidMount = () => {
-        const connection = new signalr.HubConnectionBuilder()
-            .withUrl("/liveEvents")
-            .configureLogging(signalr.LogLevel.Information)
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/liveEvents", {
+                skipNegotiation: true,
+                transport: signalR.HttpTransportType.WebSockets
+            })
+            .configureLogging(signalR.LogLevel.Information)
             .build();
-
+        connection.on("ReceiveMessage", function (user, message) {
+            var msg = message;
+            console.log("liveEvent received with message: " + msg);
+            this.setState({
+                message: msg
+            });
+        });
         connection.start().then(function () {
             console.log("connected");
         });
