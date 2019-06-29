@@ -61,7 +61,11 @@ namespace WebApplication1
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-            
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<LiveEventHub>("/live");
+            });
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
@@ -84,11 +88,7 @@ namespace WebApplication1
             });
 
             //app.UseCors("CorsPolicy");
-
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<LiveEventHub>("/liveEvents");
-            });
+          
 
             cache.Set("LeagueOfLegends", CacheCreator.CreateSportCacheById(1,db,Configuration));
             cache.Set("CSGO", CacheCreator.CreateSportCacheById(2, db, Configuration));

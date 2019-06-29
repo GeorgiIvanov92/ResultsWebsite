@@ -16,8 +16,7 @@ namespace WebApi.SignalR
             this._context = context; 
         }
         public async void SendEvent(object sender, RabbitMQMessageReceiver.LiveEventArgs e)
-        {           
-            
+        {                       
             await _context.Clients.All.SendAsync("ReceiveMessage", e.LiveEvent);
         }
     }

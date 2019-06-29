@@ -11,28 +11,28 @@ export class LiveEventHub extends Component {
             messages: [],
             hubConnection: null,
         };
+        this.parseLiveEvent = this.parseLiveEvent.bind(this);
     }
 
     componentDidMount = () => {
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/liveEvents", {
-                skipNegotiation: true,
+            .withUrl("/live", {
                 transport: signalR.HttpTransportType.WebSockets
             })
             .configureLogging(signalR.LogLevel.Information)
             .build();
-        connection.on("ReceiveMessage", function (user, message) {
-            var msg = message;
-            console.log("liveEvent received with message: " + msg);
-            this.setState({
-                message: msg
-            });
-        });
+        connection.on("ReceiveMessage", this.parseLiveEvent);
         connection.start().then(function () {
             console.log("connected");
         });
     }
-
+    parseLiveEvent(user,message) {
+            var msg = user.homeTeam.teamName;
+        console.log("liveEvent received with message: " + msg);
+        this.setState({
+            message: msg
+        });
+    }
     render() {
         return <div>{this.state.message}</div>;
     }
