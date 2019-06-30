@@ -14,6 +14,7 @@ namespace RabbitMQ.RabbitMQ
         static ConnectionFactory Factory;
         static IConnection Connection;
         static IModel Channel;
+        static IBasicProperties Properties;
         static RabbitMQMessageSender()
         {
             Factory = new ConnectionFactory() { HostName = "localhost" };
@@ -25,26 +26,25 @@ namespace RabbitMQ.RabbitMQ
                                  autoDelete: false,
                                  arguments: null);
 
-            var consumer = new EventingBasicConsumer(Channel);
-            consumer.Received += (model, ea) =>
-            {
-                var body = ea.Body;
-                var message = Encoding.UTF8.GetString(body);
-                Console.WriteLine(" [x] Received {0}", message);
-            };
-            Channel.BasicConsume(queue: "task_queue",
-                                 autoAck: true,
-                                 consumer: consumer);
+            //var consumer = new EventingBasicConsumer(Channel);
+            //consumer.Received += (model, ea) =>
+            //{
+            //    var body = ea.Body;
+            //    var message = Encoding.UTF8.GetString(body);                
+            //};
+            //Channel.BasicConsume(queue: "task_queue",
+            //                     autoAck: true,
+            //                     consumer: consumer);
+            Properties = Channel.CreateBasicProperties();
         }
         public static void Send(LiveEvent liveEvent)
         {         
             var body = ObjectToByteArray(liveEvent);
-            var properties = Channel.CreateBasicProperties();
-            properties.Persistent = true;
+            Properties.Persistent = true;
 
             Channel.BasicPublish(exchange: "",
                                  routingKey: "task_queue",
-                                 basicProperties: properties,
+                                 basicProperties: Properties,
                                  body: body);
         }
         private static byte[] ObjectToByteArray(Object obj)

@@ -33,6 +33,7 @@ namespace Tracker.Workers
                     }
                     if (shouldAddTeam)
                     {
+                        teamFromDb.Id = null;
                         teams.Add(teamFromDb);
                     }
                 }
@@ -42,7 +43,7 @@ namespace Tracker.Workers
                     dbContext.Team.AddRange(teams);
                     Console.WriteLine($"Finished Getting Teams at {DateTime.Now.ToShortTimeString()}." +
                    $" {teams.Count} teams added to Db.");
-                  
+
                     players = lol.GetPlayers(teams);
                     foreach (var playerFromDb in playersFromDb)
                     {
@@ -56,16 +57,19 @@ namespace Tracker.Workers
                         }
                         if (shouldAddPlayer)
                         {
+                            playerFromDb.PlayerId = null;
                             players.Add(playerFromDb);
                         }
                     }
                     dbContext.Player.RemoveRange(playersFromDb);
+                    var champsStatsFromDb = dbContext.ChampionStat.ToList();
+                    dbContext.RemoveRange(champsStatsFromDb);
+                    dbContext.SaveChanges();
                     dbContext.Player.AddRange(players);
+                    dbContext.SaveChanges();
 
                     var champStats = lol.GetChampionStats();
                     List<ChampionStat> stats = new List<ChampionStat>();
-                    var champsStatsFromDb = dbContext.ChampionStat.ToList();
-                    dbContext.RemoveRange(champsStatsFromDb);
                     dbContext.SaveChanges();
                     foreach (var champ in champStats) 
                     {
@@ -85,7 +89,7 @@ namespace Tracker.Workers
                     dbContext.SaveChanges();
 
 
-                     Console.WriteLine($"Finished Getting Players at {DateTime.Now.ToShortTimeString()}." +
+                     Console.WriteLine($"Finished Getting Players and Champion stats at {DateTime.Now.ToShortTimeString()}." +
                    $" {players.Count} players added to Db.");
                 }
                 Console.WriteLine($"Sampling Teams and Players again in {TeamsSamplePeriodInMinutes.Hours} hours and {TeamsSamplePeriodInMinutes.Minutes} minutes");
