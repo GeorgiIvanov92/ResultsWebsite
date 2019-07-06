@@ -92,6 +92,7 @@ namespace Tracker.Sites
                             live = ParseDota2(link);
                             if(live != null) 
                             {
+                                live.UpdateDate = DateTime.UtcNow;
                                 RabbitMQMessageSender.Send(live);
                             }
                             break;
@@ -99,6 +100,7 @@ namespace Tracker.Sites
                             live = ParseLeagueOfLegends(link);
                             if (live != null)
                             {
+                                live.UpdateDate = DateTime.UtcNow;
                                 RabbitMQMessageSender.Send(live);
                             }
                             break;

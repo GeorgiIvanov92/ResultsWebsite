@@ -17,6 +17,7 @@ namespace RabbitMQ.TransportObject
         public int GameTime { get; set; }
         public int BestOf { get; set; }
         public int MapNumber { get; set; }
+        public DateTime UpdateDate { get; set; }
         
     }
 }

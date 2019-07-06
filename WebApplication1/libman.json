@@ -1,22 +1,11 @@
 {
   "version": "1.0",
   "defaultProvider": "cdnjs",
-<<<<<<< HEAD
-  "libraries": [
-    {
-      "provider": "unpkg",
-      "library": "@aspnet/signalr@1.1.4",
-      "destination": "ClientApp/node_modules/@aspnet/signalr/"
-    }
-  ]
-=======
     "libraries": [
         {
             "provider": "unpkg",
             "library": "@aspnet/signalr@1.1.4",
             "destination": "ClientApp/node_modules/@aspnet/signalr/"
-        }
-        
+        }        
     ]
->>>>>>> 272620f74f94847144660d96ad3d84c6d96cf8c6
 }

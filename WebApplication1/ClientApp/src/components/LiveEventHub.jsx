@@ -1,6 +1,6 @@
 ﻿import React, { Component } from 'react';
 import * as  signalR from '@aspnet/signalr';
-
+import { filter, mapTo } from '../../node_modules/rxjs/operators';
 export class LiveEventHub extends Component {
     constructor(props) {
         super(props);
@@ -9,12 +9,20 @@ export class LiveEventHub extends Component {
             nick: '',
             message: '',
             messages: [],
+            liveEvents: [],
             hubConnection: null,
+            pingEpic: null,
         };
         this.parseLiveEvent = this.parseLiveEvent.bind(this);
     }
 
     componentDidMount = () => {
+        const pingEpic = action$ => action$.pipe(
+            filter(action => action.type === 'PING'),
+            mapTo({ type: 'PONG' })
+        );
+        this.setState({ pingEpic: pingEpic });
+
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/live", {
                 transport: signalR.HttpTransportType.WebSockets
@@ -23,10 +31,18 @@ export class LiveEventHub extends Component {
             .build();
         connection.on("ReceiveMessage", this.parseLiveEvent);
         connection.start().then(function () {
-            console.log("connected");
         });
     }
-    parseLiveEvent(user,message) {
+    parseLiveEvent(user, message) {
+        let liveEvents = this.state.liveEvents;
+        for (let i = 0; i < liveEvents.length; i++) {
+            if (liveEvents[i].homeTeam.teamName === user.homeTeam.teamName &&
+                liveEvents[i].awayTeam.teamName === user.awayTeam.teamName) {
+                return;
+            }
+        }
+        liveEvents.push(user);
+        if (this.state.liveEvents)
             var msg = user.homeTeam.teamName;
         console.log("liveEvent received with message: " + msg);
         this.setState({
@@ -34,6 +50,8 @@ export class LiveEventHub extends Component {
         });
     }
     render() {
-        return <div>{this.state.message}</div>;
+        return <div>{this.state.liveEvents.map((ev) =>
+            <h1>{ev.homeTeam.teamName} vs {ev.awayTeam.teamName} </h1>
+        )}</div>;
     }
 }

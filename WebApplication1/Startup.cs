@@ -8,8 +8,11 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.RabbitMQ;
+using RabbitMQ.TransportObject;
 using System;
+using System.Threading.Tasks;
 using WebApi.Cache;
+using WebApi.Cache.CachedObjects;
 using WebApi.SignalR;
 using WebApplication1.Models;
 
@@ -39,14 +42,6 @@ namespace WebApplication1
                 configuration.RootPath = "ClientApp/build";
             });
             services.AddSignalR();
-            //services.AddCors(options => options.AddPolicy("CorsPolicy",
-            //builder =>
-            //{
-            //    builder.AllowAnyMethod().AllowAnyHeader()
-            //           .WithOrigins("http://localhost:59802")
-            //           .AllowCredentials();
-            //}));
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -93,10 +88,29 @@ namespace WebApplication1
             cache.Set("LeagueOfLegends", CacheCreator.CreateSportCacheById(1,db,Configuration));
             cache.Set("CSGO", CacheCreator.CreateSportCacheById(2, db, Configuration));
             cache.Set("Dota2", CacheCreator.CreateSportCacheById(3, db, Configuration));
-
+            cache.Set("Live", new Live());
             RabbitMQMessageReceiver r = new RabbitMQMessageReceiver();
-            LiveEventHub hub = new LiveEventHub(hubContext);
+            LiveEventHub hub = new LiveEventHub(hubContext, cache);            
             r.LiveEventReached += hub.SendEvent;
+
+            //clean up old live events from cache
+            LiveEvent dummy = new LiveEvent();
+            Task.Factory.StartNew(async delegate
+            {
+                while (true)
+                {
+                    var live = cache.Get("Live") as Live;
+                    foreach (var ev in live.LiveEvents)
+                    {
+                        if (DateTime.UtcNow > ev.Value.UpdateDate.AddSeconds(60))
+                        {                            
+                            live.LiveEvents.TryRemove(hub.CreateLiveGameKey(ev.Value),out dummy);
+                        }
+                    }
+                    cache.Set("Live", live);
+                    await Task.Delay(5000);
+                }
+            });
         }
     }
 }
