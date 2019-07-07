@@ -1,6 +1,7 @@
 ﻿import React, { Component } from 'react';
 import * as  signalR from '@aspnet/signalr';
 import { filter, mapTo } from '../../node_modules/rxjs/operators';
+import { Observable } from '../../node_modules/rxjs';
 export class LiveEventHub extends Component {
     constructor(props) {
         super(props);
@@ -17,11 +18,19 @@ export class LiveEventHub extends Component {
     }
 
     componentDidMount = () => {
-        const pingEpic = action$ => action$.pipe(
-            filter(action => action.type === 'PING'),
-            mapTo({ type: 'PONG' })
-        );
-        this.setState({ pingEpic: pingEpic });
+        //const interval = new Observable(observer => {
+        //    setInterval(() => {
+        //        let liveEvents = this.state.liveEvents;
+        //        let timeObject = new Date().getTime();
+        //        if (liveEvents.length > 0) {
+        //            let asd = liveEvents[0].updateDateInEpoch;
+        //        }
+        //        liveEvents = liveEvents.filter(a => a.updateDateInEpoch > timeObject);
+        //        this.setState({ liveEvents: liveEvents });
+        //        observer.next();
+        //    }, 10000);
+        //});
+        //interval.subscribe();
 
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/live", {
@@ -35,6 +44,12 @@ export class LiveEventHub extends Component {
     }
     parseLiveEvent(user, message) {
         let liveEvents = this.state.liveEvents;
+        if (user.shouldRemoveEvent === true) {
+            let filteredLiveEvents = liveEvents.filter(a => a.homeTeam.teamName !== user.homeTeam.teamName &&
+                a.awayTeam.teamName !== user.awayTeam.teamName);
+            this.setState({ liveEvents: filteredLiveEvents });
+            return;
+        }
         for (let i = 0; i < liveEvents.length; i++) {
             if (liveEvents[i].homeTeam.teamName === user.homeTeam.teamName &&
                 liveEvents[i].awayTeam.teamName === user.awayTeam.teamName) {

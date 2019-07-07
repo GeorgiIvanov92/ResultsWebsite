@@ -139,7 +139,10 @@ namespace Tracker
         {
             FileInfo file = new FileInfo(ConfigurationManager.AppSettings["ImagesSavePath"]);
             file.Directory.Create();
-            foreach (var team in TeamLinks)
+            List<Link> tempTeamLinks = new List<Link>();
+            TeamLinks.ForEach(link => tempTeamLinks.Add(link));
+
+            foreach (var team in tempTeamLinks)
             {
                 try
                 {

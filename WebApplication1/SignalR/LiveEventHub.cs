@@ -40,6 +40,11 @@ namespace WebApi.SignalR
             _cache.Set("Live", live);
             await _context.Clients.All.SendAsync("ReceiveMessage", e.LiveEvent);
         }
+        public async void RemoveLiveEvent(LiveEvent ev)
+        {
+            ev.shouldRemoveEvent = true;
+            await _context.Clients.All.SendAsync("ReceiveMessage", ev);
+        }
         public string CreateLiveGameKey(LiveEvent liveEvent)
         {
             if (liveEvent != null)
@@ -56,5 +61,6 @@ namespace WebApi.SignalR
                await _context.Clients.All.SendAsync("ReceiveMessage", ev.Value);
             }
         }
+
     }
 }

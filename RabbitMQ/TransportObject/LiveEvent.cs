@@ -18,6 +18,7 @@ namespace RabbitMQ.TransportObject
         public int BestOf { get; set; }
         public int MapNumber { get; set; }
         public DateTime UpdateDate { get; set; }
+        public bool shouldRemoveEvent { get; set; }
         
     }
 }

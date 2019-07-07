@@ -102,9 +102,10 @@ namespace WebApplication1
                     var live = cache.Get("Live") as Live;
                     foreach (var ev in live.LiveEvents)
                     {
-                        if (DateTime.UtcNow > ev.Value.UpdateDate.AddSeconds(60))
+                        if (DateTime.UtcNow > ev.Value.UpdateDate.AddSeconds(180))
                         {                            
                             live.LiveEvents.TryRemove(hub.CreateLiveGameKey(ev.Value),out dummy);
+                            hub.RemoveLiveEvent(ev.Value);
                         }
                     }
                     cache.Set("Live", live);
