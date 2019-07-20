@@ -1,7 +1,7 @@
 ﻿import React, { Component } from 'react';
 import * as  signalR from '@aspnet/signalr';
-import { filter, mapTo } from '../../node_modules/rxjs/operators';
-import { Observable } from '../../node_modules/rxjs';
+import { LiveGame } from './LiveGame';
+//import { Observable } from '../../node_modules/rxjs';
 export class LiveEventHub extends Component {
     constructor(props) {
         super(props);
@@ -65,8 +65,20 @@ export class LiveEventHub extends Component {
         });
     }
     render() {
-        return <div>{this.state.liveEvents.map((ev) =>
-            <h1>{ev.homeTeam.teamName} vs {ev.awayTeam.teamName} </h1>
-        )}</div>;
+        let body = <h1> No Live Games Currently, Check back Later </h1>;
+        if (this.state.liveEvents.length > 0) {
+            body = (
+                this.state.liveEvents.map((ev) =>
+                    <LiveGame
+                        liveEvent={ev}
+                    />
+                ));
+        }
+
+        return (
+        <div>
+            {body}
+        </div>
+        )
     }
 }
