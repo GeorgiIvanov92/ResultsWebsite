@@ -1,5 +1,6 @@
 ﻿import React, { Component } from 'react';
-
+import { Button } from 'react-bootstrap';
+import { Random } from 'react-animated-text';
 export class LiveGame extends Component {
     constructor(props) {
         super(props);
@@ -22,9 +23,19 @@ export class LiveGame extends Component {
     render() {
         let body = [];
         if (this.state.liveEvent) {
-            body = <h1>{this.state.liveEvent.homeTeam.teamName} vs {this.state.liveEvent.awayTeam.teamName} </h1>;
-        }
-        return (
+            body = <div>
+                <Random
+                    effect="verticalFadeOut"
+                    effectDirection="down"
+                    style={{ color: 'red' }}
+                    effectChange="3.0"
+                    text="LIVE!" />
+                <Button bsStyle="primary" onClick={this.show}>
+                {this.state.liveEvent.homeTeam.teamName} vs {this.state.liveEvent.awayTeam.teamName}
+                </Button>
+</div>        
+                }
+                return (
             <div>
                 {body}
             </div>
