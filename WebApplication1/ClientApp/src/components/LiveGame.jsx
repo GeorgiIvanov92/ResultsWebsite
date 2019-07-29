@@ -29,7 +29,7 @@ export class LiveGame extends Component {
                     effectChange={0.2}
                     text="LIVE!" />
                 <Button bsStyle="primary" onClick={this.show}>
-                {this.state.liveEvent.homeTeam.teamName} vs {this.state.liveEvent.awayTeam.teamName}
+                    {this.state.liveEvent.homeTeam.teamName} {this.state.liveEvent.homeTeam.winsInSeries} - {this.state.liveEvent.awayTeam.winsInSeries} {this.state.liveEvent.awayTeam.teamName}
                 </Button>
 </div>        
                 }

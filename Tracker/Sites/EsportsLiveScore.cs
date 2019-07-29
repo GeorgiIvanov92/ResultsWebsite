@@ -178,6 +178,12 @@ namespace Tracker
                         var league = doc.DocumentNode.SelectSingleNode("//div[contains(@class,'page-description tournament-description')]//h1").InnerText;
                         var preliveNodes = doc.DocumentNode.SelectSingleNode("//div[contains(@id,'upcoming')]")
                             .SelectNodes(".//div[contains(@id,'event_id_')]");
+
+                        if(preliveNodes == null || league == null)
+                        {
+                            return;
+                        }
+
                         foreach (var node in preliveNodes)
                         {
                             Prelive prelive = new Prelive();
