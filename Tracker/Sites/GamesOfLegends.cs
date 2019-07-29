@@ -351,6 +351,11 @@ namespace Tracker.Sites
                     }
                     var tasks = new List<Task>();
                     var tables = doc.DocumentNode.SelectNodes("//table[contains(@class,'table_list')]");
+
+                    if(tables == null)
+                    {
+                        continue;
+                    }
                     foreach (var table in tables)
                     {
                         try

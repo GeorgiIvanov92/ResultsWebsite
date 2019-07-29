@@ -38,12 +38,13 @@ namespace WebApi.SignalR
                 live.LiveEvents.TryAdd(key, e.LiveEvent);
             }
             _cache.Set("Live", live);
-            await _context.Clients.All.SendAsync("ReceiveMessage", e.LiveEvent);
+
+            await _context.Clients.All.SendAsync(((int)e.LiveEvent.Sport).ToString(), e.LiveEvent);
         }
         public async void RemoveLiveEvent(LiveEvent ev)
         {
             ev.shouldRemoveEvent = true;
-            await _context.Clients.All.SendAsync("ReceiveMessage", ev);
+            await _context.Clients.All.SendAsync(((int)ev.Sport).ToString(), ev);
         }
         public string CreateLiveGameKey(LiveEvent liveEvent)
         {
@@ -58,7 +59,7 @@ namespace WebApi.SignalR
             var live = _cache.Get("Live") as Live;
             foreach(var ev in live.LiveEvents)
             {
-               await _context.Clients.All.SendAsync("ReceiveMessage", ev.Value);
+               await _context.Clients.All.SendAsync(((int)ev.Value.Sport).ToString(), ev.Value);
             }
         }
 

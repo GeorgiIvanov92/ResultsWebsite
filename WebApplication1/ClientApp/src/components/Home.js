@@ -6,7 +6,8 @@ export class Home extends Component {
   render() {
     return (
         <div>
-            <LiveEventHub/>
+            <h2 style={{ font: 'oblique' }}> Live Games will appear here if there are any </h2>
+            <LiveEventHub sportToLoad="1,3" />
       </div>
     );
   }

@@ -13,6 +13,8 @@ namespace RabbitMQ.TrackerEssentials
         public string LeagueName;
         public int MapNumber;
         public int BestOf;
+        public int ScoreHome;
+        public int ScoreAway;
         public Link(SportEnum sport, Uri uri, string additionaldata = null)
         {
             Sport = sport;
@@ -42,6 +44,17 @@ namespace RabbitMQ.TrackerEssentials
             LeagueName = leagueName;
             MapNumber = mapNumber;
             BestOf = bestOf;
+        }
+        public Link(SportEnum sport, Uri uri, string leagueName, int mapNumber, int bestOf,int scoreHome, int scoreAway, string additionaldata = null)
+        {
+            Sport = sport;
+            Uri = uri;
+            AdditionalData = additionaldata;
+            LeagueName = leagueName;
+            MapNumber = mapNumber;
+            BestOf = bestOf;
+            ScoreHome = scoreHome;
+            ScoreAway = scoreAway;
         }
     }
 }

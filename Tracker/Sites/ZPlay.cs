@@ -51,6 +51,8 @@ namespace Tracker.Sites
                     string league = string.Empty;
                     int bestOf = 0;
                     int mapNumber = 0;
+                    int scoreHome = 0;
+                    int scoreAway = 0;
                     switch (category)
                     {
                         case "csgo":
@@ -62,8 +64,15 @@ namespace Tracker.Sites
                             bestOf = int.Parse(game["round"].ToString());
                             sport = SportEnum.LeagueOfLegends;
                             league = game["league"]["name"].ToString();
+                            scoreHome = int.Parse(game["left_score"].ToString());
+                            scoreAway = int.Parse(game["right_score"].ToString());
                             uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
-                            _links.Add(new Link(sport, uri, league) { BestOf = bestOf});
+                            _links.Add(new Link(sport, uri, league)
+                            {
+                                BestOf = bestOf,
+                                ScoreHome = scoreHome,
+                                ScoreAway = scoreAway
+                            });
                             continue;
                         case "dota2":
                             var dotaIds = game["dota2_matches"].ToString().Replace("[", "").Replace("]", "").Trim().Split(",");
@@ -71,9 +80,14 @@ namespace Tracker.Sites
                             bestOf = int.Parse(game["round"].ToString());
                             league = game["league"]["name"].ToString();
                             sport = SportEnum.Dota2;
-                            sport = SportEnum.Dota2;
+                            scoreHome = int.Parse(game["left_score"].ToString());
+                            scoreAway = int.Parse(game["right_score"].ToString());
                             uri = new Uri(string.Format(_specificDota2Url, dotaIds[mapNumber-1].Trim()));
-                            _links.Add(new Link(sport, uri,league,mapNumber,bestOf));
+                            _links.Add(new Link(sport, uri, league, mapNumber, bestOf)
+                            {
+                                ScoreHome = scoreHome,
+                                ScoreAway = scoreAway
+                            });
                             continue;
                     }
                 }
@@ -142,12 +156,15 @@ namespace Tracker.Sites
                     break;
             }
             LiveTeam homeTeam = new LiveTeam();
+            homeTeam.WinsInSeries = link.ScoreHome;
             homeTeam.Players = new List<LivePlayer>();
             homeTeam.TeamName = json["radiant_team"]["name"].ToString();
             homeTeam.Gold = int.Parse(json["radiant"]["gold"].ToString());
             homeTeam.Kills = int.Parse(json["radiant"]["score"].ToString());
             ev.HomeTeam = homeTeam;
+
             LiveTeam awayTeam = new LiveTeam();
+            awayTeam.WinsInSeries = link.ScoreAway;
             awayTeam.Players = new List<LivePlayer>();
             awayTeam.TeamName = json["dire_team"]["name"].ToString();
             awayTeam.Gold = int.Parse(json["dire"]["gold"].ToString());
@@ -198,12 +215,15 @@ namespace Tracker.Sites
                     break;
             }
             LiveTeam homeTeam = new LiveTeam();
+            homeTeam.WinsInSeries = link.ScoreHome;
             homeTeam.Players = new List<LivePlayer>();
             homeTeam.TeamName = json["blue_team"]["name"].ToString();
             homeTeam.Gold = int.Parse(json["blue"]["gold"].ToString());
             homeTeam.Kills = int.Parse(json["blue"]["score"].ToString());
             ev.HomeTeam = homeTeam;
+
             LiveTeam awayTeam = new LiveTeam();
+            awayTeam.WinsInSeries = link.ScoreAway;
             awayTeam.Players = new List<LivePlayer>();
             awayTeam.TeamName = json["red_team"]["name"].ToString();
             awayTeam.Gold = int.Parse(json["red"]["gold"].ToString());

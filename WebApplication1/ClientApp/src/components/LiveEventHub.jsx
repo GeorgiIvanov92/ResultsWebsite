@@ -11,8 +11,6 @@ export class LiveEventHub extends Component {
             message: '',
             messages: [],
             liveEvents: [],
-            leagueLiveEvents: [],
-            dotaLiveEvents: [],
             hubConnection: null,
             pingEpic: null,
         };
@@ -39,80 +37,65 @@ export class LiveEventHub extends Component {
             })
             .configureLogging(signalR.LogLevel.Information)
             .build();
-        connection.on("ReceiveMessage", this.parseLiveEvent);
+
+        let sportIds = this.props.sportToLoad.split(",");
+
+        for (let i = 0; i < sportIds.length; i++) {
+            connection.on(sportIds[i].toString(), this.parseLiveEvent);
+        }
+        
         connection.start().then(function () {
         });
+        this.setState({ hubConnection: connection });
     }
-    parseLiveEvent(user, message) {
+
+    componentWillUnmount = () => {
+        let connection = this.state.hubConnection;
+        connection.stop();
+        connection.off();
+    }
+
+    parseLiveEvent(liveEvent, message) {
         let liveEvents = this.state.liveEvents;
-        if (user.shouldRemoveEvent === true) {
+        if (liveEvent.shouldRemoveEvent === true) {
 
-            let filteredLiveEvents = liveEvents.filter(a => a.homeTeam.teamName !== user.homeTeam.teamName &&
-                a.awayTeam.teamName !== user.awayTeam.teamName);     
+            let filteredLiveEvents = liveEvents.filter(a => a.homeTeam.teamName !== liveEvent.homeTeam.teamName &&
+                a.awayTeam.teamName !== liveEvent.awayTeam.teamName);     
 
-            let leagueEvents = filteredLiveEvents.filter(a => a.sport === 1);
-            let dotaEvents = filteredLiveEvents.filter(a => a.sport === 3);
-            this.setState({ liveEvents: filteredLiveEvents, leagueLiveEvents: leagueEvents, dotaLiveEvents: dotaEvents });
+            this.setState({ liveEvents: filteredLiveEvents});
 
             return;
         }
         for (let i = 0; i < liveEvents.length; i++) {
-            if (liveEvents[i].homeTeam.teamName === user.homeTeam.teamName &&
-                liveEvents[i].awayTeam.teamName === user.awayTeam.teamName) {
+
+            if (liveEvents[i].homeTeam.teamName === liveEvent.homeTeam.teamName &&
+                liveEvents[i].awayTeam.teamName === liveEvent.awayTeam.teamName) {
+
+                liveEvents[i] = liveEvent;
+                this.setState({ liveEvents: liveEvents });
+
                 return;
             }
         }
 
-        liveEvents.push(user);
+        liveEvents.push(liveEvent);
 
-        let leagueEvents = liveEvents.filter(a => a.sport === 1);
-        let dotaEvents = liveEvents.filter(a => a.sport === 3);
-
-        this.setState({ liveEvents: liveEvents, leagueLiveEvents: leagueEvents, dotaLiveEvents: dotaEvents });
+        this.setState({ liveEvents: liveEvents });
     }
     render() {
         let body;
-        let leagueOfLegends;
-        let dota2;
-        if (this.state.liveEvents.length === 0) {
-            body = <h1> No Live Games Currently, Check back Later </h1>;
+        if (this.state.liveEvents.length > 0) {
+            body = (
+                this.state.liveEvents.map((ev) =>                    
+                    <LiveGame
+                        liveEvent={ev}
+                    />
+                ));
         }
-        else {
-            if (this.state.leagueLiveEvents.length > 0) {
-                leagueOfLegends = (
-                    <div>
 
-                        <h2> LeagueOfLegends </h2>
-                        {this.state.leagueLiveEvents.map((ev) =>
-                            <LiveGame
-                                liveEvent={ev}
-                            />
-                        )}
-
-                    </div>
-                );
-            }
-            if (this.state.dotaLiveEvents.length > 0) {
-                dota2 = (
-                    <div>
-
-                        <h2> Dota 2 </h2>
-                        {this.state.dotaLiveEvents.map((ev) =>
-                            <LiveGame
-                                liveEvent={ev}
-                            />
-                        )}
-
-                    </div>
-                );
-            }           
-            }      
-    
         return (
             <div>
                 {body}
-                {leagueOfLegends}
-                {dota2}
             </div>
         )
     }
