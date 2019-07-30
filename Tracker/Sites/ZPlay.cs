@@ -172,17 +172,24 @@ namespace Tracker.Sites
             ev.AwayTeam = awayTeam;
             foreach (var player in json["players"])
             {
-                LivePlayer pl = new LivePlayer();
-                pl.Nickname = player["account"]["name"].ToString();
-                pl.ChampionName = player["hero"]["name_en"].ToString();
-                pl.ChampionImageUrl = player["hero"]["image"].ToString();
-                if (player["team"].ToString() == "radiant")
+                try
                 {
-                    ev.HomeTeam.Players.Add(pl);
+                    LivePlayer pl = new LivePlayer();
+                    pl.Nickname = player["account"]["name"].ToString();
+                    pl.ChampionName = player["hero"]["name_en"].ToString();
+                    pl.ChampionImageUrl = player["hero"]["image"].ToString();
+                    if (player["team"].ToString() == "radiant")
+                    {
+                        ev.HomeTeam.Players.Add(pl);
+                    }
+                    else
+                    {
+                        ev.AwayTeam.Players.Add(pl);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    ev.AwayTeam.Players.Add(pl);
+                    continue;
                 }
             }
             return ev;
