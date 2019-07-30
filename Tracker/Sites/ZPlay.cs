@@ -49,6 +49,7 @@ namespace Tracker.Sites
                     SportEnum sport = SportEnum.Undefined;
                     Uri uri = null;
                     string league = string.Empty;
+                    string homeTeam = string.Empty;
                     int bestOf = 0;
                     int mapNumber = 0;
                     int scoreHome = 0;
@@ -66,12 +67,14 @@ namespace Tracker.Sites
                             league = game["league"]["name"].ToString();
                             scoreHome = int.Parse(game["left_score"].ToString());
                             scoreAway = int.Parse(game["right_score"].ToString());
+                            homeTeam = game["left_team"]["name"].ToString();
                             uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
                             _links.Add(new Link(sport, uri, league)
                             {
                                 BestOf = bestOf,
                                 ScoreHome = scoreHome,
-                                ScoreAway = scoreAway
+                                ScoreAway = scoreAway,
+                                HomeTeamName = homeTeam,
                             });
                             continue;
                         case "dota2":
@@ -82,11 +85,13 @@ namespace Tracker.Sites
                             sport = SportEnum.Dota2;
                             scoreHome = int.Parse(game["left_score"].ToString());
                             scoreAway = int.Parse(game["right_score"].ToString());
+                            homeTeam = game["left_team"]["name"].ToString();
                             uri = new Uri(string.Format(_specificDota2Url, dotaIds[mapNumber-1].Trim()));
                             _links.Add(new Link(sport, uri, league, mapNumber, bestOf)
                             {
                                 ScoreHome = scoreHome,
-                                ScoreAway = scoreAway
+                                ScoreAway = scoreAway,
+                                HomeTeamName = homeTeam,
                             });
                             continue;
                     }
@@ -161,7 +166,6 @@ namespace Tracker.Sites
             homeTeam.TeamName = json["radiant_team"]["name"].ToString();
             homeTeam.Gold = int.Parse(json["radiant"]["gold"].ToString());
             homeTeam.Kills = int.Parse(json["radiant"]["score"].ToString());
-            ev.HomeTeam = homeTeam;
 
             LiveTeam awayTeam = new LiveTeam();
             awayTeam.WinsInSeries = link.ScoreAway;
@@ -169,7 +173,7 @@ namespace Tracker.Sites
             awayTeam.TeamName = json["dire_team"]["name"].ToString();
             awayTeam.Gold = int.Parse(json["dire"]["gold"].ToString());
             awayTeam.Kills = int.Parse(json["dire"]["score"].ToString());
-            ev.AwayTeam = awayTeam;
+
             foreach (var player in json["players"])
             {
                 try
@@ -180,18 +184,31 @@ namespace Tracker.Sites
                     pl.ChampionImageUrl = player["hero"]["image"].ToString();
                     if (player["team"].ToString() == "radiant")
                     {
-                        ev.HomeTeam.Players.Add(pl);
+                        homeTeam.Players.Add(pl);
                     }
                     else
                     {
-                        ev.AwayTeam.Players.Add(pl);
+                        awayTeam.Players.Add(pl);
                     }
                 }
                 catch (Exception ex)
                 {
                     continue;
                 }
+            }          
+            if (link.HomeTeamName.ToLowerInvariant() == awayTeam.TeamName.ToLowerInvariant()) //hack for reversed team names
+            {
+                ev.HomeTeam = awayTeam;
+                ev.AwayTeam = homeTeam;
+
+                ev.HomeTeam.WinsInSeries = link.ScoreHome;
+                ev.AwayTeam.WinsInSeries = link.ScoreAway;
+
+                return ev;
             }
+
+            ev.HomeTeam = homeTeam;
+            ev.AwayTeam = awayTeam;
             return ev;
         }
         private static LiveEvent ParseLeagueOfLegends(Link link)
@@ -227,7 +244,6 @@ namespace Tracker.Sites
             homeTeam.TeamName = json["blue_team"]["name"].ToString();
             homeTeam.Gold = int.Parse(json["blue"]["gold"].ToString());
             homeTeam.Kills = int.Parse(json["blue"]["score"].ToString());
-            ev.HomeTeam = homeTeam;
 
             LiveTeam awayTeam = new LiveTeam();
             awayTeam.WinsInSeries = link.ScoreAway;
@@ -235,7 +251,7 @@ namespace Tracker.Sites
             awayTeam.TeamName = json["red_team"]["name"].ToString();
             awayTeam.Gold = int.Parse(json["red"]["gold"].ToString());
             awayTeam.Kills = int.Parse(json["red"]["score"].ToString());
-            ev.AwayTeam = awayTeam;
+
             foreach (var player in json["blue"]["players"])
             {
                 LivePlayer pl = new LivePlayer();
@@ -244,7 +260,7 @@ namespace Tracker.Sites
                 pl.ChampionImageUrl = player["hero"]["image_url"].ToString();
                 if (player["color"].ToString() == "blue")
                 {
-                    ev.HomeTeam.Players.Add(pl);
+                    homeTeam.Players.Add(pl);
                 }
             }
             foreach (var player in json["red"]["players"])
@@ -255,9 +271,24 @@ namespace Tracker.Sites
                 pl.ChampionImageUrl = player["hero"]["image_url"].ToString();
                 if (player["color"].ToString() == "red")
                 {
-                    ev.AwayTeam.Players.Add(pl);
+                    awayTeam.Players.Add(pl);
                 }
             }
+
+            if (link.HomeTeamName.ToLowerInvariant() == awayTeam.TeamName.ToLowerInvariant()) //hack for reversed team names
+            {
+                ev.HomeTeam = awayTeam;
+                ev.AwayTeam = homeTeam;
+
+                ev.HomeTeam.WinsInSeries = link.ScoreHome;
+                ev.AwayTeam.WinsInSeries = link.ScoreAway;
+
+                return ev;
+            }
+
+            ev.HomeTeam = homeTeam;
+            ev.AwayTeam = awayTeam;
+
             return ev;
         }
     }

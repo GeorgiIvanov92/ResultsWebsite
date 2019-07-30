@@ -11,6 +11,7 @@ namespace RabbitMQ.TrackerEssentials
         public Uri Uri;
         public string AdditionalData;
         public string LeagueName;
+        public string HomeTeamName;
         public int MapNumber;
         public int BestOf;
         public int ScoreHome;

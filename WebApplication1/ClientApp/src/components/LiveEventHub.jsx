@@ -66,20 +66,20 @@ export class LiveEventHub extends Component {
 
             return;
         }
+        let isNewEvent = true;
         for (let i = 0; i < liveEvents.length; i++) {
 
             if (liveEvents[i].homeTeam.teamName === liveEvent.homeTeam.teamName &&
                 liveEvents[i].awayTeam.teamName === liveEvent.awayTeam.teamName) {
 
+                isNewEvent = false;
                 liveEvents[i] = liveEvent;
-                this.setState({ liveEvents: liveEvents });
-
-                return;
+                break;
             }
         }
-
-        liveEvents.push(liveEvent);
-
+        if (isNewEvent) {
+            liveEvents.push(liveEvent);
+        }
         this.setState({ liveEvents: liveEvents });
     }
     render() {
