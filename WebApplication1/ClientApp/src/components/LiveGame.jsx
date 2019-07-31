@@ -1,5 +1,5 @@
 ﻿import React, { Component } from 'react';
-import { Popover, OverlayTrigger, Jumbotron, Button, ButtonToolbar, Overlay } from 'react-bootstrap';
+import { Popover, OverlayTrigger, Jumbotron, Button, ButtonToolbar, Overlay, Grid, Row, Col } from 'react-bootstrap';
 import { Wave } from 'react-animated-text';
 import leagueLogo from './Resources/Images/leagueLogo.png';
 import dotaLogo from './Resources/Images/dotaLogo.png';
@@ -21,19 +21,31 @@ export class LiveGame extends Component {
         let body = [];       
 
         if (this.props.liveEvent) {
-            let minutes = ("0" + parseInt(this.props.liveEvent.gameTime / 60)).slice(-2);
-            let seconds = ("0" + this.props.liveEvent.gameTime % 60).slice(-2);
-            let header = this.props.liveEvent.homeTeam.teamName + " " + this.props.liveEvent.homeTeam.winsInSeries + " - " + this.props.liveEvent.awayTeam.winsInSeries + " " + this.props.liveEvent.awayTeam.teamName;
+            let liveEvent = this.props.liveEvent;
+            let minutes = ("0" + parseInt(liveEvent.gameTime / 60)).slice(-2);
+            let seconds = ("0" + liveEvent.gameTime % 60).slice(-2);
+            let header = liveEvent.homeTeam.teamName + " " + liveEvent.homeTeam.winsInSeries + " - " + liveEvent.awayTeam.winsInSeries + " " + liveEvent.awayTeam.teamName;
             let popUnder =
-                <Popover id={header} 
-                    title={header} >
-                    <Jumbotron>
-                        <h1>Hello, world!</h1>
-                        <p>
-                            This is a simple hero unit, a simple jumbotron-style component for calling
-                            extra attention to featured content or information.
-  </p>                       
-                    </Jumbotron>;
+                <Popover class='bsClass'
+                    id={header} 
+                    title={header}
+                    positionLeft={200}
+                    positionRight={500} >
+
+                    <Jumbotron style={{ display: 'inline-block', border: 'solid red 1px' }}>
+                        <h3 style={{ textAlign: 'center' }}> Currently Playing Game {liveEvent.mapNumber} of Series </h3>
+                        <Grid>
+                            <Row className="show-grid">
+                                <Col xs={12} md={8}>
+                                    <h3> {liveEvent.homeTeam.teamName}</h3>
+                                </Col>
+                                <Col>
+                                    <h3> {liveEvent.awayTeam.teamName}</h3>
+                                </Col>
+                            </Row>
+                                    
+                        </Grid>
+                    </Jumbotron>
   </Popover>;
 
             body = <div>               
@@ -49,9 +61,9 @@ export class LiveGame extends Component {
                         placement="bottom"
                         overlay={popUnder}
                     >
-                        <Button key={this.props.liveEvent.homeTeam.teamName} bsStyle="primary" >                       
-                            {minutes}:{seconds} {this.props.liveEvent.homeTeam.teamName} {this.props.liveEvent.homeTeam.winsInSeries} - {this.props.liveEvent.awayTeam.winsInSeries} {this.props.liveEvent.awayTeam.teamName}  (BO{this.props.liveEvent.bestOf})   
-                            <img style={{ width: '30px', height: '30px' }} src={this.props.liveEvent.sport === 1 ? leagueLogo : dotaLogo} alt="Logo" />
+                        <Button key={liveEvent.homeTeam.teamName} bsStyle="primary" >                       
+                            {minutes}:{seconds} {liveEvent.homeTeam.teamName} {liveEvent.homeTeam.winsInSeries} - {liveEvent.awayTeam.winsInSeries} {liveEvent.awayTeam.teamName}  (BO{liveEvent.bestOf})   
+                            <img style={{ width: '30px', height: '30px' }} src={liveEvent.sport === 1 ? leagueLogo : dotaLogo} alt="Logo" />
                     </Button>
                     </OverlayTrigger>
                 </ButtonToolbar>

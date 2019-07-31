@@ -68,6 +68,7 @@ namespace Tracker.Sites
                             scoreHome = int.Parse(game["left_score"].ToString());
                             scoreAway = int.Parse(game["right_score"].ToString());
                             homeTeam = game["left_team"]["name"].ToString();
+                            mapNumber = int.Parse(game["live_match"]["index"].ToString());
                             uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
                             _links.Add(new Link(sport, uri, league)
                             {
@@ -75,6 +76,7 @@ namespace Tracker.Sites
                                 ScoreHome = scoreHome,
                                 ScoreAway = scoreAway,
                                 HomeTeamName = homeTeam,
+                                MapNumber = mapNumber,
                             });
                             continue;
                         case "dota2":
