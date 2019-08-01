@@ -68,15 +68,16 @@ namespace Tracker.Sites
                             scoreHome = int.Parse(game["left_score"].ToString());
                             scoreAway = int.Parse(game["right_score"].ToString());
                             homeTeam = game["left_team"]["name"].ToString();
-                            mapNumber = int.Parse(game["live_match"]["index"].ToString());
+                            mapNumber = bestOf == 1 ? 1 : int.Parse(game["live_match"]["index"].ToString());
                             uri = new Uri(string.Format(_specificLoLUrl, id.Trim(), getEpochSeconds()));
-                            _links.Add(new Link(sport, uri, league)
+                            _links.Add(new Link(sport, uri)
                             {
                                 BestOf = bestOf,
                                 ScoreHome = scoreHome,
                                 ScoreAway = scoreAway,
                                 HomeTeamName = homeTeam,
                                 MapNumber = mapNumber,
+                                LeagueName = league,
                             });
                             continue;
                         case "dota2":

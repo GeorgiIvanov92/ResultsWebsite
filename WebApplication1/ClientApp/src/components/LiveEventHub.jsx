@@ -13,6 +13,7 @@ export class LiveEventHub extends Component {
             liveEvents: [],
             hubConnection: null,
             pingEpic: null,
+            teamLogos: [],
         };
         this.parseLiveEvent = this.parseLiveEvent.bind(this);
     }
@@ -31,6 +32,14 @@ export class LiveEventHub extends Component {
         //    }, 10000);
         //});
         //interval.subscribe();
+        
+        fetch('api/LeagueOfLegends/GetSport')
+            .then(response => response.json())
+            .then(data => {
+                this.setState({
+                    teamLogos: data.teamLogos,                   
+                });
+            });    
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/live", {
                 transport: signalR.HttpTransportType.WebSockets
@@ -89,6 +98,7 @@ export class LiveEventHub extends Component {
                 this.state.liveEvents.map((ev) =>                    
                     <LiveGame
                         liveEvent={ev}
+                        teamLogos={this.state.teamLogos}
                     />
                 ));
         }
