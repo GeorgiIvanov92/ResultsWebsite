@@ -7,6 +7,7 @@ using RabbitMQ.TransportObject;
 using RabbitMQ.TrackerEssentials;
 using static RabbitMQ.TrackerEssentials.Communication.Sports;
 using RabbitMQ.RabbitMQ;
+using Tracker.Sites.Zplay;
 
 namespace Tracker.Sites
 {

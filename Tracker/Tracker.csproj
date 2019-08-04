@@ -19,6 +19,7 @@
     <PackageReference Include="PdfSharpCore" Version="1.0.7" />
     <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="websocket-sharp-with-proxy-support" Version="1.9.1" />
   </ItemGroup>
 
   <ItemGroup>
