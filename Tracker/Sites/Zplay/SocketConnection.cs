@@ -17,9 +17,6 @@ namespace Tracker.Sites.Zplay
         private bool _shouldGetGameIds = false;
         public Dictionary<string,LiveEvent> ActiveGames;
         private readonly Timer _timer;
-        private const string placeHolderString = @"""{0}"":(.+?).""";
-        private Regex homeTeamRegex = new Regex(@"""team_a"":{""battle_odd"".+?team_name"":""(.+?)""", RegexOptions.Compiled | RegexOptions.Multiline);
-        private Regex awayTeamRegex = new Regex(@"""team_b"":{""battle_odd"".+?team_name"":""(.+?)""", RegexOptions.Compiled | RegexOptions.Multiline);
         private Regex placeHolderRegex;
         public SocketConnection()
         {
@@ -51,41 +48,49 @@ namespace Tracker.Sites.Zplay
         {
             try
             {
+                if (e.Data == "3")
+                {
+                    _ws.Send("2");
+                    return;
+                }
                 if (e.Data == "40/score,")
                 {
                     _ws.Send(@"42/score,[""live_list""]");
                 }
                 else if (e.Data.Contains("live_list"))
                 {
-                    placeHolderRegex = new Regex(string.Format(placeHolderString,"battle_id"), RegexOptions.Multiline | RegexOptions.Compiled);
-                    var homeTeamMatches = homeTeamRegex.Matches(e.Data);
-                    var awayTeamMatches = awayTeamRegex.Matches(e.Data);
-                    var battleIdsMatches = placeHolderRegex.Matches(e.Data);
-                    if (homeTeamMatches.Count == awayTeamMatches.Count && awayTeamMatches.Count == battleIdsMatches.Count)
+                    var gameJson = JArray.Parse(e.Data.Replace("42/score,", ""))[1];
+                    foreach (var game in gameJson)
                     {
-                        for (int i = 0; i < homeTeamMatches.Count; i++)
+                        try
                         {
-                            var homeTeamGroup = homeTeamMatches[i].Groups[1];
-                            var awayTeamGroup = awayTeamMatches[i].Groups[1];
-                            var battleIdsGroup = battleIdsMatches[i].Groups[1];
-                            if (homeTeamGroup != null && awayTeamGroup != null && battleIdsGroup != null)
+                            var key = game["battle_id"].ToString();
+                            if (ActiveGames.ContainsKey(key))
                             {
-                                string key = battleIdsGroup.Value;
-                                if (ActiveGames.ContainsKey(key))
-                                {
-                                    continue;
-                                }
-                                LiveEvent liveEvent = new LiveEvent();
-                                liveEvent.HomeTeam = new LiveTeam();
-                                liveEvent.AwayTeam = new LiveTeam();
-                                liveEvent.HomeTeam.TeamName = homeTeamGroup.Value;
-                                liveEvent.AwayTeam.TeamName = awayTeamGroup.Value;  
-                                ActiveGames.Add(key,liveEvent);
-                                // ActiveGames.Add($"{match.Groups[1].Value}@{match.Groups[2].Value}@{match.Groups[3].Value}");
+                                continue;
                             }
+                            var league = game["league_name"].ToString();
+                            var bestOf = game["bo_num"].ToString();
+                            LiveEvent liveEvent = new LiveEvent();
+                            liveEvent.LeagueName = league;
+                            liveEvent.BestOf = int.Parse(bestOf);
+                            liveEvent.HomeTeam = new LiveTeam();
+                            liveEvent.AwayTeam = new LiveTeam();
+                            liveEvent.HomeTeam.TeamName = game["team_a"]["team_name"].ToString();
+                            liveEvent.HomeTeam.WinsInSeries = int.Parse(game["team_a"]["score"].ToString());
+                            liveEvent.AwayTeam.TeamName = game["team_b"]["team_name"].ToString();
+                            liveEvent.AwayTeam.WinsInSeries = int.Parse(game["team_b"]["score"].ToString());
+                            ActiveGames.Add(key, liveEvent);
+                        }
+                        catch (Exception ex)
+                        {
+
                         }
                     }
-                }             
+
+
+
+                }
             }
             catch (Exception ex)
             {
